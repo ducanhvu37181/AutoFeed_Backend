@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="AutoFeed_Backend/AutoFeed_Backend.csproj" />
+  <Project Path="AutoFeed_Backend_DAO/AutoFeed_Backend_DAO.csproj" />
+  <Project Path="AutoFeed_Backend_Repositories/AutoFeed_Backend_Repositories.csproj" />
+  <Project Path="AutoFeed_Backend_Services/AutoFeed_Backend_Services.csproj" />
+</Solution>
