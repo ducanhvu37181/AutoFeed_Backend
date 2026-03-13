@@ -1,0 +1,121 @@
+﻿{
+   "CodeGenerationMode": 4,
+   "ContextClassName": "AutoFeedDBContext",
+   "ContextNamespace": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": true,
+   "IrregularWords": null,
+   "MinimumProductVersion": "2.6.1224",
+   "ModelNamespace": null,
+   "OutputContextPath": null,
+   "OutputPath": "Models",
+   "PluralRules": null,
+   "PreserveCasingWithRegex": true,
+   "ProjectRootNamespace": "AutoFeed_Backend_DAO",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 2,
+   "SelectedToBeGenerated": 0,
+   "SingularRules": null,
+   "T4TemplatePath": null,
+   "Tables": [
+      {
+         "Name": "[dbo].[Barn]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[BarnIoT_Device]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ChickenBarn]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Data_IoT]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[FeedingRule]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[FeedingRuleDetail]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[FlockChicken]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Food]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[FoodStorage]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Inventory]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[IoT_Device]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[LargeChicken]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Report]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Request]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Role]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Schedule]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Task]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[User]",
+         "ObjectType": 0
+      }
+   ],
+   "UiHint": null,
+   "UncountableWords": null,
+   "UseAsyncStoredProcedureCalls": true,
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": false,
+   "UseDatabaseNamesForRoutines": true,
+   "UseDateOnlyTimeOnly": true,
+   "UseDbContextSplitting": false,
+   "UseDecimalDataAnnotationForSprocResult": true,
+   "UseFluentApiOnly": true,
+   "UseHandleBars": false,
+   "UseHierarchyId": false,
+   "UseInflector": true,
+   "UseInternalAccessModifiersForSprocsAndFunctions": false,
+   "UseLegacyPluralizer": false,
+   "UseManyToManyEntity": false,
+   "UseNoDefaultConstructor": false,
+   "UseNoNavigations": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UsePrefixNavigationNaming": false,
+   "UseSchemaFolders": false,
+   "UseSchemaNamespaces": false,
+   "UseSpatial": false,
+   "UseT4": false,
+   "UseT4Split": false
+}
