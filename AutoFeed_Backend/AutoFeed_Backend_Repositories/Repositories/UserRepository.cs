@@ -13,6 +13,15 @@ public class UserRepository : GenericRepository<User>
 
     public UserRepository(AutoFeedDBContext context) : base(context) { }
 
+    // --- ĐÂY LÀ HÀM LOGIN MỚI THÊM VÀO ---
+    public async Task<User?> LoginAsync(string username, string password)
+    {
+        return await _context.Set<User>()
+            .FirstOrDefaultAsync(u => u.Username == username
+                                 && u.Password == password
+                                 && u.Status == true);
+    }
+
     public async Task<List<User>> GetActiveAsync()
     {
         return await _context.Set<User>()
