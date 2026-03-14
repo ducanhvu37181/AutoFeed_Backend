@@ -1,5 +1,6 @@
 using AutoFeed_Backend_DAO.Models;
 using AutoFeed_Backend_Repositories.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
 namespace AutoFeed_Backend_Repositories.UnitOfWork;
@@ -8,6 +9,8 @@ public class UnitOfWork : IUnitOfWork
 {
     private readonly AutoFeedDBContext _context;
     private TaskRepository _taskRepository;
+    private LargeChickenRepository _largeChickenRepository;
+    private UserRepository _userRepository;
 
     public UnitOfWork() => _context ??= new AutoFeedDBContext();
 
@@ -23,6 +26,22 @@ public class UnitOfWork : IUnitOfWork
             return _taskRepository ??= new TaskRepository(_context);
         }
     }
+    public LargeChickenRepository LargeChickens
+    { 
+        get
+        {
+            return _largeChickenRepository ??= new LargeChickenRepository(_context);
+        }
+    }
+
+    public UserRepository Users
+    {
+        get
+        {
+            return _userRepository ??= new UserRepository(_context);
+        }
+    }
+    
 
     public int SaveChangesWithTransaction()
     {

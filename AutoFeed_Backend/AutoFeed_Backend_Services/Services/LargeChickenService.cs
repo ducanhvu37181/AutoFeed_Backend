@@ -1,0 +1,90 @@
+﻿using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Repositories.UnitOfWork;
+using AutoFeed_Backend_Services.Interfaces;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace AutoFeed_Backend_Services.Services;
+
+public class LargeChickenService : ILargeChickenService
+{
+    private readonly IUnitOfWork _unitOfWork;
+
+    public LargeChickenService()
+    {
+        _unitOfWork = new UnitOfWork();
+    }
+
+    public LargeChickenService(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<List<LargeChicken>> GetAllAsync()
+    {
+        return await _unitOfWork.LargeChickens.GetAllAsync();
+    }
+
+    public async Task<List<LargeChicken>> GetActiveAsync()
+    {
+        return await _unitOfWork.LargeChickens.GetActiveAsync();
+    }
+
+    public async Task<List<LargeChicken>> GetInactiveAsync()
+    {
+        return await _unitOfWork.LargeChickens.GetInactiveAsync();
+    }
+
+    public async Task<LargeChicken?> GetByIdAsync(int id)
+    {
+        return await _unitOfWork.LargeChickens.GetByIdAsync(id);
+    }
+
+    public async Task<List<LargeChicken>> SearchAsync(string? name, string? healthStatus, int? flockId, bool includeInactive)
+    {
+        return await _unitOfWork.LargeChickens.SearchAsync(name, healthStatus, flockId, includeInactive);
+    }
+
+    public async Task<int> CreateAsync(LargeChicken entity)
+    {
+        entity.IsActive = true;
+        _unitOfWork.LargeChickens.PrepareCreate(entity);
+        return await _unitOfWork.SaveChangesWithTransactionAsync();
+    }
+
+    public async Task<bool> UpdateAsync(LargeChicken entity)
+    {
+        try
+        {
+            _unitOfWork.LargeChickens.PrepareUpdate(entity);
+            var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+            return result > 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var entity = await _unitOfWork.LargeChickens.GetByIdAsync(id);
+        if (entity == null) return false;
+
+        entity.IsActive = false;
+        _unitOfWork.LargeChickens.PrepareUpdate(entity);
+        var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+        return result > 0;
+    }
+
+    public async Task<bool> RestoreAsync(int id)
+    {
+        var entity = await _unitOfWork.LargeChickens.GetByIdAsync(id);
+        if (entity == null) return false;
+
+        entity.IsActive = true;
+        _unitOfWork.LargeChickens.PrepareUpdate(entity);
+        var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+        return result > 0;
+    }
+}
