@@ -15,11 +15,15 @@ public partial class FlockChicken
 
     public decimal? Weight { get; set; }
 
-    public int? Age { get; set; }
+    public DateOnly? DoB { get; set; }
+
+    public DateOnly? TransferDate { get; set; }
 
     public string HealthStatus { get; set; }
 
     public string Note { get; set; }
+
+    public bool? IsActive { get; set; }
 
     public virtual ChickenBarn ChickenBarn { get; set; }
 

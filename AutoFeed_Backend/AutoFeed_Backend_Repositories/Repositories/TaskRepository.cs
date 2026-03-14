@@ -1,0 +1,32 @@
+using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Repositories.BasicRepo;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Task = AutoFeed_Backend_DAO.Models.Task;
+
+namespace AutoFeed_Backend_Repositories.Repositories
+{
+    public class TaskRepository : GenericRepository<Task>
+    {
+        public TaskRepository() : base()
+        {
+        }
+
+        public TaskRepository(AutoFeedDBContext context) : base(context)
+        {
+        }
+                
+        // Async variants
+        public async Task<List<Task>> getActiveTaskAsync()
+        {
+            return await _context.Set<Task>().Where(t => t.Status == true).ToListAsync();
+        }
+
+        public async Task<List<Task>> getInactiveTaskAsync()
+        {
+            return await _context.Set<Task>().Where(t => t.Status != true).ToListAsync();
+        }
+    }
+}

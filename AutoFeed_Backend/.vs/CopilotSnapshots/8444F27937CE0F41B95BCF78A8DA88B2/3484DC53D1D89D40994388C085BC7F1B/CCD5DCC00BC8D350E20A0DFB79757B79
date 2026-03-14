@@ -1,0 +1,33 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using TaskModel = AutoFeed_Backend_DAO.Models.Task;
+
+namespace AutoFeed_Backend_Services.Interfaces;
+
+public interface ITaskService
+{
+    // Create
+    TaskModel CreateTask(TaskModel task);
+    Task<int> CreateTaskAsync(TaskModel task);
+
+    // Read
+    TaskModel GetTaskById(int id);
+    Task<TaskModel?> GetTaskByIdAsync(int id);
+
+    List<TaskModel> GetAllTasks();
+    Task<List<TaskModel>> GetAllTasksAsync();
+
+    List<TaskModel> GetActiveTasks();
+    Task<List<TaskModel>> GetActiveTasksAsync();
+
+    List<TaskModel> GetInactiveTasks();
+    Task<List<TaskModel>> GetInactiveTasksAsync();
+
+    // Update
+    bool UpdateTask(TaskModel task);
+    Task<bool> UpdateTaskAsync(TaskModel task);
+
+    // Delete (soft delete -> set inactive)
+    bool DeleteTask(int id);
+    Task<bool> DeleteTaskAsync(int id);
+}
