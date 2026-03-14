@@ -14,4 +14,18 @@ public static class ServiceProvider
         services.AddScoped<ITaskService, TaskService>();
         return services;
     }
+    public static IServiceCollection AddChickenServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<ILargeChickenService, LargeChickenService>();
+        return services;
+    }
+
+    public static IServiceCollection AddUserServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IUserService, UserService>();
+        return services;
+    }
 }
+    

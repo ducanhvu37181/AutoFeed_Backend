@@ -6,7 +6,10 @@ namespace AutoFeed_Backend_Repositories.UnitOfWork;
 public interface IUnitOfWork
 {
     TaskRepository Tasks { get; }
+    LargeChickenRepository LargeChickens { get; }
+    UserRepository Users { get; }
 
     int SaveChangesWithTransaction();
     Task<int> SaveChangesWithTransactionAsync();
+
 }
