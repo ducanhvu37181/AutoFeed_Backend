@@ -1,0 +1,77 @@
+﻿using AutoFeed_Backend_Services.Interfaces;
+using AutoFeed_Backend_Repositories.Repositories;
+using AutoFeed_Backend_Repositories.UnitOfWork;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using TaskModel = AutoFeed_Backend_DAO.Models.Task;
+
+namespace AutoFeed_Backend_Services.Services;
+
+public class TaskService : ITaskService
+{
+    private readonly IUnitOfWork _unitOfWork;
+
+    public TaskService()
+    {
+        _unitOfWork = new UnitOfWork();
+    }
+
+    public TaskService(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
+    }
+
+    // Create
+    public async Task<int> CreateTaskAsync(TaskModel task)
+    {
+        _unitOfWork.Tasks.PrepareCreate(task);
+        return await _unitOfWork.SaveAsync();
+    }
+
+    // Read
+    public async Task<TaskModel?> GetTaskByIdAsync(int id)
+    {
+        return await _unitOfWork.Tasks.GetByIdAsync(id);
+    }
+
+    public async Task<List<TaskModel>> GetAllTasksAsync()
+    {
+        return await _unitOfWork.Tasks.GetAllAsync();
+    }
+
+    public async Task<List<TaskModel>> GetActiveTasksAsync()
+    {
+        return await _unitOfWork.Tasks.getActiveTaskAsync();
+    }
+
+    public async Task<List<TaskModel>> GetInactiveTasksAsync()
+    {
+        return await _unitOfWork.Tasks.getInactiveTaskAsync();
+    }
+
+    // Update
+    public async Task<bool> UpdateTaskAsync(TaskModel task)
+    {
+        try
+        {
+            _unitOfWork.Tasks.PrepareUpdate(task);
+            var result = await _unitOfWork.SaveAsync();
+            return result > 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    // Delete -> soft delete: set Status = false
+    public async Task<bool> DeleteTaskAsync(int id)
+    {
+        var entity = await _unitOfWork.Tasks.GetByIdAsync(id);
+        if (entity == null) return false;
+        entity.Status = false;
+        _unitOfWork.Tasks.PrepareUpdate(entity);
+        var res = await _unitOfWork.SaveAsync();
+        return res > 0;
+    }
+}

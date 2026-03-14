@@ -10,8 +10,4 @@
     <ProjectReference Include="..\AutoFeed_Backend_DAO\AutoFeed_Backend_DAO.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="UnitOfWork\" />
-  </ItemGroup>
-
 </Project>
