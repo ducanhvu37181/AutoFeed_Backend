@@ -14,8 +14,4 @@
     <ProjectReference Include="..\AutoFeed_Backend_Services\AutoFeed_Backend_Services.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
 </Project>
