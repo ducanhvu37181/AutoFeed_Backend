@@ -22,14 +22,14 @@ public class FoodController : ControllerBase
 
         var result = foods.Select(f => new
         {
-            ItemID = f.FoodId,
+            ItemID = "FD" + f.FoodId.ToString("D3"),
             Name = f.Name,
             Category = f.Type,
             Quantity = f.Quantity,
-            MinStock = 200, // Gia su mac dinh theo Figma
-            Status = f.Quantity <= 200 ? "Low Stock" : "In Stock",
-            LastRestocked = DateTime.Now.ToString("yyyy-MM-dd"), // Lay tam ngay hien tai
-            Supplier = "Nha cung cap mac dinh"
+            MinStock = 50,
+            Status = f.Quantity <= 50 ? "Low Stock" : "In Stock",
+            LastRestocked = DateTime.Now.ToString("yyyy-MM-dd"),
+            Supplier = f.Note ?? "Chưa có nhà cung cấp"
         });
 
         return Ok(result);
@@ -39,6 +39,12 @@ public class FoodController : ControllerBase
     public async Task<IActionResult> AddItem(Food item)
     {
         if (item == null) return BadRequest();
+
+        // Map các trường từ giao diện Add Inventory Item vào DB
+        // item.Name ứng với Item Name
+        // item.Type ứng với Category
+        // item.Quantity ứng với Quantity
+        // item.Note có thể dùng tạm để lưu Supplier 
 
         await _unitOfWork.Foods.CreateAsync(item);
         var result = await _unitOfWork.SaveChangesWithTransactionAsync();
