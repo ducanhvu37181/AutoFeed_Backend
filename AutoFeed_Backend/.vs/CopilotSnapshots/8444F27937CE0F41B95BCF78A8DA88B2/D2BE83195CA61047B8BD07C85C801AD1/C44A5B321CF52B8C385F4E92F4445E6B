@@ -1,0 +1,39 @@
+﻿using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Repositories.Repositories;
+using System.Threading.Tasks;
+
+namespace AutoFeed_Backend_Repositories.UnitOfWork;
+
+public class UnitOfWork : IUnitOfWork
+{
+    private readonly AutoFeedDBContext _context;
+    private TaskRepository _taskRepository;
+
+    public UnitOfWork()
+    {
+        _context = new AutoFeedDBContext();
+    }
+
+    public UnitOfWork(AutoFeedDBContext context)
+    {
+        _context = context;
+    }
+
+    public TaskRepository Tasks => _taskRepository ??= new TaskRepository(_context);
+
+    public int Save()
+    {
+        return _context.SaveChanges();
+    }
+
+    public async Task<int> SaveAsync()
+    {
+        return await _context.SaveChangesAsync();
+    }
+
+    public void Dispose()
+    {
+        _context?.Dispose();
+        GC.SuppressFinalize(this);
+    }
+}

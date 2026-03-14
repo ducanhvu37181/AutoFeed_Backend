@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Services.Services;
 using AutoFeed_Backend_Repositories.Repositories;
+using AutoFeed_Backend_Repositories.UnitOfWork;
 
 namespace AutoFeed_Backend_Services.ServiceProvider;
 
@@ -9,7 +10,7 @@ public static class ServiceProvider
 {
     public static IServiceCollection AddTaskServices(this IServiceCollection services)
     {
-        services.AddScoped<TaskRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ITaskService, TaskService>();
         return services;
     }

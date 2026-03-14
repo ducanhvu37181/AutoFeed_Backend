@@ -2,6 +2,9 @@ using AutoFeed_Backend_Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using TaskModel = AutoFeed_Backend_DAO.Models.Task;
+using AutoFeed_Backend.Models.Requests;
+using AutoFeed_Backend.Models.Responses;
+using System.Linq;
 
 namespace AutoFeed_Backend.Controllers;
 
@@ -20,52 +23,196 @@ public class TaskController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var items = await _service.GetAllTasksAsync();
-        return Ok(items);
+        var response = new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = items,
+            Description = "Success"
+        };
+        return Ok(response);
     }
 
     [HttpGet("active")]
     public async Task<IActionResult> GetActive()
     {
         var items = await _service.GetActiveTasksAsync();
-        return Ok(items);
+        var response = new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = items,
+            Description = "Success"
+        };
+        return Ok(response);
     }
 
     [HttpGet("inactive")]
     public async Task<IActionResult> GetInactive()
     {
         var items = await _service.GetInactiveTasksAsync();
-        return Ok(items);
+        var response = new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = items,
+            Description = "Success"
+        };
+        return Ok(response);
     }
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id)
     {
         var item = await _service.GetTaskByIdAsync(id);
-        if (item == null) return NotFound();
-        return Ok(item);
+        if (item == null)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 404,
+                Data = null,
+                Description = "Not Found"
+            };
+            return NotFound(error);
+        }
+        var response = new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = item,
+            Description = "Success"
+        };
+        return Ok(response);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] TaskModel model)
+    public async Task<IActionResult> Create([FromBody] CreateTaskRequest model)
     {
-        var id = await _service.CreateTaskAsync(model);
-        return CreatedAtAction(nameof(Get), new { id = model.TaskId }, model);
+        if (model == null || string.IsNullOrWhiteSpace(model.Title))
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Invalid request"
+            };
+            return BadRequest(error);
+        }
+
+        var task = new TaskModel
+        {
+            Title = model.Title,
+            Description = model.Description,
+            Status = true
+        };
+
+        var id = await _service.CreateTaskAsync(task);
+        if (id <= 0)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 500,
+                Data = null,
+                Description = "Create failed"
+            };
+            return StatusCode(500, error);
+        }
+
+        var response = new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 201,
+            Data = task,
+            Description = "Created"
+        };
+        return CreatedAtAction(nameof(Get), new { id = task.TaskId }, response);
     }
 
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, [FromBody] TaskModel model)
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateTaskRequest model)
     {
-        if (id != model.TaskId) return BadRequest();
-        var ok = await _service.UpdateTaskAsync(model);
-        if (!ok) return BadRequest();
-        return NoContent();
+        if (model == null || string.IsNullOrWhiteSpace(model.Title))
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Invalid request"
+            };
+            return BadRequest(error);
+        }
+
+        var existing = await _service.GetTaskByIdAsync(id);
+        if (existing == null)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 404,
+                Data = null,
+                Description = "Not Found"
+            };
+            return NotFound(error);
+        }
+
+        existing.Title = model.Title;
+        existing.Description = model.Description;
+        // Update status if provided
+        if (model.Status.HasValue)
+        {
+            existing.Status = model.Status.Value;
+        }
+
+        var ok = await _service.UpdateTaskAsync(existing);
+        if (!ok)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 500,
+                Data = null,
+                Description = "Update failed"
+            };
+            return StatusCode(500, error);
+        }
+
+        var successResponse = new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = null,
+            Description = "Update success"
+        };
+        return Ok(successResponse);
     }
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
         var ok = await _service.DeleteTaskAsync(id);
-        if (!ok) return NotFound();
-        return NoContent();
+        if (!ok)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 404,
+                Data = null,
+                Description = "Not Found or Delete failed"
+            };
+            return NotFound(error);
+        }
+
+        var success = new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = null,
+            Description = "Delete success"
+        };
+        return Ok(success);
     }
 }

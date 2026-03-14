@@ -1,5 +1,6 @@
 using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Repositories.Repositories;
+using AutoFeed_Backend_Repositories.UnitOfWork;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TaskModel = AutoFeed_Backend_DAO.Models.Task;
@@ -8,43 +9,44 @@ namespace AutoFeed_Backend_Services.Services;
 
 public class TaskService : ITaskService
 {
-    private readonly TaskRepository _repo;
+    private readonly IUnitOfWork _unitOfWork;
 
     public TaskService()
     {
-        _repo = new TaskRepository();
+        _unitOfWork = new UnitOfWork();
     }
 
-    public TaskService(TaskRepository repository)
+    public TaskService(IUnitOfWork unitOfWork)
     {
-        _repo = repository ?? new TaskRepository();
+        _unitOfWork = unitOfWork;
     }
 
     // Create
     public async Task<int> CreateTaskAsync(TaskModel task)
     {
-        return await _repo.CreateAsync(task);
+        _unitOfWork.Tasks.PrepareCreate(task);
+        return await _unitOfWork.SaveChangesWithTransactionAsync();
     }
 
     // Read
     public async Task<TaskModel?> GetTaskByIdAsync(int id)
     {
-        return await _repo.GetByIdAsync(id);
+        return await _unitOfWork.Tasks.GetByIdAsync(id);
     }
 
     public async Task<List<TaskModel>> GetAllTasksAsync()
     {
-        return await _repo.GetAllAsync();
+        return await _unitOfWork.Tasks.GetAllAsync();
     }
 
     public async Task<List<TaskModel>> GetActiveTasksAsync()
     {
-        return await _repo.getActiveTaskAsync();
+        return await _unitOfWork.Tasks.getActiveTaskAsync();
     }
 
     public async Task<List<TaskModel>> GetInactiveTasksAsync()
     {
-        return await _repo.getInactiveTaskAsync();
+        return await _unitOfWork.Tasks.getInactiveTaskAsync();
     }
 
     // Update
@@ -52,7 +54,8 @@ public class TaskService : ITaskService
     {
         try
         {
-            var result = await _repo.UpdateAsync(task);
+            _unitOfWork.Tasks.PrepareUpdate(task);
+            var result = await _unitOfWork.SaveChangesWithTransactionAsync();
             return result > 0;
         }
         catch
@@ -64,9 +67,11 @@ public class TaskService : ITaskService
     // Delete -> soft delete: set Status = false
     public async Task<bool> DeleteTaskAsync(int id)
     {
-        var entity = await _repo.GetByIdAsync(id);
+        var entity = await _unitOfWork.Tasks.GetByIdAsync(id);
         if (entity == null) return false;
         entity.Status = false;
-        return await UpdateTaskAsync(entity);
+        _unitOfWork.Tasks.PrepareUpdate(entity);
+        var res = await _unitOfWork.SaveChangesWithTransactionAsync();
+        return res > 0;
     }
 }
