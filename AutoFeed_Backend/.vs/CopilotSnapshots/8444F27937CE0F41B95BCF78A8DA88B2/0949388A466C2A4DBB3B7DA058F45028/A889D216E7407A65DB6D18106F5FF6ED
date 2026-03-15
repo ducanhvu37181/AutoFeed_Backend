@@ -1,4 +1,4 @@
-using AutoFeed_Backend_Services.Interfaces;
+﻿using AutoFeed_Backend_Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using TaskModel = AutoFeed_Backend_DAO.Models.Task;
@@ -62,21 +62,6 @@ public class TaskController : ControllerBase
     public async Task<IActionResult> GetInactive()
     {
         var items = await _service.GetInactiveTasksAsync();
-        var dto = items.Select(ToDto).ToList();
-        var response = new ApiResponse<object>
-        {
-            Status = true,
-            HttpCode = 200,
-            Data = dto,
-            Description = "Success"
-        };
-        return Ok(response);
-    }
-
-    [HttpGet("search")]
-    public async Task<IActionResult> Search([FromQuery] string q)
-    {
-        var items = await _service.SearchTasksAsync(q);
         var dto = items.Select(ToDto).ToList();
         var response = new ApiResponse<object>
         {
@@ -152,7 +137,7 @@ public class TaskController : ControllerBase
         {
             Status = true,
             HttpCode = 201,
-            Data = ToDto(task),
+            Data = task,
             Description = "Created"
         };
         return CreatedAtAction(nameof(Get), new { id = task.TaskId }, response);
@@ -207,12 +192,11 @@ public class TaskController : ControllerBase
             return StatusCode(500, error);
         }
 
-        var updated = ToDto(existing);
         var successResponse = new ApiResponse<object>
         {
             Status = true,
             HttpCode = 200,
-            Data = updated,
+            Data = null,
             Description = "Update success"
         };
         return Ok(successResponse);
