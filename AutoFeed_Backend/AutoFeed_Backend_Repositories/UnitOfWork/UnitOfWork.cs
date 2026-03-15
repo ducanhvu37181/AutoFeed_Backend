@@ -12,6 +12,7 @@ public class UnitOfWork : IUnitOfWork
     private LargeChickenRepository _largeChickenRepository;
     private UserRepository _userRepository;
     private FoodRepository _foodRepository;
+    private IoTDeviceRepository _ioTDeviceRepository;
 
     public UnitOfWork() => _context ??= new AutoFeedDBContext();
 
@@ -20,23 +21,11 @@ public class UnitOfWork : IUnitOfWork
         _context = context;
     }
 
-    public TaskRepository Tasks
-    {
-        get { return _taskRepository ??= new TaskRepository(_context); }
-    }
-    public LargeChickenRepository LargeChickens
-    {
-        get { return _largeChickenRepository ??= new LargeChickenRepository(_context); }
-    }
-    public UserRepository Users
-    {
-        get { return _userRepository ??= new UserRepository(_context); }
-    }
-
-    public FoodRepository Foods
-    {
-        get { return _foodRepository ??= new FoodRepository(_context); }
-    }
+    public TaskRepository Tasks => _taskRepository ??= new TaskRepository(_context);
+    public LargeChickenRepository LargeChickens => _largeChickenRepository ??= new LargeChickenRepository(_context);
+    public UserRepository Users => _userRepository ??= new UserRepository(_context);
+    public FoodRepository Foods => _foodRepository ??= new FoodRepository(_context);
+    public IoTDeviceRepository IoTDevices => _ioTDeviceRepository ??= new IoTDeviceRepository(_context);
 
     public int SaveChangesWithTransaction()
     {
@@ -48,7 +37,7 @@ public class UnitOfWork : IUnitOfWork
                 result = _context.SaveChanges();
                 dbContextTransaction.Commit();
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
                 result = 0;
                 dbContextTransaction.Rollback();
@@ -67,7 +56,7 @@ public class UnitOfWork : IUnitOfWork
                 result = await _context.SaveChangesAsync();
                 await dbContextTransaction.CommitAsync();
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
                 result = 0;
                 await dbContextTransaction.RollbackAsync();
