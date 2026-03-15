@@ -1,4 +1,4 @@
-using AutoFeed_Backend_DAO.Models;
+﻿using AutoFeed_Backend_DAO.Models;
 using AutoFeed_Backend_Repositories.BasicRepo;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -27,27 +27,6 @@ namespace AutoFeed_Backend_Repositories.Repositories
         public async Task<List<Task>> getInactiveTaskAsync()
         {
             return await _context.Set<Task>().Where(t => t.Status != true).ToListAsync();
-        }
-
-        // Search by title, description or id
-        public async Task<List<Task>> SearchAsync(string query)
-        {
-            if (string.IsNullOrWhiteSpace(query))
-                return await _context.Set<Task>().ToListAsync();
-
-            query = query.Trim();
-
-            // try parse id
-            if (int.TryParse(query, out var id))
-            {
-                return await _context.Set<Task>()
-                    .Where(t => t.TaskId == id || (t.Title != null && t.Title.Contains(query)) || (t.Description != null && t.Description.Contains(query)))
-                    .ToListAsync();
-            }
-
-            return await _context.Set<Task>()
-                .Where(t => (t.Title != null && t.Title.Contains(query)) || (t.Description != null && t.Description.Contains(query)))
-                .ToListAsync();
         }
     }
 }

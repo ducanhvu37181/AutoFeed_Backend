@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using TaskModel = AutoFeed_Backend_DAO.Models.Task;
 
@@ -23,7 +23,4 @@ public interface ITaskService
 
     // Delete (soft delete -> set inactive)
     Task<bool> DeleteTaskAsync(int id);
-
-    // Search
-    Task<List<TaskModel>> SearchTasksAsync(string query);
 }
