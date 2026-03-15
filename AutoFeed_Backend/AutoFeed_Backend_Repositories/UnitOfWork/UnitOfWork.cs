@@ -11,6 +11,7 @@ public class UnitOfWork : IUnitOfWork
     private TaskRepository _taskRepository;
     private LargeChickenRepository _largeChickenRepository;
     private UserRepository _userRepository;
+    private FoodRepository _foodRepository;
 
     public UnitOfWork() => _context ??= new AutoFeedDBContext();
 
@@ -21,27 +22,21 @@ public class UnitOfWork : IUnitOfWork
 
     public TaskRepository Tasks
     {
-        get
-        {
-            return _taskRepository ??= new TaskRepository(_context);
-        }
+        get { return _taskRepository ??= new TaskRepository(_context); }
     }
     public LargeChickenRepository LargeChickens
-    { 
-        get
-        {
-            return _largeChickenRepository ??= new LargeChickenRepository(_context);
-        }
+    {
+        get { return _largeChickenRepository ??= new LargeChickenRepository(_context); }
     }
-
     public UserRepository Users
     {
-        get
-        {
-            return _userRepository ??= new UserRepository(_context);
-        }
+        get { return _userRepository ??= new UserRepository(_context); }
     }
-    
+
+    public FoodRepository Foods
+    {
+        get { return _foodRepository ??= new FoodRepository(_context); }
+    }
 
     public int SaveChangesWithTransaction()
     {

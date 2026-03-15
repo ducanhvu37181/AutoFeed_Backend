@@ -8,8 +8,9 @@ public interface IUnitOfWork
     TaskRepository Tasks { get; }
     LargeChickenRepository LargeChickens { get; }
     UserRepository Users { get; }
+    // Thêm dòng này
+    FoodRepository Foods { get; }
 
     int SaveChangesWithTransaction();
     Task<int> SaveChangesWithTransactionAsync();
-
 }
