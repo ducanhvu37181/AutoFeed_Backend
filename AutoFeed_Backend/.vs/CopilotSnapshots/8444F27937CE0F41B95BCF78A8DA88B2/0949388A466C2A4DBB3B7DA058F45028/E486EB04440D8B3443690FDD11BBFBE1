@@ -1,4 +1,4 @@
-using AutoFeed_Backend_Services.Interfaces;
+﻿using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Repositories.Repositories;
 using AutoFeed_Backend_Repositories.UnitOfWork;
 using System.Collections.Generic;
@@ -47,12 +47,6 @@ public class TaskService : ITaskService
     public async Task<List<TaskModel>> GetInactiveTasksAsync()
     {
         return await _unitOfWork.Tasks.getInactiveTaskAsync();
-    }
-
-    // Search
-    public async Task<List<TaskModel>> SearchTasksAsync(string query)
-    {
-        return await _unitOfWork.Tasks.SearchAsync(query);
     }
 
     // Update
