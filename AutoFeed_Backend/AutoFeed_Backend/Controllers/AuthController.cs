@@ -15,10 +15,9 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(string username, string password)
+    public async Task<IActionResult> Login(string usernameOrEmail, string password)
     {
-        // Gọi hàm Login mình vừa viết ở Repository
-        var user = await _unitOfWork.Users.LoginAsync(username, password);
+        var user = await _unitOfWork.Users.LoginAsync(usernameOrEmail, password);
 
         if (user == null)
         {
@@ -32,6 +31,7 @@ public class AuthController : ControllerBase
             {
                 user.UserId,
                 user.Username,
+                user.Email,
                 user.FullName,
                 user.RoleId
             }
