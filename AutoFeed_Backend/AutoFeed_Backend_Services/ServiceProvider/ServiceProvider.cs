@@ -27,5 +27,23 @@ public static class ServiceProvider
         services.AddScoped<IUserService, UserService>();
         return services;
     }
+
+    public static IServiceCollection AddScheduleServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IScheduleService, ScheduleService>();
+        return services;
+    }
+
+    // Registers all service groups in one call
+    public static IServiceCollection AddServiceProvider(this IServiceCollection services)
+    {
+        services.AddTaskServices();
+        services.AddChickenServices();
+        services.AddUserServices();
+        services.AddScheduleServices();
+        return services;
+    }
+
 }
     

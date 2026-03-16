@@ -10,6 +10,7 @@ public interface IUnitOfWork
     UserRepository Users { get; }
     // Thêm dòng này
     FoodRepository Foods { get; }
+    ScheduleRepository Schedules { get; }
 
     int SaveChangesWithTransaction();
     Task<int> SaveChangesWithTransactionAsync();

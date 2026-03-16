@@ -1,0 +1,14 @@
+using System;
+
+namespace AutoFeed_Backend.Models.Requests;
+
+public class UpdateScheduleRequest
+{
+    public int? UserId { get; set; }
+    public int? TaskId { get; set; }
+    public int? CbarnId { get; set; }
+    public string Description { get; set; }
+    public bool? Status { get; set; }
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+}
