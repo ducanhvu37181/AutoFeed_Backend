@@ -44,7 +44,7 @@ CREATE TABLE [dbo].[IoT_Device] (
     [deviceID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [name] NVARCHAR(100) NULL,
     [description] NVARCHAR(MAX) NULL,
-    [status] BIT DEFAULT 1 -- Boolean: 1=Active, 0=Inactive
+    [status] BIT DEFAULT 1 -- 1=Active, 0=Inactive
 );
 
 CREATE TABLE [dbo].[FlockChicken] (
@@ -52,11 +52,11 @@ CREATE TABLE [dbo].[FlockChicken] (
     [name] NVARCHAR(100) NULL,
     [quantity] INT NULL,
     [weight] DECIMAL(18, 2) NULL,
-    [DoB] DATE NULL,                 -- Replaced Age with Date of Birth
-    [transferDate] DATE NULL,        -- Track migration between barns
+    [DoB] DATE NULL,                 -- Date of Birth
+    [transferDate] DATE NULL,        -- Ngày chuyển chuồng
     [healthStatus] NVARCHAR(100) NULL,
     [note] NVARCHAR(MAX) NULL,
-    [isActive] BIT DEFAULT 1         -- Track if flock is currently on farm
+    [isActive] BIT DEFAULT 1         -- Boolean presence track
 );
 
 CREATE TABLE [dbo].[Task] (
@@ -99,8 +99,8 @@ CREATE TABLE [dbo].[Data_IoT] (
     [deviceID] INT NOT NULL,
     [value] DECIMAL(18, 4) NULL,
     [description] NVARCHAR(MAX) NULL,
-    [recordDate] DATETIME DEFAULT GETDATE(), -- Ngay + Gio
-    [sequenceNumber] INT NULL,                -- Lan thu may
+    [recordDate] DATETIME DEFAULT GETDATE(),
+    [sequenceNumber] INT NULL,
     CONSTRAINT [FK_DataIoT_Barn] FOREIGN KEY([barnID]) REFERENCES [dbo].[Barn] ([barnID]),
     CONSTRAINT [FK_DataIoT_Device] FOREIGN KEY([deviceID]) REFERENCES [dbo].[IoT_Device] ([deviceID])
 );
@@ -112,7 +112,7 @@ CREATE TABLE [dbo].[LargeChicken] (
     [weight] DECIMAL(18, 2) NULL,
     [healthStatus] NVARCHAR(100) NULL,
     [note] NVARCHAR(MAX) NULL,
-    [isActive] BIT DEFAULT 1, -- Removed Age, added isActive Boolean
+    [isActive] BIT DEFAULT 1, -- Boolean presence track
     CONSTRAINT [FK_LargeChicken_Flock] FOREIGN KEY([flockID]) REFERENCES [dbo].[FlockChicken] ([flockID])
 );
 
@@ -201,61 +201,55 @@ CREATE TABLE [dbo].[Request] (
     CONSTRAINT [FK_Request_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID])
 );
 
+-- UPDATED: Schedule with 3-state Status and Note column
 CREATE TABLE [dbo].[Schedule] (
     [schedID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [userID] INT NULL,
     [taskID] INT NULL,
     [CBarnID] INT NULL,
     [description] NVARCHAR(MAX) NULL,
-    [status] BIT DEFAULT 0,
+    [note] NVARCHAR(MAX) NULL,                                -- Added Note column
+    [status] NVARCHAR(20) DEFAULT 'pending',                  -- Changed from BIT to NVARCHAR
     [startDate] DATETIME NULL,
     [endDate] DATETIME NULL,
     [createdDate] DATETIME DEFAULT GETDATE(),
     CONSTRAINT [FK_Sched_CBarn] FOREIGN KEY([CBarnID]) REFERENCES [dbo].[ChickenBarn] ([CBarnID]),
     CONSTRAINT [FK_Sched_Task] FOREIGN KEY([taskID]) REFERENCES [dbo].[Task] ([taskID]),
-    CONSTRAINT [FK_Sched_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID])
+    CONSTRAINT [FK_Sched_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID]),
+    CONSTRAINT [CK_Schedule_Status] CHECK ([status] IN ('pending', 'in progress', 'completed')) -- Enum-like constraint
 );
 GO
 
 -- ======================================================
--- 6. SAMPLE DATA INSERTION (NO ID TYPING)
+-- 6. SAMPLE DATA INSERTION
 -- ======================================================
 
--- Roles
+-- Base Roles
 INSERT INTO [dbo].[Role] (description) VALUES ('Administrator'), ('Farm Worker');
 
--- Food
+-- Base Food
 INSERT INTO [dbo].[Food] (name, type, price, quantity) VALUES ('Organic Corn', 'Grain', 15.50, 500), ('Vitamin Pellets', 'Supplement', 25.00, 200);
 
 -- Barns
 INSERT INTO [dbo].[Barn] (temperature, humidity, type, area) VALUES (24.5, 60.0, 'Broiler', 500.00), (22.0, 55.0, 'Layer', 300.00);
 
--- IoT Devices
-INSERT INTO [dbo].[IoT_Device] (name, description, status) VALUES ('Sensor-T1', 'Temperature Sensor', 1), ('Sensor-H1', 'Humidity Sensor', 1);
-
--- Flock
+-- Chickens
 INSERT INTO [dbo].[FlockChicken] (name, quantity, weight, DoB, transferDate, healthStatus, isActive) 
 VALUES ('White Leghorn Flock A', 1000, 1.2, '2026-01-10', '2026-03-01', 'Healthy', 1);
 
 -- Users
 INSERT INTO [dbo].[User] (roleID, email, password, fullName, username, status) 
-VALUES (1, 'admin@autofeed.com', 'hashed_pass_123', 'John Doe', 'admin_john', 1),
-       (2, 'worker1@autofeed.com', 'hashed_pass_456', 'Jane Smith', 'jane_worker', 1);
+VALUES (1, 'admin@autofeed.com', 'pass123', 'John Doe', 'admin_john', 1),
+       (2, 'worker1@autofeed.com', 'pass456', 'Jane Smith', 'jane_worker', 1);
 
--- Data IoT (Barn 1, Device 1)
-INSERT INTO [dbo].[Data_IoT] (barnID, deviceID, value, description, sequenceNumber) 
-VALUES (1, 1, 24.8, 'Standard reading', 1), (1, 1, 25.1, 'Standard reading', 2);
-
--- Large Chicken
-INSERT INTO [dbo].[LargeChicken] (flockID, name, weight, healthStatus, isActive) 
-VALUES (1, 'Queen Hen 01', 2.5, 'Excellent', 1);
-
--- Assign Chicken to Barn
+-- Deployment / Assignment
 INSERT INTO [dbo].[ChickenBarn] (barnID, flockID, startDate, status) VALUES (1, 1, '2026-03-01', 1);
 
--- Tasks
-INSERT INTO [dbo].[Task] (title, description, status) VALUES ('Morning Feeding', 'Distribute 50kg of corn', 0);
+-- Task Definition
+INSERT INTO [dbo].[Task] (title, description, status) VALUES ('Morning Feeding', 'Distribute 50kg of corn', 1);
 
--- Schedule
-INSERT INTO [dbo].[Schedule] (userID, taskID, CBarnID, startDate, status) VALUES (2, 1, 1, GETDATE(), 0);
+-- UPDATED Schedule Sample: Using the new multi-state status and notes
+INSERT INTO [dbo].[Schedule] (userID, taskID, CBarnID, description, note, status, startDate) 
+VALUES (2, 1, 1, 'Feed the White Leghorn flock', 'Checked inventory before starting', 'in progress', GETDATE());
+
 GO
