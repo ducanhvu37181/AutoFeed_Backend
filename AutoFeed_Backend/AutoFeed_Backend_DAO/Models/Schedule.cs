@@ -17,7 +17,11 @@ public partial class Schedule
 
     public string Description { get; set; }
 
-    public bool? Status { get; set; }
+    public string Note { get; set; }
+
+    public string Priority { get; set; }
+
+    public string Status { get; set; }
 
     public DateTime? StartDate { get; set; }
 

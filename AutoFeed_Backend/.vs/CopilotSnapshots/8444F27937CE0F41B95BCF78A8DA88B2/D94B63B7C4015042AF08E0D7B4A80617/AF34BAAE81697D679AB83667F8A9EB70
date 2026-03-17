@@ -1,0 +1,133 @@
+﻿using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Services.Interfaces;
+using AutoFeed_Backend.Models.Requests;
+using AutoFeed_Backend.Models.Responses;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+
+namespace AutoFeed_Backend.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class LargeChickenController : ControllerBase
+{
+    private readonly ILargeChickenService _service;
+
+    public LargeChickenController(ILargeChickenService service)
+    {
+        _service = service;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var items = await _service.GetAllAsync();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = items, Description = "Success" });
+    }
+
+    [HttpGet("active")]
+    public async Task<IActionResult> GetActive()
+    {
+        var items = await _service.GetActiveAsync();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = items, Description = "Success" });
+    }
+
+    [HttpGet("inactive")]
+    public async Task<IActionResult> GetInactive()
+    {
+        var items = await _service.GetInactiveAsync();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = items, Description = "Success" });
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> Get(int id)
+    {
+        var item = await _service.GetByIdAsync(id);
+        if (item == null)
+            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = item, Description = "Success" });
+    }
+
+    // GET api/largechicken/search?name=xxx&healthStatus=yyy&flockId=1&includeInactive=false
+    [HttpGet("search")]
+    public async Task<IActionResult> Search(
+        [FromQuery] string? name,
+        [FromQuery] string? healthStatus,
+        [FromQuery] int? flockId,
+        [FromQuery] bool includeInactive = false)
+    {
+        var items = await _service.SearchAsync(name, healthStatus, flockId, includeInactive);
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = items, Description = "Success" });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateLargeChickenRequest model)
+    {
+        if (model == null || string.IsNullOrWhiteSpace(model.Name))
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
+
+        var entity = new LargeChicken
+        {
+            FlockId = model.FlockId,
+            Name = model.Name,
+            Weight = model.Weight,
+            HealthStatus = model.HealthStatus,
+            Note = model.Note
+            
+        };
+
+        var result = await _service.CreateAsync(entity);
+        if (result <= 0)
+            return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Create failed" });
+
+        return CreatedAtAction(nameof(Get), new { id = entity.ChickenLid },
+            new ApiResponse<object> { Status = true, HttpCode = 201, Data = entity, Description = "Created" });
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateLargeChickenRequest model)
+    {
+        if (model == null)
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
+
+        var existing = await _service.GetByIdAsync(id);
+        if (existing == null)
+            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
+
+        existing.FlockId = model.FlockId;
+        existing.Name = model.Name;
+        existing.Weight = model.Weight;
+        existing.HealthStatus = model.HealthStatus;
+        existing.Note = model.Note;
+        existing.IsActive = existing.IsActive; // keep current status
+
+        var ok = await _service.UpdateAsync(existing);
+        if (!ok)
+            return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Update failed" });
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Update success" });
+    }
+
+    // Soft delete
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var ok = await _service.DeleteAsync(id);
+        if (!ok)
+            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found or Delete failed" });
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Delete success" });
+    }
+
+    // Restore
+    [HttpPatch("{id:int}/restore")]
+    public async Task<IActionResult> Restore(int id)
+    {
+        var ok = await _service.RestoreAsync(id);
+        if (!ok)
+            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found or Restore failed" });
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Restore success" });
+    }
+}

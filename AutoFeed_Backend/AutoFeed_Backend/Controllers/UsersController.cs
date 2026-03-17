@@ -1,6 +1,7 @@
 ﻿using AutoFeed_Backend_DAO.Models;
 using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend.Models.Requests;
+using AutoFeed_Backend.Models.Requests.User;
 using AutoFeed_Backend.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;

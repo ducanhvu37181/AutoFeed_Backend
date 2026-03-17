@@ -54,24 +54,35 @@ public class ScheduleService : IScheduleService
     {
         var entity = await _unitOfWork.Schedules.GetByIdAsync(id);
         if (entity == null) return false;
-        entity.Status = false;
+        entity.Status = "pending"; // soft-delete set to pending or some value representing removed
         _unitOfWork.Schedules.PrepareUpdate(entity);
         var r = await _unitOfWork.SaveChangesWithTransactionAsync();
         return r > 0;
     }
 
-    public async Task<List<ScheduleModel>> GetInProgressTaskAsync()
+    public async Task<List<ScheduleModel>> GetInProgressScheduleAsync()
     {
-        return await _unitOfWork.Schedules.GetInProgressTaskAsync();
+        return await _unitOfWork.Schedules.GetInProgressScheduleAsync();
     }
 
-    public async Task<List<ScheduleModel>> GetCompletedTaskAsync()
+    public async Task<List<ScheduleModel>> GetCompletedScheduleAsync()
     {
-        return await _unitOfWork.Schedules.GetCompletedTaskAsync();
+        return await _unitOfWork.Schedules.GetCompletedScheduleAsync();
+    }
+
+    public async Task<List<ScheduleModel>> GetPendingScheduleAsync()
+    {
+        return await _unitOfWork.Schedules.GetPendingScheduleAsync();
     }
 
     public async Task<List<ScheduleModel>> SearchSchedulesAsync(string query)
     {
         return await _unitOfWork.Schedules.SearchAsync(query);
+    }
+
+    public async Task<string> GetUserNameByIdAsync(int userId)
+    {
+        var user = await _unitOfWork.Users.GetByIdAsync(userId);
+        return user?.Username ?? string.Empty;
     }
 }
