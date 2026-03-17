@@ -12,19 +12,25 @@ public class ScheduleRepository : GenericRepository<Schedule>
     public ScheduleRepository() : base() { }
     public ScheduleRepository(AutoFeedDBContext context) : base(context) { }
 
-    public async Task<List<Schedule>> GetInProgressTaskAsync()
+    public async Task<List<Schedule>> GetInProgressScheduleAsync()
     {
-        // In-progress schedules are marked with Status == true and within the start/end window
+        // Status is stored as string: e.g. "pending", "inprogress", "completed".
         return await _context.Set<Schedule>()
-            .Where(s => s.Status == true && (s.StartDate <= System.DateTime.Now && (s.EndDate == null || s.EndDate >= System.DateTime.Now)))
+            .Where(s => s.Status != null && s.Status.ToLower() == "inprogress")
             .ToListAsync();
     }
 
-    public async Task<List<Schedule>> GetCompletedTaskAsync()
+    public async Task<List<Schedule>> GetCompletedScheduleAsync()
     {
-        // Completed schedules should have Status == false and an EndDate in the past
         return await _context.Set<Schedule>()
-            .Where(s => s.Status == false && s.EndDate != null && s.EndDate < System.DateTime.Now)
+            .Where(s => s.Status != null && s.Status.ToLower() == "completed")
+            .ToListAsync();
+    }
+
+    public async Task<List<Schedule>> GetPendingScheduleAsync()
+    {
+        return await _context.Set<Schedule>()
+            .Where(s => s.Status != null && s.Status.ToLower() == "pending")
             .ToListAsync();
     }
 

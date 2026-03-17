@@ -12,7 +12,11 @@ public interface IScheduleService
     Task<bool> UpdateScheduleAsync(ScheduleModel schedule);
     Task<bool> DeleteScheduleAsync(int id);
 
-    Task<List<ScheduleModel>> GetInProgressTaskAsync();
-    Task<List<ScheduleModel>> GetCompletedTaskAsync();
+    Task<List<ScheduleModel>> GetInProgressScheduleAsync();
+    Task<List<ScheduleModel>> GetCompletedScheduleAsync();
+    Task<List<ScheduleModel>> GetPendingScheduleAsync();
     Task<List<ScheduleModel>> SearchSchedulesAsync(string query);
+
+    // helper to resolve username by user id
+    Task<string> GetUserNameByIdAsync(int userId);
 }

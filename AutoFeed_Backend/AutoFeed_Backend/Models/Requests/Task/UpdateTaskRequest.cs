@@ -1,0 +1,8 @@
+namespace AutoFeed_Backend.Models.Requests.Task;
+
+public class UpdateTaskRequest
+{
+    public string Title { get; set; }
+    public string Description { get; set; }
+    public bool? Status { get; set; }
+}

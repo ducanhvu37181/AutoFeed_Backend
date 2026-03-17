@@ -100,7 +100,7 @@ CREATE TABLE [dbo].[Data_IoT] (
     [value] DECIMAL(18, 4) NULL,
     [description] NVARCHAR(MAX) NULL,
     [recordDate] DATETIME DEFAULT GETDATE(),
-    [sequenceNumber] INT NULL,
+    [sequenceNumber] INT NULL, -- Lan thu may
     CONSTRAINT [FK_DataIoT_Barn] FOREIGN KEY([barnID]) REFERENCES [dbo].[Barn] ([barnID]),
     CONSTRAINT [FK_DataIoT_Device] FOREIGN KEY([deviceID]) REFERENCES [dbo].[IoT_Device] ([deviceID])
 );
@@ -112,7 +112,7 @@ CREATE TABLE [dbo].[LargeChicken] (
     [weight] DECIMAL(18, 2) NULL,
     [healthStatus] NVARCHAR(100) NULL,
     [note] NVARCHAR(MAX) NULL,
-    [isActive] BIT DEFAULT 1, -- Boolean presence track
+    [isActive] BIT DEFAULT 1, -- Removed Age
     CONSTRAINT [FK_LargeChicken_Flock] FOREIGN KEY([flockID]) REFERENCES [dbo].[FlockChicken] ([flockID])
 );
 
@@ -201,55 +201,50 @@ CREATE TABLE [dbo].[Request] (
     CONSTRAINT [FK_Request_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID])
 );
 
--- UPDATED: Schedule with 3-state Status and Note column
+-- UPDATED: Schedule with Priority, Status Enum, and Notes
 CREATE TABLE [dbo].[Schedule] (
     [schedID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [userID] INT NULL,
     [taskID] INT NULL,
     [CBarnID] INT NULL,
     [description] NVARCHAR(MAX) NULL,
-    [note] NVARCHAR(MAX) NULL,                                -- Added Note column
-    [status] NVARCHAR(20) DEFAULT 'pending',                  -- Changed from BIT to NVARCHAR
+    [note] NVARCHAR(MAX) NULL,
+    [priority] NVARCHAR(10) DEFAULT 'medium',               -- Added Priority
+    [status] NVARCHAR(20) DEFAULT 'pending',                -- 3-state Status
     [startDate] DATETIME NULL,
     [endDate] DATETIME NULL,
     [createdDate] DATETIME DEFAULT GETDATE(),
     CONSTRAINT [FK_Sched_CBarn] FOREIGN KEY([CBarnID]) REFERENCES [dbo].[ChickenBarn] ([CBarnID]),
     CONSTRAINT [FK_Sched_Task] FOREIGN KEY([taskID]) REFERENCES [dbo].[Task] ([taskID]),
     CONSTRAINT [FK_Sched_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID]),
-    CONSTRAINT [CK_Schedule_Status] CHECK ([status] IN ('pending', 'in progress', 'completed')) -- Enum-like constraint
+    CONSTRAINT [CK_Schedule_Status] CHECK ([status] IN ('pending', 'in progress', 'completed')),
+    CONSTRAINT [CK_Schedule_Priority] CHECK ([priority] IN ('low', 'medium', 'high')) -- Priority Check
 );
 GO
 
 -- ======================================================
--- 6. SAMPLE DATA INSERTION
+-- 6. SAMPLE DATA INSERTION (NO ID TYPING)
 -- ======================================================
 
 -- Base Roles
 INSERT INTO [dbo].[Role] (description) VALUES ('Administrator'), ('Farm Worker');
 
--- Base Food
-INSERT INTO [dbo].[Food] (name, type, price, quantity) VALUES ('Organic Corn', 'Grain', 15.50, 500), ('Vitamin Pellets', 'Supplement', 25.00, 200);
+-- Food & Barns
+INSERT INTO [dbo].[Food] (name, type, price, quantity) VALUES ('Organic Corn', 'Grain', 15.50, 500);
+INSERT INTO [dbo].[Barn] (temperature, humidity, type, area) VALUES (24.5, 60.0, 'Broiler', 500.00);
 
--- Barns
-INSERT INTO [dbo].[Barn] (temperature, humidity, type, area) VALUES (24.5, 60.0, 'Broiler', 500.00), (22.0, 55.0, 'Layer', 300.00);
-
--- Chickens
+-- Chickens & User
 INSERT INTO [dbo].[FlockChicken] (name, quantity, weight, DoB, transferDate, healthStatus, isActive) 
 VALUES ('White Leghorn Flock A', 1000, 1.2, '2026-01-10', '2026-03-01', 'Healthy', 1);
 
--- Users
 INSERT INTO [dbo].[User] (roleID, email, password, fullName, username, status) 
-VALUES (1, 'admin@autofeed.com', 'pass123', 'John Doe', 'admin_john', 1),
-       (2, 'worker1@autofeed.com', 'pass456', 'Jane Smith', 'jane_worker', 1);
+VALUES (2, 'worker1@autofeed.com', 'hashed_pass_456', 'Jane Smith', 'jane_worker', 1);
 
--- Deployment / Assignment
+-- Relationship & Task
 INSERT INTO [dbo].[ChickenBarn] (barnID, flockID, startDate, status) VALUES (1, 1, '2026-03-01', 1);
-
--- Task Definition
 INSERT INTO [dbo].[Task] (title, description, status) VALUES ('Morning Feeding', 'Distribute 50kg of corn', 1);
 
--- UPDATED Schedule Sample: Using the new multi-state status and notes
-INSERT INTO [dbo].[Schedule] (userID, taskID, CBarnID, description, note, status, startDate) 
-VALUES (2, 1, 1, 'Feed the White Leghorn flock', 'Checked inventory before starting', 'in progress', GETDATE());
-
+-- UPDATED Sample: Includes Priority, Status, and Note
+INSERT INTO [dbo].[Schedule] (userID, taskID, CBarnID, priority, status, note, startDate) 
+VALUES (1, 1, 1, 'high', 'pending', 'Ensure the feeding machine is calibrated.', GETDATE());
 GO

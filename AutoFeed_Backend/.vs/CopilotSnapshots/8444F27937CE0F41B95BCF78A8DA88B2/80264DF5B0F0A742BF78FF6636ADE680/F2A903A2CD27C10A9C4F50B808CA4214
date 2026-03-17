@@ -1,0 +1,88 @@
+﻿using AutoFeed_Backend_Services.Interfaces;
+using AutoFeed_Backend_Repositories.UnitOfWork;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using ScheduleModel = AutoFeed_Backend_DAO.Models.Schedule;
+
+namespace AutoFeed_Backend_Services.Services;
+
+public class ScheduleService : IScheduleService
+{
+    private readonly IUnitOfWork _unitOfWork;
+
+    public ScheduleService()
+    {
+        _unitOfWork = new UnitOfWork();
+    }
+
+    public ScheduleService(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<int> CreateScheduleAsync(ScheduleModel schedule)
+    {
+        _unitOfWork.Schedules.PrepareCreate(schedule);
+        return await _unitOfWork.SaveChangesWithTransactionAsync();
+    }
+
+    public async Task<ScheduleModel?> GetScheduleByIdAsync(int id)
+    {
+        return await _unitOfWork.Schedules.GetByIdAsync(id);
+    }
+
+    public async Task<List<ScheduleModel>> GetAllSchedulesAsync()
+    {
+        return await _unitOfWork.Schedules.GetAllAsync();
+    }
+
+    public async Task<bool> UpdateScheduleAsync(ScheduleModel schedule)
+    {
+        try
+        {
+            _unitOfWork.Schedules.PrepareUpdate(schedule);
+            var r = await _unitOfWork.SaveChangesWithTransactionAsync();
+            return r > 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public async Task<bool> DeleteScheduleAsync(int id)
+    {
+        var entity = await _unitOfWork.Schedules.GetByIdAsync(id);
+        if (entity == null) return false;
+        entity.Status = "pending"; // soft-delete set to pending or some value representing removed
+        _unitOfWork.Schedules.PrepareUpdate(entity);
+        var r = await _unitOfWork.SaveChangesWithTransactionAsync();
+        return r > 0;
+    }
+
+    public async Task<List<ScheduleModel>> GetInProgressScheduleAsync()
+    {
+        return await _unitOfWork.Schedules.GetInProgressScheduleAsync();
+    }
+
+    public async Task<List<ScheduleModel>> GetCompletedScheduleAsync()
+    {
+        return await _unitOfWork.Schedules.GetCompletedScheduleAsync();
+    }
+
+    public async Task<List<ScheduleModel>> GetPendingScheduleAsync()
+    {
+        return await _unitOfWork.Schedules.GetPendingScheduleAsync();
+    }
+
+    public async Task<List<ScheduleModel>> SearchSchedulesAsync(string query)
+    {
+        return await _unitOfWork.Schedules.SearchAsync(query);
+    }
+
+    public async Task<string> GetUserNameByIdAsync(int userId)
+    {
+        var user = await _unitOfWork.Users.GetByIdAsync(userId);
+        return user?.Username ?? string.Empty;
+    }
+}

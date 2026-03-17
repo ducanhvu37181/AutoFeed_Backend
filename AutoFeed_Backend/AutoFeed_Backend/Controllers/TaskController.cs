@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using TaskModel = AutoFeed_Backend_DAO.Models.Task;
 using AutoFeed_Backend.Models.Requests;
+using AutoFeed_Backend.Models.Requests.Task;
 using AutoFeed_Backend.Models.Responses;
 using System.Linq;
 using System.Collections.Generic;
