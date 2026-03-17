@@ -9,6 +9,7 @@ public class UnitOfWork : IUnitOfWork
 {
     private readonly AutoFeedDBContext _context;
     private TaskRepository _taskRepository;
+    private ScheduleRepository _scheduleRepository;
     private LargeChickenRepository _largeChickenRepository;
     private UserRepository _userRepository;
     private FoodRepository _foodRepository;
@@ -23,6 +24,10 @@ public class UnitOfWork : IUnitOfWork
     public TaskRepository Tasks
     {
         get { return _taskRepository ??= new TaskRepository(_context); }
+    }
+    public ScheduleRepository Schedules
+    {
+        get { return _scheduleRepository ??= new ScheduleRepository(_context); }
     }
     public LargeChickenRepository LargeChickens
     {

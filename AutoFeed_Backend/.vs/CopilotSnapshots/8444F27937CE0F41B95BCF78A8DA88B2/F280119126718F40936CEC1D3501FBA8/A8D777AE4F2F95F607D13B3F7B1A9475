@@ -1,0 +1,16 @@
+﻿using System.Threading.Tasks;
+using AutoFeed_Backend_Repositories.Repositories;
+
+namespace AutoFeed_Backend_Repositories.UnitOfWork;
+
+public interface IUnitOfWork
+{
+    TaskRepository Tasks { get; }
+    LargeChickenRepository LargeChickens { get; }
+    UserRepository Users { get; }
+    // Thêm dòng này
+    FoodRepository Foods { get; }
+
+    int SaveChangesWithTransaction();
+    Task<int> SaveChangesWithTransactionAsync();
+}
