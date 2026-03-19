@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using ScheduleModel = AutoFeed_Backend_DAO.Models.Schedule;
 
@@ -19,6 +19,4 @@ public interface IScheduleService
 
     // helper to resolve username by user id
     Task<string> GetUserNameByIdAsync(int userId);
-
-    Task<List<ScheduleModel>> GetSchedulesByUserAsync(int userId);
 }
