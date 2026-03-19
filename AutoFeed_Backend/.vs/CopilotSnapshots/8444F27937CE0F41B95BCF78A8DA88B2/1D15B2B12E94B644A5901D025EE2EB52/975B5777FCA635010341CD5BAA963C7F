@@ -1,4 +1,4 @@
-using AutoFeed_Backend_Services.Interfaces;
+﻿using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Repositories.UnitOfWork;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -84,10 +84,5 @@ public class ScheduleService : IScheduleService
     {
         var user = await _unitOfWork.Users.GetByIdAsync(userId);
         return user?.Username ?? string.Empty;
-    }
-
-    public async Task<List<ScheduleModel>> GetSchedulesByUserAsync(int userId)
-    {
-        return await _unitOfWork.Schedules.GetByUserIdAsync(userId);
     }
 }
