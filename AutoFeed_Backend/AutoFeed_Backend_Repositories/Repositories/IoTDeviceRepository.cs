@@ -1,0 +1,45 @@
+﻿using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Repositories.BasicRepo;
+using Microsoft.EntityFrameworkCore;
+
+namespace AutoFeed_Backend_Repositories.Repositories;
+
+public class IoTDeviceRepository : GenericRepository<IoTDevice>
+{
+    public IoTDeviceRepository() : base() { }
+    public IoTDeviceRepository(AutoFeedDBContext context) : base(context) { }
+
+    public async System.Threading.Tasks.Task<IEnumerable<IoTDevice>> GetDevicesWithBarnAsync(string search, string type, string status)
+    {
+        var query = _context.IoTDevices
+            .Include(d => d.BarnIoTDevices)
+                .ThenInclude(b => b.Barn)
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(search))
+            query = query.Where(d => d.Name.Contains(search) || d.DeviceId.ToString().Contains(search));
+
+        if (!string.IsNullOrEmpty(type) && type != "All Types")
+            query = query.Where(d => d.Name.Contains(type));
+
+        return await query.ToListAsync();
+    }
+
+    public async System.Threading.Tasks.Task<IEnumerable<Barn>> GetAllBarnsAsync() => await _context.Barns.ToListAsync();
+
+    public async System.Threading.Tasks.Task ReassignDeviceAsync(int deviceId, int newBarnId)
+    {
+        var oldAssignments = _context.BarnIoTDevices.Where(b => b.DeviceId == deviceId);
+        _context.BarnIoTDevices.RemoveRange(oldAssignments);
+
+        var newAssignment = new BarnIoTDevice
+        {
+            DeviceId = deviceId,
+            BarnId = newBarnId,
+            InstallationDate = DateOnly.FromDateTime(DateTime.Now),
+            Status = true
+        };
+        _context.BarnIoTDevices.Add(newAssignment);
+        await _context.SaveChangesAsync();
+    }
+}

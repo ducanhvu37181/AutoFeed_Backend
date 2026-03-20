@@ -1,7 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Services.Services;
-using AutoFeed_Backend_Repositories.Repositories;
 using AutoFeed_Backend_Repositories.UnitOfWork;
 
 namespace AutoFeed_Backend_Services.ServiceProvider;
@@ -14,6 +13,7 @@ public static class ServiceProvider
         services.AddScoped<ITaskService, TaskService>();
         return services;
     }
+
     public static IServiceCollection AddChickenServices(this IServiceCollection services)
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -25,6 +25,7 @@ public static class ServiceProvider
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IAuthService, AuthService>();
         return services;
     }
 
@@ -35,15 +36,28 @@ public static class ServiceProvider
         return services;
     }
 
-    // Registers all service groups in one call
+    public static IServiceCollection AddInventoryServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IFoodService, FoodService>();
+        return services;
+    }
+
+    public static IServiceCollection AddIoTDeviceServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IIoTDeviceService, IoTDeviceService>();
+        return services;
+    }
+
     public static IServiceCollection AddServiceProvider(this IServiceCollection services)
     {
         services.AddTaskServices();
         services.AddChickenServices();
         services.AddUserServices();
         services.AddScheduleServices();
+        services.AddInventoryServices();
+        services.AddIoTDeviceServices();
         return services;
     }
-
 }
-    
