@@ -1,6 +1,4 @@
-using AutoFeed_Backend_Services.Interfaces;
-using AutoFeed_Backend_Services.Services;
-using AutoFeed_Backend_Repositories.UnitOfWork;
+using AutoFeed_Backend_Services.ServiceProvider;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -9,11 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IFoodService, FoodService>();
-builder.Services.AddScoped<IIoTDeviceService, IoTDeviceService>();
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddServiceProvider();
 
 builder.Services.AddEndpointsApiExplorer();
 
