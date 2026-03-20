@@ -1,4 +1,4 @@
-﻿using AutoFeed_Backend_Repositories.UnitOfWork;
+﻿using AutoFeed_Backend_Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoFeed_Backend.Controllers;
@@ -7,34 +7,21 @@ namespace AutoFeed_Backend.Controllers;
 [ApiController]
 public class AuthController : ControllerBase
 {
-    private readonly IUnitOfWork _unitOfWork;
-
-    public AuthController(IUnitOfWork unitOfWork)
-    {
-        _unitOfWork = unitOfWork;
-    }
+    private readonly IAuthService _authService;
+    public AuthController(IAuthService authService) => _authService = authService;
 
     [HttpPost("login")]
     public async Task<IActionResult> Login(string usernameOrEmail, string password)
     {
-        var user = await _unitOfWork.Users.LoginAsync(usernameOrEmail, password);
+        var user = await _authService.LoginAsync(usernameOrEmail, password);
+        if (user == null) return Unauthorized(new { message = "Sai tài khoản hoặc mật khẩu!" });
 
-        if (user == null)
-        {
-            return Unauthorized(new { message = "Tài khoản hoặc mật khẩu không chính xác!" });
-        }
-
+        var token = _authService.GenerateJwtToken(user);
         return Ok(new
         {
-            message = "Đăng nhập thành công!",
-            user = new
-            {
-                user.UserId,
-                user.Username,
-                user.Email,
-                user.FullName,
-                user.RoleId
-            }
+            message = "Thành công!",
+            token = token,
+            user = new { user.UserId, user.Username, user.FullName, user.RoleId }
         });
     }
 }

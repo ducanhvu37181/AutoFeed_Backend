@@ -1,4 +1,5 @@
 ﻿using AutoFeed_Backend_DAO.Models;
+using Microsoft.AspNetCore.Authorization;
 using AutoFeed_Backend_Repositories.UnitOfWork;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,6 +7,7 @@ namespace AutoFeed_Backend.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class DeviceController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;

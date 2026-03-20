@@ -10,4 +10,7 @@
     <ProjectReference Include="..\AutoFeed_Backend_DAO\AutoFeed_Backend_DAO.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="GitHub.Copilot.SDK" Version="0.1.32" />
+  </ItemGroup>
 </Project>

@@ -1,0 +1,26 @@
+﻿<Properties StartupConfiguration="{595447D5-E8B3-4CEA-A806-FBE53645CD98}|https">
+  <MonoDevelop.Ide.ItemProperties.AutoFeed__Backend PreferredExecutionTarget="/Applications/Google Chrome.app" />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.Workbench ActiveDocument="AutoFeed_Backend/appsettings.json">
+    <Files>
+      <File FileName="AutoFeed_Backend/appsettings.json" Line="12" Column="2" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="AutoFeed_Backend" expanded="True">
+            <Node name="AutoFeed_Backend">
+              <Node name="appsettings.json" selected="True" />
+            </Node>
+            <Node name="AutoFeed_Backend_DAO" expanded="True" />
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+</Properties>
