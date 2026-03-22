@@ -10,7 +10,8 @@ public interface IUnitOfWork
     UserRepository Users { get; }
     FoodRepository Foods { get; }
     ScheduleRepository Schedules { get; }
-    IoTDeviceRepository IoTDevices { get; } 
+    IoTDeviceRepository IoTDevices { get; }
+    RequestRepository Requests { get; }
 
     int SaveChangesWithTransaction();
     Task<int> SaveChangesWithTransactionAsync();
