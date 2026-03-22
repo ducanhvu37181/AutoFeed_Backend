@@ -50,6 +50,13 @@ public static class ServiceProvider
         return services;
     }
 
+    public static IServiceCollection AddRequestServices(this IServiceCollection services)  
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IRequestService, RequestService>();
+        return services;
+    }
+
     public static IServiceCollection AddServiceProvider(this IServiceCollection services)
     {
         services.AddTaskServices();
@@ -58,6 +65,7 @@ public static class ServiceProvider
         services.AddScheduleServices();
         services.AddInventoryServices();
         services.AddIoTDeviceServices();
+        services.AddRequestServices();
         return services;
     }
 }
