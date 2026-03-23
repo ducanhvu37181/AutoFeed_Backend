@@ -24,9 +24,7 @@ public class ScheduleController : ControllerBase
     [HttpGet("user/{userId:int}")]
     public async Task<IActionResult> GetByUser(int userId)
     {
-        var items = await _service.GetSchedulesByUserAsync(userId);
-        var user = await _service.GetUserNameByIdAsync(userId);
-        var dto = items.Select(s => ToDto(s, user)).ToList();
+        var dto = await _service.GetSchedulesByUserResponsesAsync(userId);
         var response = new ApiResponse<object>
         {
             Status = true,
@@ -37,34 +35,10 @@ public class ScheduleController : ControllerBase
         return Ok(response);
     }
 
-    private ScheduleResponse ToDto(ScheduleModel s, string username = null) => new ScheduleResponse
-    {
-        SchedId = s.SchedId,
-        UserId = s.UserId,
-        TaskId = s.TaskId,
-        CbarnId = s.CbarnId,
-        Description = s.Description,
-        Note = s.Note,
-        Priority = s.Priority,
-        Status = s.Status,
-        StartDate = s.StartDate,
-        EndDate = s.EndDate,
-        Username = username
-    };
-
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var items = await _service.GetAllSchedulesAsync();
-        // fetch usernames for user ids
-        var users = items.Where(i => i.UserId.HasValue).Select(i => i.UserId.Value).Distinct().ToList();
-        var userMap = new Dictionary<int, string>();
-        foreach (var uid in users)
-        {
-            var u = await _service.GetUserNameByIdAsync(uid);
-            userMap[uid] = u;
-        }
-        var dto = items.Select(s => ToDto(s, s.UserId.HasValue && userMap.ContainsKey(s.UserId.Value) ? userMap[s.UserId.Value] : null)).ToList();
+        var dto = await _service.GetAllScheduleResponsesAsync();
         var response = new ApiResponse<object>
         {
             Status = true,
@@ -78,15 +52,7 @@ public class ScheduleController : ControllerBase
     [HttpGet("inprogress")]
     public async Task<IActionResult> GetInProgress()
     {
-        var items = await _service.GetInProgressScheduleAsync();
-        var users = items.Where(i => i.UserId.HasValue).Select(i => i.UserId.Value).Distinct().ToList();
-        var userMap = new Dictionary<int, string>();
-        foreach (var uid in users)
-        {
-            var u = await _service.GetUserNameByIdAsync(uid);
-            userMap[uid] = u;
-        }
-        var dto = items.Select(s => ToDto(s, s.UserId.HasValue && userMap.ContainsKey(s.UserId.Value) ? userMap[s.UserId.Value] : null)).ToList();
+        var dto = await _service.GetInProgressScheduleResponsesAsync();
         var response = new ApiResponse<object>
         {
             Status = true,
@@ -100,15 +66,7 @@ public class ScheduleController : ControllerBase
     [HttpGet("completed")]
     public async Task<IActionResult> GetCompleted()
     {
-        var items = await _service.GetCompletedScheduleAsync();
-        var users = items.Where(i => i.UserId.HasValue).Select(i => i.UserId.Value).Distinct().ToList();
-        var userMap = new Dictionary<int, string>();
-        foreach (var uid in users)
-        {
-            var u = await _service.GetUserNameByIdAsync(uid);
-            userMap[uid] = u;
-        }
-        var dto = items.Select(s => ToDto(s, s.UserId.HasValue && userMap.ContainsKey(s.UserId.Value) ? userMap[s.UserId.Value] : null)).ToList();
+        var dto = await _service.GetCompletedScheduleResponsesAsync();
         var response = new ApiResponse<object>
         {
             Status = true,
@@ -122,15 +80,7 @@ public class ScheduleController : ControllerBase
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string q)
     {
-        var items = await _service.SearchSchedulesAsync(q);
-        var users = items.Where(i => i.UserId.HasValue).Select(i => i.UserId.Value).Distinct().ToList();
-        var userMap = new Dictionary<int, string>();
-        foreach (var uid in users)
-        {
-            var u = await _service.GetUserNameByIdAsync(uid);
-            userMap[uid] = u;
-        }
-        var dto = items.Select(s => ToDto(s, s.UserId.HasValue && userMap.ContainsKey(s.UserId.Value) ? userMap[s.UserId.Value] : null)).ToList();
+        var dto = await _service.SearchScheduleResponsesAsync(q);
         var response = new ApiResponse<object>
         {
             Status = true,
@@ -144,27 +94,11 @@ public class ScheduleController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id)
     {
-        var item = await _service.GetScheduleByIdAsync(id);
-        if (item == null)
-        {
-            var error = new ApiResponse<object>
-            {
-                Status = false,
-                HttpCode = 404,
-                Data = null,
-                Description = "Not Found"
-            };
-            return NotFound(error);
-        }
-        var username = item.UserId.HasValue ? await _service.GetUserNameByIdAsync(item.UserId.Value) : null;
-        var response = new ApiResponse<object>
-        {
-            Status = true,
-            HttpCode = 200,
-            Data = ToDto(item, username),
-            Description = "Success"
-        };
-        return Ok(response);
+        var dto = await _service.GetScheduleResponseByIdAsync(id);
+        if (dto == null)
+            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
 
     [HttpPost]
@@ -208,12 +142,12 @@ public class ScheduleController : ControllerBase
             return StatusCode(500, error);
         }
 
-        var username = schedule.UserId.HasValue ? await _service.GetUserNameByIdAsync(schedule.UserId.Value) : null;
+        var responseDto = await _service.GetScheduleResponseByIdAsync(id);
         var response = new ApiResponse<object>
         {
             Status = true,
             HttpCode = 201,
-            Data = ToDto(schedule, username),
+            Data = responseDto,
             Description = "Created"
         };
         return CreatedAtAction(nameof(Get), new { id = schedule.SchedId }, response);
@@ -270,8 +204,7 @@ public class ScheduleController : ControllerBase
             return StatusCode(500, error);
         }
 
-        var username = existing.UserId.HasValue ? await _service.GetUserNameByIdAsync(existing.UserId.Value) : null;
-        var updated = ToDto(existing, username);
+        var updated = await _service.GetScheduleResponseByIdAsync(id);
         var successResponse = new ApiResponse<object>
         {
             Status = true,

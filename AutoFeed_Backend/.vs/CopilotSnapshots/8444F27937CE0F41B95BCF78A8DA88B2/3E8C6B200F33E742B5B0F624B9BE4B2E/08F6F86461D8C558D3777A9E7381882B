@@ -1,0 +1,113 @@
+﻿using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Repositories.UnitOfWork;
+using AutoFeed_Backend_Services.Interfaces;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace AutoFeed_Backend_Services.Services;
+
+public class UserService : IUserService
+{
+    private readonly IUnitOfWork _unitOfWork;
+
+    public UserService()
+    {
+        _unitOfWork = new UnitOfWork();
+    }
+
+    public UserService(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<List<User>> GetAllAsync()
+    {
+        return await _unitOfWork.Users.GetAllAsync();
+    }
+
+    public async Task<List<User>> GetActiveAsync()
+    {
+        return await _unitOfWork.Users.GetActiveAsync();
+    }
+
+    public async Task<List<User>> GetInactiveAsync()
+    {
+        return await _unitOfWork.Users.GetInactiveAsync();
+    }
+
+    public async Task<User?> GetByIdAsync(int id)
+    {
+        return await _unitOfWork.Users.GetByIdAsync(id);
+    }
+
+    public async Task<List<User>> SearchAsync(string? keyword, int? roleId, bool includeInactive)
+    {
+        return await _unitOfWork.Users.SearchAsync(keyword, roleId, includeInactive);
+    }
+
+    public async Task<int> CreateAsync(User entity)
+    {
+        // Check duplicate email/username
+        var exists = await _unitOfWork.Users.IsEmailOrUsernameExistsAsync(entity.Email, entity.Username);
+        if (exists) return -1;
+
+        entity.Status = true;
+        //entity.Password = BCrypt.Net.BCrypt.HashPassword(entity.Password);
+        _unitOfWork.Users.PrepareCreate(entity);
+        return await _unitOfWork.SaveChangesWithTransactionAsync();
+    }
+
+    public async Task<bool> UpdateAsync(User entity)
+    {
+        try
+        {
+            // Check duplicate email/username excluding self
+            var duplicate = await _unitOfWork.Users.IsEmailOrUsernameExistsAsync(
+                entity.Email, entity.Username, entity.UserId);
+            if (duplicate) return false;
+
+            _unitOfWork.Users.PrepareUpdate(entity);
+            var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+            return result > 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    //public async Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword)
+    //{
+    //    var entity = await _unitOfWork.Users.GetByIdAsync(userId);
+    //    if (entity == null || entity.Status != true) return false;
+
+    //    if (!BCrypt.Net.BCrypt.Verify(oldPassword, entity.Password)) return false;
+
+    //    entity.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+    //    _unitOfWork.Users.PrepareUpdate(entity);
+    //    var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+    //    return result > 0;
+    //}
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var entity = await _unitOfWork.Users.GetByIdAsync(id);
+        if (entity == null) return false;
+
+        entity.Status = false;
+        _unitOfWork.Users.PrepareUpdate(entity);
+        var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+        return result > 0;
+    }
+
+    public async Task<bool> RestoreAsync(int id)
+    {
+        var entity = await _unitOfWork.Users.GetByIdAsync(id);
+        if (entity == null) return false;
+
+        entity.Status = true;
+        _unitOfWork.Users.PrepareUpdate(entity);
+        var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+        return result > 0;
+    }
+}

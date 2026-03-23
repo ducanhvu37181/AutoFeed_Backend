@@ -1,0 +1,49 @@
+﻿using Microsoft.Extensions.DependencyInjection;
+using AutoFeed_Backend_Services.Interfaces;
+using AutoFeed_Backend_Services.Services;
+using AutoFeed_Backend_Repositories.Repositories;
+using AutoFeed_Backend_Repositories.UnitOfWork;
+
+namespace AutoFeed_Backend_Services.ServiceProvider;
+
+public static class ServiceProvider
+{
+    public static IServiceCollection AddTaskServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<ITaskService, TaskService>();
+        return services;
+    }
+
+    public static IServiceCollection AddChickenServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<ILargeChickenService, LargeChickenService>();
+        return services;
+    }
+
+    public static IServiceCollection AddUserServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IUserService, UserService>();
+        return services;
+    }
+
+    public static IServiceCollection AddScheduleServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IScheduleService, ScheduleService>();
+        return services;
+    }
+
+    // Registers all service groups in one call
+    public static IServiceCollection AddServiceProvider(this IServiceCollection services)
+    {
+        services.AddTaskServices();
+        services.AddChickenServices();
+        services.AddUserServices();
+        services.AddScheduleServices();
+        services.AddScoped<IChickenBarnService, ChickenBarnService>();
+        return services;
+    }
+}

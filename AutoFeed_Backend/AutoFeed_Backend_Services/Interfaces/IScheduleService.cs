@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ScheduleModel = AutoFeed_Backend_DAO.Models.Schedule;
+using AutoFeed_Backend_Services.Models.Responses;
+using System;
 
 namespace AutoFeed_Backend_Services.Interfaces;
 
@@ -21,4 +23,17 @@ public interface IScheduleService
     Task<string> GetUserNameByIdAsync(int userId);
 
     Task<List<ScheduleModel>> GetSchedulesByUserAsync(int userId);
+
+    // higher-level mapping helpers
+    Task<Dictionary<int, int>> GetBarnMapForSchedulesAsync(IEnumerable<int> cbarnIds);
+    Task<Dictionary<int, string>> GetTaskTitleMapAsync(IEnumerable<int> taskIds);
+    Task<Dictionary<int, string>> GetUserNameMapAsync(IEnumerable<int> userIds);
+
+    // Return DTOs ready for API consumption (mapping done in service)
+    Task<List<ScheduleResponse>> GetAllScheduleResponsesAsync();
+    Task<List<ScheduleResponse>> GetInProgressScheduleResponsesAsync();
+    Task<List<ScheduleResponse>> GetCompletedScheduleResponsesAsync();
+    Task<List<ScheduleResponse>> SearchScheduleResponsesAsync(string query);
+    Task<ScheduleResponse?> GetScheduleResponseByIdAsync(int id);
+    Task<List<ScheduleResponse>> GetSchedulesByUserResponsesAsync(int userId);
 }
