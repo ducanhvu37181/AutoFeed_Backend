@@ -1,4 +1,4 @@
-using AutoFeed_Backend_Services.Interfaces;
+﻿using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Repositories.UnitOfWork;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -156,16 +156,6 @@ public class ScheduleService : IScheduleService
     {
         var items = await GetSchedulesByUserAsync(userId);
         return await MapToResponsesAsync(items);
-    }
-
-    public async Task<bool> UpdateScheduleStatusAsync(int id, string status)
-    {
-        var entity = await _unitOfWork.Schedules.GetByIdAsync(id);
-        if (entity == null) return false;
-        entity.Status = status;
-        _unitOfWork.Schedules.PrepareUpdate(entity);
-        var r = await _unitOfWork.SaveChangesWithTransactionAsync();
-        return r > 0;
     }
 
     private async Task<List<ScheduleResponse>> MapToResponsesAsync(IEnumerable<ScheduleModel> items)
