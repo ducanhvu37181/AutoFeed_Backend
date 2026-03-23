@@ -15,6 +15,8 @@ public class UnitOfWork : IUnitOfWork
     private FoodRepository _foodRepository;
     private IoTDeviceRepository _ioTDeviceRepository;
     private RequestRepository _requestRepository;
+    // --- THÊM DÒNG NÀY ---
+    private BarnRepository _barnRepository;
 
     public UnitOfWork() => _context ??= new AutoFeedDBContext();
 
@@ -23,38 +25,36 @@ public class UnitOfWork : IUnitOfWork
         _context = context;
     }
 
-    //public TaskRepository Tasks
-    //{
-    //    get { return _taskRepository ??= new TaskRepository(_context); }
-    //}
-    //public ScheduleRepository Schedules
-    //{
-    //    get { return _scheduleRepository ??= new ScheduleRepository(_context); }
-    //}
-    //public LargeChickenRepository LargeChickens
-    //{
-    //    get { return _largeChickenRepository ??= new LargeChickenRepository(_context); }
-    //}
-    //public UserRepository Users
-    //{
-    //    get { return _userRepository ??= new UserRepository(_context); }
-    //}
+    public TaskRepository Tasks
+    {
+        get { return _taskRepository ??= new TaskRepository(_context); }
+    }
+    public ScheduleRepository Schedules
+    {
+        get { return _scheduleRepository ??= new ScheduleRepository(_context); }
+    }
+    public LargeChickenRepository LargeChickens
+    {
+        get { return _largeChickenRepository ??= new LargeChickenRepository(_context); }
+    }
+    public UserRepository Users
+    {
+        get { return _userRepository ??= new UserRepository(_context); }
+    }
 
-    //public FoodRepository Foods
-    //{
-    //    get { return _foodRepository ??= new FoodRepository(_context); }
-    //}
-    //public RequestRepository Requests
-    //{
-    //    get { return _requestRepository ??= new RequestRepository(_context); }
-    //}
-    public TaskRepository Tasks => _taskRepository ??= new TaskRepository(_context);
-    public ScheduleRepository Schedules => _scheduleRepository ??= new ScheduleRepository(_context);
-    public LargeChickenRepository LargeChickens => _largeChickenRepository ??= new LargeChickenRepository(_context);
-    public UserRepository Users => _userRepository ??= new UserRepository(_context);
-    public FoodRepository Foods => _foodRepository ??= new FoodRepository(_context);
+    public FoodRepository Foods
+    {
+        get { return _foodRepository ??= new FoodRepository(_context); }
+    }
+    public RequestRepository Requests
+    {
+        get { return _requestRepository ??= new RequestRepository(_context); }
+    }
+
     public IoTDeviceRepository IoTDevices => _ioTDeviceRepository ??= new IoTDeviceRepository(_context);
-    public RequestRepository Requests => _requestRepository ??= new RequestRepository(_context);
+
+    // --- THÊM DÒNG NÀY ---
+    public BarnRepository Barns => _barnRepository ??= new BarnRepository(_context);
 
     public int SaveChangesWithTransaction()
     {
