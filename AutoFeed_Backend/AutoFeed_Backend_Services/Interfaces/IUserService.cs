@@ -13,6 +13,9 @@ public interface IUserService
     Task<User?> GetByIdAsync(int id);
     Task<List<User>> SearchAsync(string? keyword, int? roleId, bool includeInactive);
 
+    // Provide map of users by id for bulk operations
+    Task<Dictionary<int, string>> GetUserNameMapAsync(IEnumerable<int> userIds);
+
     // Create
     Task<int> CreateAsync(User entity);
 

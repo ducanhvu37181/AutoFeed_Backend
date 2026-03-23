@@ -13,6 +13,7 @@ public class UnitOfWork : IUnitOfWork
     private LargeChickenRepository _largeChickenRepository;
     private UserRepository _userRepository;
     private FoodRepository _foodRepository;
+    private ChickenBarnRepository _chickenBarnRepository;
     private IoTDeviceRepository _ioTDeviceRepository;
     private RequestRepository _requestRepository;
     // --- THÊM DÒNG NÀY ---
@@ -32,6 +33,10 @@ public class UnitOfWork : IUnitOfWork
     public ScheduleRepository Schedules
     {
         get { return _scheduleRepository ??= new ScheduleRepository(_context); }
+    }
+    public ChickenBarnRepository ChickenBarns
+    {
+        get { return _chickenBarnRepository ??= new ChickenBarnRepository(_context); }
     }
     public LargeChickenRepository LargeChickens
     {

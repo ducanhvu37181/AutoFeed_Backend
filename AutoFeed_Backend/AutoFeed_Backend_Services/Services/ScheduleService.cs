@@ -3,6 +3,7 @@ using AutoFeed_Backend_Repositories.UnitOfWork;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ScheduleModel = AutoFeed_Backend_DAO.Models.Schedule;
+using AutoFeed_Backend_Services.Models.Responses;
 
 namespace AutoFeed_Backend_Services.Services;
 
@@ -89,6 +90,107 @@ public class ScheduleService : IScheduleService
     public async Task<List<ScheduleModel>> GetSchedulesByUserAsync(int userId)
     {
         return await _unitOfWork.Schedules.GetByUserIdAsync(userId);
+    }
+
+    public async Task<Dictionary<int, int>> GetBarnMapForSchedulesAsync(IEnumerable<int> cbarnIds)
+    {
+        var ids = cbarnIds?.ToList() ?? new List<int>();
+        var result = new Dictionary<int, int>();
+        if (!ids.Any()) return result;
+        var cbarns = await _unitOfWork.ChickenBarns.GetByIdsAsync(ids);
+        return cbarns.ToDictionary(c => c.CbarnId, c => c.BarnId ?? 0);
+    }
+
+    public async Task<Dictionary<int, string>> GetTaskTitleMapAsync(IEnumerable<int> taskIds)
+    {
+        var ids = taskIds?.ToList() ?? new List<int>();
+        var result = new Dictionary<int, string>();
+        if (!ids.Any()) return result;
+        var tasks = await _unitOfWork.Tasks.GetAllAsync();
+        return tasks.Where(t => ids.Contains(t.TaskId)).ToDictionary(t => t.TaskId, t => t.Title);
+    }
+
+    public async Task<Dictionary<int, string>> GetUserNameMapAsync(IEnumerable<int> userIds)
+    {
+        var ids = userIds?.ToList() ?? new List<int>();
+        var result = new Dictionary<int, string>();
+        if (!ids.Any()) return result;
+        var users = await _unitOfWork.Users.GetAllAsync();
+        return users.Where(u => ids.Contains(u.UserId)).ToDictionary(u => u.UserId, u => u.Username);
+    }
+
+    // High-level methods returning DTOs
+    public async Task<List<ScheduleResponse>> GetAllScheduleResponsesAsync()
+    {
+        var items = await GetAllSchedulesAsync();
+        return await MapToResponsesAsync(items);
+    }
+
+    public async Task<List<ScheduleResponse>> GetInProgressScheduleResponsesAsync()
+    {
+        var items = await GetInProgressScheduleAsync();
+        return await MapToResponsesAsync(items);
+    }
+
+    public async Task<List<ScheduleResponse>> GetCompletedScheduleResponsesAsync()
+    {
+        var items = await GetCompletedScheduleAsync();
+        return await MapToResponsesAsync(items);
+    }
+
+    public async Task<List<ScheduleResponse>> SearchScheduleResponsesAsync(string query)
+    {
+        var items = await SearchSchedulesAsync(query);
+        return await MapToResponsesAsync(items);
+    }
+
+    public async Task<ScheduleResponse?> GetScheduleResponseByIdAsync(int id)
+    {
+        var item = await GetScheduleByIdAsync(id);
+        if (item == null) return null;
+        var list = await MapToResponsesAsync(new List<ScheduleModel> { item });
+        return list.FirstOrDefault();
+    }
+
+    public async Task<List<ScheduleResponse>> GetSchedulesByUserResponsesAsync(int userId)
+    {
+        var items = await GetSchedulesByUserAsync(userId);
+        return await MapToResponsesAsync(items);
+    }
+
+    private async Task<List<ScheduleResponse>> MapToResponsesAsync(IEnumerable<ScheduleModel> items)
+    {
+        var itemList = items.ToList();
+        var userIds = itemList.Where(i => i.UserId.HasValue).Select(i => i.UserId.Value).Distinct();
+        var cbarnIds = itemList.Where(i => i.CbarnId.HasValue).Select(i => i.CbarnId.Value).Distinct();
+        var taskIds = itemList.Where(i => i.TaskId.HasValue).Select(i => i.TaskId.Value).Distinct();
+
+        var userMap = await GetUserNameMapAsync(userIds);
+        var cbarnMap = await GetBarnMapForSchedulesAsync(cbarnIds);
+        var taskMap = await GetTaskTitleMapAsync(taskIds);
+
+        var result = itemList.Select(s => {
+            var username = s.UserId.HasValue && userMap.ContainsKey(s.UserId.Value) ? userMap[s.UserId.Value] : null;
+            var resp = new ScheduleResponse
+            {
+                SchedId = s.SchedId,
+                UserId = s.UserId,
+                TaskId = s.TaskId,
+                CbarnId = s.CbarnId,
+                Description = s.Description,
+                Note = s.Note,
+                Priority = s.Priority,
+                Status = s.Status,
+                StartDate = s.StartDate,
+                EndDate = s.EndDate,
+                Username = username,
+                BarnId = s.CbarnId.HasValue && cbarnMap.ContainsKey(s.CbarnId.Value) ? cbarnMap[s.CbarnId.Value] : null,
+                TaskTitle = s.TaskId.HasValue && taskMap.ContainsKey(s.TaskId.Value) ? taskMap[s.TaskId.Value] : null
+            };
+            return resp;
+        }).ToList();
+
+        return result;
     }
 }
 

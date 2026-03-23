@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Services.Services;
 using AutoFeed_Backend_Repositories.UnitOfWork;
+using Azure.Core;
 
 namespace AutoFeed_Backend_Services.ServiceProvider;
 
@@ -65,6 +66,13 @@ public static class ServiceProvider
         return services;
     }
 
+    public static IServiceCollection AddChickenBarnService(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IChickenBarnService, ChickenBarnService>();
+        return services;
+    }
+
     public static IServiceCollection AddServiceProvider(this IServiceCollection services)
     {
         services.AddTaskServices();
@@ -75,6 +83,7 @@ public static class ServiceProvider
         services.AddIoTDeviceServices();
         services.AddRequestServices();
         services.AddBarnServices();
+        services.AddChickenBarnService();
 
         return services;
     }

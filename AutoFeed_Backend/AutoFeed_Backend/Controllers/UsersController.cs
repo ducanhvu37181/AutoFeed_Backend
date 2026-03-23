@@ -23,7 +23,16 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var items = await _service.GetAllAsync();
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = items, Description = "Success" });
+        var dto = items.Select(u => new AutoFeed_Backend.Models.Responses.UserResponse {
+            UserId = u.UserId,
+            RoleId = u.RoleId,
+            Email = u.Email,
+            FullName = u.FullName,
+            Phone = u.Phone,
+            Username = u.Username,
+            Status = u.Status
+        }).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
 
     [HttpGet("active")]
@@ -47,9 +56,19 @@ public class UserController : ControllerBase
         if (item == null)
             return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
 
-        // Ẩn password trước khi trả về
-        item.Password = null;
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = item, Description = "Success" });
+        // map to response DTO and hide password
+        var dto = new AutoFeed_Backend.Models.Responses.UserResponse
+        {
+            UserId = item.UserId,
+            RoleId = item.RoleId,
+            Email = item.Email,
+            FullName = item.FullName,
+            Phone = item.Phone,
+            Username = item.Username,
+            Status = item.Status
+        };
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
 
     // GET api/user/search?keyword=john&roleId=2&includeInactive=false
@@ -60,9 +79,16 @@ public class UserController : ControllerBase
         [FromQuery] bool includeInactive = false)
     {
         var items = await _service.SearchAsync(keyword, roleId, includeInactive);
-        // Ẩn password
-        items.ForEach(u => u.Password = null);
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = items, Description = "Success" });
+        var dto = items.Select(u => new AutoFeed_Backend.Models.Responses.UserResponse {
+            UserId = u.UserId,
+            RoleId = u.RoleId,
+            Email = u.Email,
+            FullName = u.FullName,
+            Phone = u.Phone,
+            Username = u.Username,
+            Status = u.Status
+        }).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
 
     [HttpPost]
