@@ -228,7 +228,7 @@ public class ScheduleController : ControllerBase
             {
                 Status = false,
                 HttpCode = 400,
-                Data = null,
+                Data = null,    
                 Description = "Invalid request"
             };
             return BadRequest(error);

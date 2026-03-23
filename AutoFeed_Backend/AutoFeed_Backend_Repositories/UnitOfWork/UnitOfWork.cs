@@ -23,32 +23,33 @@ public class UnitOfWork : IUnitOfWork
         _context = context;
     }
 
-    public TaskRepository Tasks
-    {
-        get { return _taskRepository ??= new TaskRepository(_context); }
-    }
-    public ScheduleRepository Schedules
-    {
-        get { return _scheduleRepository ??= new ScheduleRepository(_context); }
-    }
-    public LargeChickenRepository LargeChickens
-    {
-        get { return _largeChickenRepository ??= new LargeChickenRepository(_context); }
-    }
-    public UserRepository Users
-    {
-        get { return _userRepository ??= new UserRepository(_context); }
-    }
+    //public TaskRepository Tasks
+    //{
+    //    get { return _taskRepository ??= new TaskRepository(_context); }
+    //}
+    //public ScheduleRepository Schedules
+    //{
+    //    get { return _scheduleRepository ??= new ScheduleRepository(_context); }
+    //}
+    //public LargeChickenRepository LargeChickens
+    //{
+    //    get { return _largeChickenRepository ??= new LargeChickenRepository(_context); }
+    //}
+    //public UserRepository Users
+    //{
+    //    get { return _userRepository ??= new UserRepository(_context); }
+    //}
 
-    public FoodRepository Foods
-    {
-        get { return _foodRepository ??= new FoodRepository(_context); }
-    }
-    public RequestRepository Requests
-    {
-        get { return _requestRepository ??= new RequestRepository(_context); }
-    }
+    //public FoodRepository Foods
+    //{
+    //    get { return _foodRepository ??= new FoodRepository(_context); }
+    //}
+    //public RequestRepository Requests
+    //{
+    //    get { return _requestRepository ??= new RequestRepository(_context); }
+    //}
     public TaskRepository Tasks => _taskRepository ??= new TaskRepository(_context);
+    public ScheduleRepository Schedules => _scheduleRepository ??= new ScheduleRepository(_context);
     public LargeChickenRepository LargeChickens => _largeChickenRepository ??= new LargeChickenRepository(_context);
     public UserRepository Users => _userRepository ??= new UserRepository(_context);
     public FoodRepository Foods => _foodRepository ??= new FoodRepository(_context);
