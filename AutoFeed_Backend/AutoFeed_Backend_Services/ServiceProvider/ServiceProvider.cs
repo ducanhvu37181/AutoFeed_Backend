@@ -50,10 +50,18 @@ public static class ServiceProvider
         return services;
     }
 
-    public static IServiceCollection AddRequestServices(this IServiceCollection services)  
+    public static IServiceCollection AddRequestServices(this IServiceCollection services)
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IRequestService, RequestService>();
+        return services;
+    }
+
+    // --- THÊM HÀM NÀY ĐỂ ĐĂNG KÝ BARN ---
+    public static IServiceCollection AddBarnServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IBarnService, BarnService>();
         return services;
     }
 
@@ -66,6 +74,8 @@ public static class ServiceProvider
         services.AddInventoryServices();
         services.AddIoTDeviceServices();
         services.AddRequestServices();
+        services.AddBarnServices();
+
         return services;
     }
 }

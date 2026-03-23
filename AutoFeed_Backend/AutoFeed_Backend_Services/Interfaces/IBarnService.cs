@@ -1,0 +1,14 @@
+﻿using AutoFeed_Backend_DAO.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace AutoFeed_Backend_Services.Interfaces;
+
+public interface IBarnService
+{
+    Task<IEnumerable<Barn>> GetAllAsync();
+    Task<Barn?> GetByIdAsync(int id);
+    Task<bool> CreateBarnAsync(Barn barn);
+    Task<bool> UpdateBarnAsync(Barn barn);
+    Task<bool> DeleteBarnAsync(int id);
+}

@@ -12,6 +12,7 @@ public interface IUnitOfWork
     ScheduleRepository Schedules { get; }
     IoTDeviceRepository IoTDevices { get; }
     RequestRepository Requests { get; }
+    BarnRepository Barns { get; } 
 
     int SaveChangesWithTransaction();
     Task<int> SaveChangesWithTransactionAsync();
