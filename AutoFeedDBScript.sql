@@ -4,10 +4,14 @@
 USE [master]
 GO
 
-IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'AutoFeedDB')
+IF EXISTS (SELECT * FROM sys.databases WHERE name = 'AutoFeedDB')
 BEGIN
-    CREATE DATABASE [AutoFeedDB];
+    ALTER DATABASE [AutoFeedDB] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE [AutoFeedDB];
 END
+GO
+
+CREATE DATABASE [AutoFeedDB];
 GO
 
 USE [AutoFeedDB]
@@ -52,18 +56,20 @@ CREATE TABLE [dbo].[FlockChicken] (
     [name] NVARCHAR(100) NULL,
     [quantity] INT NULL,
     [weight] DECIMAL(18, 2) NULL,
-    [DoB] DATE NULL,                 -- Date of Birth
-    [transferDate] DATE NULL,        -- Ngày chuyển chuồng
+    [DoB] DATE NULL,                 
+    [transferDate] DATE NULL,        
     [healthStatus] NVARCHAR(100) NULL,
     [note] NVARCHAR(MAX) NULL,
-    [isActive] BIT DEFAULT 1         -- Boolean presence track
+    [isActive] BIT DEFAULT 1         
 );
 
 CREATE TABLE [dbo].[Task] (
     [taskID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [title] NVARCHAR(100) NULL,
     [description] NVARCHAR(MAX) NULL,
-    [status] BIT DEFAULT 0 
+    [startTime] TIME NULL,           -- Time only
+    [endTime] TIME NULL,             -- Time only
+    [status] BIT DEFAULT 1 
 );
 
 -- ======================================================
@@ -100,7 +106,7 @@ CREATE TABLE [dbo].[Data_IoT] (
     [value] DECIMAL(18, 4) NULL,
     [description] NVARCHAR(MAX) NULL,
     [recordDate] DATETIME DEFAULT GETDATE(),
-    [sequenceNumber] INT NULL, -- Lan thu may
+    [sequenceNumber] INT NULL, 
     CONSTRAINT [FK_DataIoT_Barn] FOREIGN KEY([barnID]) REFERENCES [dbo].[Barn] ([barnID]),
     CONSTRAINT [FK_DataIoT_Device] FOREIGN KEY([deviceID]) REFERENCES [dbo].[IoT_Device] ([deviceID])
 );
@@ -112,7 +118,7 @@ CREATE TABLE [dbo].[LargeChicken] (
     [weight] DECIMAL(18, 2) NULL,
     [healthStatus] NVARCHAR(100) NULL,
     [note] NVARCHAR(MAX) NULL,
-    [isActive] BIT DEFAULT 1, -- Removed Age
+    [isActive] BIT DEFAULT 1, 
     CONSTRAINT [FK_LargeChicken_Flock] FOREIGN KEY([flockID]) REFERENCES [dbo].[FlockChicken] ([flockID])
 );
 
@@ -143,8 +149,8 @@ CREATE TABLE [dbo].[FoodStorage] (
 CREATE TABLE [dbo].[ChickenBarn] (
     [CBarnID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [barnID] INT NULL,
-    [chickenLID] INT NULL UNIQUE,
-    [flockID] INT NULL UNIQUE,
+    [chickenLID] INT NULL,
+    [flockID] INT NULL,
     [startDate] DATE NULL,
     [exportDate] DATE NULL,
     [note] NVARCHAR(MAX) NULL,
@@ -154,16 +160,23 @@ CREATE TABLE [dbo].[ChickenBarn] (
     CONSTRAINT [FK_CBarn_LargeChicken] FOREIGN KEY([chickenLID]) REFERENCES [dbo].[LargeChicken] ([chickenLID])
 );
 
+-- Filtered Indexes to allow multiple NULLs but unique real IDs
+CREATE UNIQUE NONCLUSTERED INDEX UIX_ChickenBarn_Flock ON ChickenBarn(flockID) WHERE flockID IS NOT NULL;
+CREATE UNIQUE NONCLUSTERED INDEX UIX_ChickenBarn_Chicken ON ChickenBarn(chickenLID) WHERE chickenLID IS NOT NULL;
+
 CREATE TABLE [dbo].[FeedingRule] (
     [ruleID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-    [chickenLID] INT NULL UNIQUE,
-    [flockID] INT NULL UNIQUE,
+    [chickenLID] INT NULL,
+    [flockID] INT NULL,
     [times] INT NULL,
     [description] NVARCHAR(MAX) NULL,
     [note] NVARCHAR(MAX) NULL,
     CONSTRAINT [FK_Rule_Flock] FOREIGN KEY([flockID]) REFERENCES [dbo].[FlockChicken] ([flockID]),
     CONSTRAINT [FK_Rule_LargeChicken] FOREIGN KEY([chickenLID]) REFERENCES [dbo].[LargeChicken] ([chickenLID])
 );
+
+CREATE UNIQUE NONCLUSTERED INDEX UIX_FeedingRule_Flock ON FeedingRule(flockID) WHERE flockID IS NOT NULL;
+CREATE UNIQUE NONCLUSTERED INDEX UIX_FeedingRule_Chicken ON FeedingRule(chickenLID) WHERE chickenLID IS NOT NULL;
 
 -- ======================================================
 -- 5. OPERATION & LOGGING TABLES (Level 3)
@@ -196,12 +209,11 @@ CREATE TABLE [dbo].[Request] (
     [userID] INT NULL,
     [type] NVARCHAR(50) NULL,
     [description] NVARCHAR(MAX) NULL,
-    [status] BIT DEFAULT 0,
+    [status] NVARCHAR(50) DEFAULT 'pending', -- Updated to String
     [createdAt] DATETIME DEFAULT GETDATE(),
     CONSTRAINT [FK_Request_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID])
 );
 
--- UPDATED: Schedule with Priority, Status Enum, and Notes
 CREATE TABLE [dbo].[Schedule] (
     [schedID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [userID] INT NULL,
@@ -209,8 +221,8 @@ CREATE TABLE [dbo].[Schedule] (
     [CBarnID] INT NULL,
     [description] NVARCHAR(MAX) NULL,
     [note] NVARCHAR(MAX) NULL,
-    [priority] NVARCHAR(10) DEFAULT 'medium',               -- Added Priority
-    [status] NVARCHAR(20) DEFAULT 'pending',                -- 3-state Status
+    [priority] NVARCHAR(10) DEFAULT 'medium',               
+    [status] NVARCHAR(20) DEFAULT 'pending',                
     [startDate] DATETIME NULL,
     [endDate] DATETIME NULL,
     [createdDate] DATETIME DEFAULT GETDATE(),
@@ -218,33 +230,81 @@ CREATE TABLE [dbo].[Schedule] (
     CONSTRAINT [FK_Sched_Task] FOREIGN KEY([taskID]) REFERENCES [dbo].[Task] ([taskID]),
     CONSTRAINT [FK_Sched_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID]),
     CONSTRAINT [CK_Schedule_Status] CHECK ([status] IN ('pending', 'in progress', 'completed')),
-    CONSTRAINT [CK_Schedule_Priority] CHECK ([priority] IN ('low', 'medium', 'high')) -- Priority Check
+    CONSTRAINT [CK_Schedule_Priority] CHECK ([priority] IN ('low', 'medium', 'high'))
 );
 GO
 
 -- ======================================================
--- 6. SAMPLE DATA INSERTION (NO ID TYPING)
+-- 6. SAMPLE DATA (3+ SAMPLES PER ENTITY)
 -- ======================================================
 
--- Base Roles
-INSERT INTO [dbo].[Role] (description) VALUES ('Administrator'), ('Farm Worker');
+-- Roles
+INSERT INTO [Role] (description) VALUES ('Manager'), ('TechFarmer'), ('Farmer');
 
--- Food & Barns
-INSERT INTO [dbo].[Food] (name, type, price, quantity) VALUES ('Organic Corn', 'Grain', 15.50, 500);
-INSERT INTO [dbo].[Barn] (temperature, humidity, type, area) VALUES (24.5, 60.0, 'Broiler', 500.00);
+-- Users
+INSERT INTO [User] (roleID, email, password, fullName, username) VALUES 
+(1, 'mgr@farm.com', 'p1', 'Alice Mgr', 'alice'),
+(2, 'tech@farm.com', 'p2', 'Bob Tech', 'bob'),
+(3, 'farmer@farm.com', 'p3', 'Charlie Farm', 'charlie');
 
--- Chickens & User
-INSERT INTO [dbo].[FlockChicken] (name, quantity, weight, DoB, transferDate, healthStatus, isActive) 
-VALUES ('White Leghorn Flock A', 1000, 1.2, '2026-01-10', '2026-03-01', 'Healthy', 1);
+-- Food
+INSERT INTO [Food] (name, type, price, quantity) VALUES 
+('Corn', 'Grain', 10.5, 1000), ('Soy', 'Protein', 20.0, 500), ('Vitamin', 'Supp', 5.0, 200);
 
-INSERT INTO [dbo].[User] (roleID, email, password, fullName, username, status) 
-VALUES (2, 'worker1@autofeed.com', 'hashed_pass_456', 'Jane Smith', 'jane_worker', 1);
+-- Barns
+INSERT INTO [Barn] (temperature, humidity, type, area) VALUES 
+(25, 60, 'Type A', 500), (22, 55, 'Type B', 300), (24, 50, 'Type C', 400);
 
--- Relationship & Task
-INSERT INTO [dbo].[ChickenBarn] (barnID, flockID, startDate, status) VALUES (1, 1, '2026-03-01', 1);
-INSERT INTO [dbo].[Task] (title, description, status) VALUES ('Morning Feeding', 'Distribute 50kg of corn', 1);
+-- IoT
+INSERT INTO [IoT_Device] (name, description) VALUES 
+('T-01', 'Temp Sensor'), ('H-01', 'Humid Sensor'), ('W-01', 'Water Sensor');
 
--- UPDATED Sample: Includes Priority, Status, and Note
-INSERT INTO [dbo].[Schedule] (userID, taskID, CBarnID, priority, status, note, startDate) 
-VALUES (1, 1, 1, 'high', 'pending', 'Ensure the feeding machine is calibrated.', GETDATE());
+-- Flocks
+INSERT INTO [FlockChicken] (name, quantity, DoB, transferDate) VALUES 
+('Flock Alpha', 100, '2026-01-01', '2026-03-01'), 
+('Flock Beta', 200, '2026-02-01', '2026-03-05'),
+('Flock Gamma', 150, '2026-02-15', '2026-03-10');
+
+-- Tasks
+INSERT INTO [Task] (title, startTime, endTime) VALUES 
+('Feeding', '07:00', '08:00'), ('Cleaning', '09:00', '10:00'), ('Checking', '14:00', '15:00');
+
+-- BarnIoT
+INSERT INTO [BarnIoT_Device] (barnID, deviceID, installationDate) VALUES (1,1,'2026-03-01'), (2,2,'2026-03-01'), (3,3,'2026-03-01');
+
+-- IoT Data
+INSERT INTO [Data_IoT] (barnID, deviceID, value, sequenceNumber) VALUES (1,1,25.5,1), (2,2,55.0,1), (3,3,10.0,1);
+
+-- Large Chickens
+INSERT INTO [LargeChicken] (flockID, name, weight) VALUES (1, 'Hero 1', 2.5), (2, 'Hero 2', 2.8), (3, 'Hero 3', 3.0);
+
+-- Inventory
+INSERT INTO [Inventory] (foodID, quantity, weightPerBag) VALUES (1,10,50), (2,5,25), (3,2,10);
+
+-- Storage
+INSERT INTO [FoodStorage] (foodID, barnID, food_weight) VALUES (1,1,500), (2,2,250), (3,3,100);
+
+-- ChickenBarn Assignment (Rule: 1 entity per barn at a time)
+INSERT INTO [ChickenBarn] (barnID, flockID, chickenLID, startDate) VALUES 
+(1, 1, NULL, '2026-03-01'), -- Barn 1 has Flock 1
+(2, NULL, 2, '2026-03-01'), -- Barn 2 has Large Chicken 2
+(3, 3, NULL, '2026-03-01'); -- Barn 3 has Flock 3
+
+-- Feeding Rules
+INSERT INTO [FeedingRule] (flockID, chickenLID, times) VALUES 
+(1, NULL, 3), (NULL, 2, 2), (3, NULL, 4);
+
+-- Rule Details
+INSERT INTO [FeedingRuleDetail] (ruleID, foodID, startDate, endDate) VALUES 
+(1,1,'2026-03-01','2026-04-01'), (2,2,'2026-03-01','2026-04-01'), (3,3,'2026-03-01','2026-04-01');
+
+-- Reports
+INSERT INTO [Report] (userID, type, description) VALUES (1,'Weekly','OK'), (2,'Daily','OK'), (3,'Health','OK');
+
+-- Requests
+INSERT INTO [Request] (userID, type, description) VALUES (1,'Fix','Lights'), (2,'Add','Food'), (3,'Check','Sensor');
+
+-- Schedules
+INSERT INTO [Schedule] (userID, taskID, CBarnID, priority, status) VALUES 
+(1,1,1,'high','pending'), (2,2,2,'medium','in progress'), (3,3,3,'low','completed');
 GO
