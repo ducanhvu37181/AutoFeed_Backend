@@ -26,7 +26,7 @@ public class RequestController : ControllerBase
         UserId = r.UserId,
         Type = r.Type,
         Description = r.Description,
-        Status = r.Status,
+        Status = r.Status != null && (r.Status.ToLower() == "pending" || r.Status.ToLower() == "approved"),
         CreatedAt = r.CreatedAt
     };
 
@@ -191,8 +191,8 @@ public class RequestController : ControllerBase
         existing.UserId = model.UserId;
         existing.Type = model.Type;
         existing.Description = model.Description;
-        if (model.Status.HasValue)
-            existing.Status = model.Status.Value;
+        if (!string.IsNullOrWhiteSpace(model.Status))
+            existing.Status = model.Status;
 
         var ok = await _service.UpdateRequestAsync(existing);
         if (!ok)

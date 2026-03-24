@@ -133,7 +133,9 @@ public class TaskController : ControllerBase
         {
             Title = model.Title,
             Description = model.Description,
-            Status = true
+            Status = true,
+            StartTime = model.StartTime,
+            EndTime = model.EndTime
         };
 
         var id = await _service.CreateTaskAsync(task);
@@ -189,6 +191,8 @@ public class TaskController : ControllerBase
 
         existing.Title = model.Title;
         existing.Description = model.Description;
+        existing.StartTime = model.StartTime;
+        existing.EndTime = model.EndTime;
         // Update status if provided
         if (model.Status.HasValue)
         {

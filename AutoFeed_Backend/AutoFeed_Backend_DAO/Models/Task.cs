@@ -13,6 +13,10 @@ public partial class Task
 
     public string Description { get; set; }
 
+    public TimeOnly? StartTime { get; set; }
+
+    public TimeOnly? EndTime { get; set; }
+
     public bool? Status { get; set; }
 
     public virtual ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
