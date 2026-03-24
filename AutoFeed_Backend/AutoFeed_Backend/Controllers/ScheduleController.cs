@@ -142,6 +142,7 @@ public class ScheduleController : ControllerBase
             return StatusCode(500, error);
         }
 
+        
         var responseDto = await _service.GetScheduleResponseByIdAsync(id);
         var response = new ApiResponse<object>
         {
