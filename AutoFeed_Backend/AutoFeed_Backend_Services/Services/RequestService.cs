@@ -23,7 +23,7 @@ public class RequestService : IRequestService
     // Create
     public async Task<int> CreateRequestAsync(Request request)
     {
-        request.Status = false;                          // mặc định chưa xử lý
+        request.Status = "pending";                          // default: pending
         request.CreatedAt = System.DateTime.UtcNow;
         _unitOfWork.Requests.PrepareCreate(request);
         return await _unitOfWork.SaveChangesWithTransactionAsync();
@@ -71,7 +71,8 @@ public class RequestService : IRequestService
         var entity = await _unitOfWork.Requests.GetByIdAsync(id);
         if (entity == null) return false;
 
-        entity.Status = false;
+        // deleting marks request as rejected
+        entity.Status = "rejected";
         _unitOfWork.Requests.PrepareUpdate(entity);
         var result = await _unitOfWork.SaveChangesWithTransactionAsync();
         return result > 0;
