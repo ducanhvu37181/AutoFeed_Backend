@@ -1,4 +1,4 @@
-using AutoFeed_Backend_Services.Interfaces;
+﻿using AutoFeed_Backend_Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using ScheduleModel = AutoFeed_Backend_DAO.Models.Schedule;
@@ -25,20 +25,6 @@ public class ScheduleController : ControllerBase
     public async Task<IActionResult> GetByUser(int userId)
     {
         var dto = await _service.GetSchedulesByUserResponsesAsync(userId);
-        var response = new ApiResponse<object>
-        {
-            Status = true,
-            HttpCode = 200,
-            Data = dto,
-            Description = "Success"
-        };
-        return Ok(response);
-    }
-
-    [HttpGet("user/{userId:int}/date")]
-    public async Task<IActionResult> GetByUserAndDate(int userId, [FromQuery] System.DateTime date)
-    {
-        var dto = await _service.GetSchedulesByUserAndDateAsync(userId, date);
         var response = new ApiResponse<object>
         {
             Status = true,
