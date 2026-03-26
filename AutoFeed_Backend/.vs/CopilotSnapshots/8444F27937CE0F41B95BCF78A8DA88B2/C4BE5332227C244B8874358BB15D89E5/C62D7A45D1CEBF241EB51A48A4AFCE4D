@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using ScheduleModel = AutoFeed_Backend_DAO.Models.Schedule;
 using AutoFeed_Backend_Services.Models.Responses;
@@ -38,6 +38,4 @@ public interface IScheduleService
     Task<List<ScheduleResponse>> GetSchedulesByUserResponsesAsync(int userId);
 
     Task<bool> UpdateScheduleStatusAsync(int id, string status);
-
-    Task<List<ScheduleResponse>> GetSchedulesByUserAndDateAsync(int userId, System.DateTime date);
 }
