@@ -196,15 +196,15 @@ public class ScheduleController : ControllerBase
             return NotFound(error);
         }
 
-        existing.UserId = model.UserId;
-        existing.TaskId = model.TaskId;
-        existing.CbarnId = model.CbarnId;
+        existing.UserId = model.UserId; // No change
+        existing.TaskId = model.TaskId; // No change
+        existing.CbarnId = model.CbarnId; // No change
         existing.Description = model.Description;
         existing.Note = model.Note;
         existing.Priority = model.Priority;
         if (!string.IsNullOrWhiteSpace(model.Status)) existing.Status = model.Status;
-        existing.StartDate = model.StartDate;
-        existing.EndDate = model.EndDate;
+        existing.StartDate = model.StartDate; // No change
+        existing.EndDate = model.EndDate; // No change
 
         var ok = await _service.UpdateScheduleAsync(existing);
         if (!ok)
