@@ -68,12 +68,11 @@ public partial class AutoFeedDBContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer(GetConnectionString("DefaultConnection")).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Barn>(entity =>
         {
-            entity.HasKey(e => e.BarnId).HasName("PK__Barn__C683E3D4262CFD48");
+            entity.HasKey(e => e.BarnId).HasName("PK__Barn__C683E3D4869C7003");
 
             entity.ToTable("Barn");
 
@@ -92,13 +91,14 @@ public partial class AutoFeedDBContext : DbContext
                 .HasColumnType("decimal(5, 2)")
                 .HasColumnName("temperature");
             entity.Property(e => e.Type)
+                .IsRequired()
                 .HasMaxLength(50)
                 .HasColumnName("type");
         });
 
         modelBuilder.Entity<BarnIoTDevice>(entity =>
         {
-            entity.HasKey(e => e.BDeviceId).HasName("PK__BarnIoT___9C4A58186E2C7EE2");
+            entity.HasKey(e => e.BDeviceId).HasName("PK__BarnIoT___9C4A5818FF9370A2");
 
             entity.ToTable("BarnIoT_Device");
 
@@ -112,24 +112,26 @@ public partial class AutoFeedDBContext : DbContext
 
             entity.HasOne(d => d.Barn).WithMany(p => p.BarnIoTDevices)
                 .HasForeignKey(d => d.BarnId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_BarnIoT_Barn");
 
             entity.HasOne(d => d.Device).WithMany(p => p.BarnIoTDevices)
                 .HasForeignKey(d => d.DeviceId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_BarnIoT_Device");
         });
 
         modelBuilder.Entity<ChickenBarn>(entity =>
         {
-            entity.HasKey(e => e.CbarnId).HasName("PK__ChickenB__2D4B3D06447D7D99");
+            entity.HasKey(e => e.CbarnId).HasName("PK__ChickenB__2D4B3D06F685EDC2");
 
             entity.ToTable("ChickenBarn");
 
-            entity.HasIndex(e => e.ChickenLid, "UIX_ChickenBarn_Chicken")
+            entity.HasIndex(e => e.ChickenLid, "UIX_CBarn_Chicken")
                 .IsUnique()
                 .HasFilter("([chickenLID] IS NOT NULL)");
 
-            entity.HasIndex(e => e.FlockId, "UIX_ChickenBarn_Flock")
+            entity.HasIndex(e => e.FlockId, "UIX_CBarn_Flock")
                 .IsUnique()
                 .HasFilter("([flockID] IS NOT NULL)");
 
@@ -146,6 +148,7 @@ public partial class AutoFeedDBContext : DbContext
 
             entity.HasOne(d => d.Barn).WithMany(p => p.ChickenBarns)
                 .HasForeignKey(d => d.BarnId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_CBarn_Barn");
 
             entity.HasOne(d => d.ChickenL).WithOne(p => p.ChickenBarn)
@@ -159,13 +162,15 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<DataIoT>(entity =>
         {
-            entity.HasKey(e => e.DataId).HasName("PK__Data_IoT__923E3685E8F0B580");
+            entity.HasKey(e => e.DataId).HasName("PK__Data_IoT__923E3685DF1B76F8");
 
             entity.ToTable("Data_IoT");
 
             entity.Property(e => e.DataId).HasColumnName("dataID");
             entity.Property(e => e.BarnId).HasColumnName("barnID");
-            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.Description)
+                .IsRequired()
+                .HasColumnName("description");
             entity.Property(e => e.DeviceId).HasColumnName("deviceID");
             entity.Property(e => e.RecordDate)
                 .HasDefaultValueSql("(getdate())")
@@ -189,21 +194,23 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<FeedingRule>(entity =>
         {
-            entity.HasKey(e => e.RuleId).HasName("PK__FeedingR__121C0641F7B9094E");
+            entity.HasKey(e => e.RuleId).HasName("PK__FeedingR__121C0641161BC2C7");
 
             entity.ToTable("FeedingRule");
 
-            entity.HasIndex(e => e.ChickenLid, "UIX_FeedingRule_Chicken")
+            entity.HasIndex(e => e.ChickenLid, "UIX_FRule_Chicken")
                 .IsUnique()
                 .HasFilter("([chickenLID] IS NOT NULL)");
 
-            entity.HasIndex(e => e.FlockId, "UIX_FeedingRule_Flock")
+            entity.HasIndex(e => e.FlockId, "UIX_FRule_Flock")
                 .IsUnique()
                 .HasFilter("([flockID] IS NOT NULL)");
 
             entity.Property(e => e.RuleId).HasColumnName("ruleID");
             entity.Property(e => e.ChickenLid).HasColumnName("chickenLID");
-            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.Description)
+                .IsRequired()
+                .HasColumnName("description");
             entity.Property(e => e.FlockId).HasColumnName("flockID");
             entity.Property(e => e.Note).HasColumnName("note");
             entity.Property(e => e.Times).HasColumnName("times");
@@ -219,12 +226,14 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<FeedingRuleDetail>(entity =>
         {
-            entity.HasKey(e => e.FeedRuleDetailId).HasName("PK__FeedingR__26A980CAF3567CEB");
+            entity.HasKey(e => e.FeedRuleDetailId).HasName("PK__FeedingR__26A980CAA45C390C");
 
             entity.ToTable("FeedingRuleDetail");
 
             entity.Property(e => e.FeedRuleDetailId).HasColumnName("feedRuleDetailID");
-            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.Description)
+                .IsRequired()
+                .HasColumnName("description");
             entity.Property(e => e.EndDate).HasColumnName("endDate");
             entity.Property(e => e.FoodId).HasColumnName("foodID");
             entity.Property(e => e.RuleId).HasColumnName("ruleID");
@@ -235,27 +244,31 @@ public partial class AutoFeedDBContext : DbContext
 
             entity.HasOne(d => d.Food).WithMany(p => p.FeedingRuleDetails)
                 .HasForeignKey(d => d.FoodId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Detail_Food");
 
             entity.HasOne(d => d.Rule).WithMany(p => p.FeedingRuleDetails)
                 .HasForeignKey(d => d.RuleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Detail_Rule");
         });
 
         modelBuilder.Entity<FlockChicken>(entity =>
         {
-            entity.HasKey(e => e.FlockId).HasName("PK__FlockChi__6D32C9F17619C2C9");
+            entity.HasKey(e => e.FlockId).HasName("PK__FlockChi__6D32C9F194C7C33A");
 
             entity.ToTable("FlockChicken");
 
             entity.Property(e => e.FlockId).HasColumnName("flockID");
             entity.Property(e => e.HealthStatus)
+                .IsRequired()
                 .HasMaxLength(100)
                 .HasColumnName("healthStatus");
             entity.Property(e => e.IsActive)
                 .HasDefaultValue(true)
                 .HasColumnName("isActive");
             entity.Property(e => e.Name)
+                .IsRequired()
                 .HasMaxLength(100)
                 .HasColumnName("name");
             entity.Property(e => e.Note).HasColumnName("note");
@@ -268,12 +281,13 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<Food>(entity =>
         {
-            entity.HasKey(e => e.FoodId).HasName("PK__Food__77EAEA191A52ACCE");
+            entity.HasKey(e => e.FoodId).HasName("PK__Food__77EAEA19B205770E");
 
             entity.ToTable("Food");
 
             entity.Property(e => e.FoodId).HasColumnName("foodID");
             entity.Property(e => e.Name)
+                .IsRequired()
                 .HasMaxLength(100)
                 .HasColumnName("name");
             entity.Property(e => e.Note).HasColumnName("note");
@@ -282,13 +296,14 @@ public partial class AutoFeedDBContext : DbContext
                 .HasColumnName("price");
             entity.Property(e => e.Quantity).HasColumnName("quantity");
             entity.Property(e => e.Type)
+                .IsRequired()
                 .HasMaxLength(50)
                 .HasColumnName("type");
         });
 
         modelBuilder.Entity<FoodStorage>(entity =>
         {
-            entity.HasKey(e => e.StorageId).HasName("PK__FoodStor__D1437C8AD190FA0B");
+            entity.HasKey(e => e.StorageId).HasName("PK__FoodStor__D1437C8AE937CD94");
 
             entity.ToTable("FoodStorage");
 
@@ -305,16 +320,18 @@ public partial class AutoFeedDBContext : DbContext
 
             entity.HasOne(d => d.Barn).WithMany(p => p.FoodStorages)
                 .HasForeignKey(d => d.BarnId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Storage_Barn");
 
             entity.HasOne(d => d.Food).WithMany(p => p.FoodStorages)
                 .HasForeignKey(d => d.FoodId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Storage_Food");
         });
 
         modelBuilder.Entity<Inventory>(entity =>
         {
-            entity.HasKey(e => e.InventId).HasName("PK__Inventor__3805E39FB0E3ECCD");
+            entity.HasKey(e => e.InventId).HasName("PK__Inventor__3805E39F974D1D0B");
 
             entity.ToTable("Inventory");
 
@@ -328,18 +345,22 @@ public partial class AutoFeedDBContext : DbContext
 
             entity.HasOne(d => d.Food).WithMany(p => p.Inventories)
                 .HasForeignKey(d => d.FoodId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Inventory_Food");
         });
 
         modelBuilder.Entity<IoTDevice>(entity =>
         {
-            entity.HasKey(e => e.DeviceId).HasName("PK__IoT_Devi__84BE14B718B844E2");
+            entity.HasKey(e => e.DeviceId).HasName("PK__IoT_Devi__84BE14B7AA3F6A83");
 
             entity.ToTable("IoT_Device");
 
             entity.Property(e => e.DeviceId).HasColumnName("deviceID");
-            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.Description)
+                .IsRequired()
+                .HasColumnName("description");
             entity.Property(e => e.Name)
+                .IsRequired()
                 .HasMaxLength(100)
                 .HasColumnName("name");
             entity.Property(e => e.Status)
@@ -349,19 +370,21 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<LargeChicken>(entity =>
         {
-            entity.HasKey(e => e.ChickenLid).HasName("PK__LargeChi__6DE57F4B71C7529D");
+            entity.HasKey(e => e.ChickenLid).HasName("PK__LargeChi__6DE57F4BC871530D");
 
             entity.ToTable("LargeChicken");
 
             entity.Property(e => e.ChickenLid).HasColumnName("chickenLID");
             entity.Property(e => e.FlockId).HasColumnName("flockID");
             entity.Property(e => e.HealthStatus)
+                .IsRequired()
                 .HasMaxLength(100)
                 .HasColumnName("healthStatus");
             entity.Property(e => e.IsActive)
                 .HasDefaultValue(true)
                 .HasColumnName("isActive");
             entity.Property(e => e.Name)
+                .IsRequired()
                 .HasMaxLength(100)
                 .HasColumnName("name");
             entity.Property(e => e.Note).HasColumnName("note");
@@ -371,12 +394,13 @@ public partial class AutoFeedDBContext : DbContext
 
             entity.HasOne(d => d.Flock).WithMany(p => p.LargeChickens)
                 .HasForeignKey(d => d.FlockId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_LargeChicken_Flock");
         });
 
         modelBuilder.Entity<Report>(entity =>
         {
-            entity.HasKey(e => e.ReportId).HasName("PK__Report__1C9B4ECDCC58EED7");
+            entity.HasKey(e => e.ReportId).HasName("PK__Report__1C9B4ECDA659C55A");
 
             entity.ToTable("Report");
 
@@ -385,23 +409,27 @@ public partial class AutoFeedDBContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("createDate");
-            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.Description)
+                .IsRequired()
+                .HasColumnName("description");
             entity.Property(e => e.Status)
                 .HasDefaultValue(true)
                 .HasColumnName("status");
             entity.Property(e => e.Type)
+                .IsRequired()
                 .HasMaxLength(50)
                 .HasColumnName("type");
             entity.Property(e => e.UserId).HasColumnName("userID");
 
             entity.HasOne(d => d.User).WithMany(p => p.Reports)
                 .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Report_User");
         });
 
         modelBuilder.Entity<Request>(entity =>
         {
-            entity.HasKey(e => e.RequestId).HasName("PK__Request__E3C5DE51BF552884");
+            entity.HasKey(e => e.RequestId).HasName("PK__Request__E3C5DE514576F3E8");
 
             entity.ToTable("Request");
 
@@ -410,57 +438,61 @@ public partial class AutoFeedDBContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("createdAt");
-            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.Description)
+                .IsRequired()
+                .HasColumnName("description");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
                 .HasDefaultValue("pending")
                 .HasColumnName("status");
             entity.Property(e => e.Type)
+                .IsRequired()
                 .HasMaxLength(50)
                 .HasColumnName("type");
             entity.Property(e => e.UserId).HasColumnName("userID");
 
             entity.HasOne(d => d.User).WithMany(p => p.Requests)
                 .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Request_User");
         });
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__Role__CD98460ADCD93F13");
+            entity.HasKey(e => e.RoleId).HasName("PK__Role__CD98460A018C5DA3");
 
             entity.ToTable("Role");
 
             entity.Property(e => e.RoleId).HasColumnName("roleID");
             entity.Property(e => e.Description)
+                .IsRequired()
                 .HasMaxLength(255)
                 .HasColumnName("description");
         });
 
         modelBuilder.Entity<Schedule>(entity =>
         {
-            entity.HasKey(e => e.SchedId).HasName("PK__Schedule__F378328E9B1CD47A");
+            entity.HasKey(e => e.SchedId).HasName("PK__Schedule__F378328E82EEFB07");
 
             entity.ToTable("Schedule");
 
             entity.Property(e => e.SchedId).HasColumnName("schedID");
             entity.Property(e => e.CbarnId).HasColumnName("CBarnID");
             entity.Property(e => e.CreatedDate)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
+                .HasDefaultValueSql("(CONVERT([date],getdate()))")
                 .HasColumnName("createdDate");
-            entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.EndDate)
-                .HasColumnType("datetime")
-                .HasColumnName("endDate");
-            entity.Property(e => e.Note).HasColumnName("note");
+            entity.Property(e => e.Description)
+                .IsRequired()
+                .HasColumnName("description");
+            entity.Property(e => e.EndDate).HasColumnName("endDate");
+            entity.Property(e => e.Note)
+                .IsRequired()
+                .HasColumnName("note");
             entity.Property(e => e.Priority)
                 .HasMaxLength(10)
                 .HasDefaultValue("medium")
                 .HasColumnName("priority");
-            entity.Property(e => e.StartDate)
-                .HasColumnType("datetime")
-                .HasColumnName("startDate");
+            entity.Property(e => e.StartDate).HasColumnName("startDate");
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .HasDefaultValue("pending")
@@ -470,44 +502,50 @@ public partial class AutoFeedDBContext : DbContext
 
             entity.HasOne(d => d.Cbarn).WithMany(p => p.Schedules)
                 .HasForeignKey(d => d.CbarnId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Sched_CBarn");
 
             entity.HasOne(d => d.Task).WithMany(p => p.Schedules)
                 .HasForeignKey(d => d.TaskId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Sched_Task");
 
             entity.HasOne(d => d.User).WithMany(p => p.Schedules)
                 .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Sched_User");
         });
 
         modelBuilder.Entity<Task>(entity =>
         {
-            entity.HasKey(e => e.TaskId).HasName("PK__Task__DD5D55A2E276215F");
+            entity.HasKey(e => e.TaskId).HasName("PK__Task__DD5D55A2E05E1D35");
 
             entity.ToTable("Task");
 
             entity.Property(e => e.TaskId).HasColumnName("taskID");
-            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.Description)
+                .IsRequired()
+                .HasColumnName("description");
             entity.Property(e => e.EndTime).HasColumnName("endTime");
             entity.Property(e => e.StartTime).HasColumnName("startTime");
             entity.Property(e => e.Status)
                 .HasDefaultValue(true)
                 .HasColumnName("status");
             entity.Property(e => e.Title)
+                .IsRequired()
                 .HasMaxLength(100)
                 .HasColumnName("title");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__User__CB9A1CDFA0A0676A");
+            entity.HasKey(e => e.UserId).HasName("PK__User__CB9A1CDF2FA1C98F");
 
             entity.ToTable("User");
 
-            entity.HasIndex(e => e.Email, "UQ__User__AB6E616415929D9C").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__User__AB6E61640FD9509D").IsUnique();
 
-            entity.HasIndex(e => e.Username, "UQ__User__F3DBC572EEE55949").IsUnique();
+            entity.HasIndex(e => e.Username, "UQ__User__F3DBC572A67A80EE").IsUnique();
 
             entity.Property(e => e.UserId).HasColumnName("userID");
             entity.Property(e => e.Email)
@@ -515,6 +553,7 @@ public partial class AutoFeedDBContext : DbContext
                 .HasMaxLength(100)
                 .HasColumnName("email");
             entity.Property(e => e.FullName)
+                .IsRequired()
                 .HasMaxLength(100)
                 .HasColumnName("fullName");
             entity.Property(e => e.LastLogin)
@@ -525,6 +564,7 @@ public partial class AutoFeedDBContext : DbContext
                 .HasMaxLength(255)
                 .HasColumnName("password");
             entity.Property(e => e.Phone)
+                .IsRequired()
                 .HasMaxLength(20)
                 .HasColumnName("phone");
             entity.Property(e => e.RoleId).HasColumnName("roleID");
@@ -532,11 +572,13 @@ public partial class AutoFeedDBContext : DbContext
                 .HasDefaultValue(true)
                 .HasColumnName("status");
             entity.Property(e => e.Username)
+                .IsRequired()
                 .HasMaxLength(50)
                 .HasColumnName("username");
 
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .HasForeignKey(d => d.RoleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_User_Role");
         });
 

@@ -9,13 +9,13 @@ public partial class FoodStorage
 {
     public int StorageId { get; set; }
 
-    public int? FoodId { get; set; }
+    public int FoodId { get; set; }
 
-    public int? BarnId { get; set; }
+    public int BarnId { get; set; }
 
-    public decimal? FoodWeight { get; set; }
+    public decimal FoodWeight { get; set; }
 
-    public decimal? LeftoverFood { get; set; }
+    public decimal LeftoverFood { get; set; }
 
     public string Note { get; set; }
 

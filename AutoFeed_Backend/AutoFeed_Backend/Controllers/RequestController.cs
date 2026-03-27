@@ -132,7 +132,7 @@ public class RequestController : ControllerBase
 
         var entity = new Request
         {
-            UserId = model.UserId,
+            UserId = model.UserId ?? 0,
             Type = model.Type,
             Description = model.Description
         };
@@ -188,7 +188,7 @@ public class RequestController : ControllerBase
             return NotFound(error);
         }
 
-        existing.UserId = model.UserId;
+        existing.UserId = model.UserId ?? existing.UserId;
         existing.Type = model.Type;
         existing.Description = model.Description;
         if (!string.IsNullOrWhiteSpace(model.Status))

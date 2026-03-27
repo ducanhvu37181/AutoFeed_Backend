@@ -9,11 +9,11 @@ public partial class LargeChicken
 {
     public int ChickenLid { get; set; }
 
-    public int? FlockId { get; set; }
+    public int FlockId { get; set; }
 
     public string Name { get; set; }
 
-    public decimal? Weight { get; set; }
+    public decimal Weight { get; set; }
 
     public string HealthStatus { get; set; }
 

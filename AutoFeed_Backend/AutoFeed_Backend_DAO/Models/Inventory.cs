@@ -9,13 +9,13 @@ public partial class Inventory
 {
     public int InventId { get; set; }
 
-    public int? FoodId { get; set; }
+    public int FoodId { get; set; }
 
-    public int? Quantity { get; set; }
+    public int Quantity { get; set; }
 
-    public decimal? WeightPerBag { get; set; }
+    public decimal WeightPerBag { get; set; }
 
-    public DateOnly? ExpiredDate { get; set; }
+    public DateOnly ExpiredDate { get; set; }
 
     public virtual Food Food { get; set; }
 }

@@ -55,7 +55,17 @@ public class ScheduleRepository : GenericRepository<Schedule>
     public async Task<List<Schedule>> GetByUserIdAsync(int userId)
     {
         return await _context.Set<Schedule>()
-            .Where(s => s.UserId.HasValue && s.UserId.Value == userId)
+            .Where(s => s.UserId == userId)
+            .ToListAsync();
+    }
+
+    public async Task<List<Schedule>> GetByUserAndDateAsync(int userId, System.DateTime date)
+    {
+        var d = DateOnly.FromDateTime(date);
+        return await _context.Set<Schedule>()
+            .Where(s => s.UserId == userId
+                && s.StartDate <= d
+                && (s.EndDate == null || s.EndDate >= d))
             .ToListAsync();
     }
 }
