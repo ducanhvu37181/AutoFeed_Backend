@@ -14,9 +14,11 @@ public interface IRequestService
     Task<List<Request>> GetAllRequestsAsync();
     Task<List<Request>> GetActiveRequestsAsync();
     Task<List<Request>> GetInactiveRequestsAsync();
+    Task<List<Request>> GetByUserIdAsync(int userId);
 
     // Update
     Task<bool> UpdateRequestAsync(Request request);
+    Task<bool> UpdateStatusAsync(int id, string status);
 
     // Delete (soft delete -> Status = false)
     Task<bool> DeleteRequestAsync(int id);
