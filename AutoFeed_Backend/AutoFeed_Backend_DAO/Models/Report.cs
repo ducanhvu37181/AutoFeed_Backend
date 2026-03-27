@@ -9,7 +9,7 @@ public partial class Report
 {
     public int ReportId { get; set; }
 
-    public int? UserId { get; set; }
+    public int UserId { get; set; }
 
     public string Type { get; set; }
 

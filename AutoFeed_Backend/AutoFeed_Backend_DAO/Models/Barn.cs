@@ -9,13 +9,13 @@ public partial class Barn
 {
     public int BarnId { get; set; }
 
-    public decimal? Temperature { get; set; }
+    public decimal Temperature { get; set; }
 
-    public decimal? Humidity { get; set; }
+    public decimal Humidity { get; set; }
 
     public string Type { get; set; }
 
-    public decimal? Area { get; set; }
+    public decimal Area { get; set; }
 
     public DateTime? CreateDate { get; set; }
 

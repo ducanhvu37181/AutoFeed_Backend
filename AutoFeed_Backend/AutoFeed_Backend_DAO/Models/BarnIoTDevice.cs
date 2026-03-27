@@ -9,11 +9,11 @@ public partial class BarnIoTDevice
 {
     public int BDeviceId { get; set; }
 
-    public int? BarnId { get; set; }
+    public int BarnId { get; set; }
 
-    public int? DeviceId { get; set; }
+    public int DeviceId { get; set; }
 
-    public DateOnly? InstallationDate { get; set; }
+    public DateOnly InstallationDate { get; set; }
 
     public bool? Status { get; set; }
 

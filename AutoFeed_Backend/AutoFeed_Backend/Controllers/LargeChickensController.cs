@@ -70,12 +70,11 @@ public class LargeChickenController : ControllerBase
 
         var entity = new LargeChicken
         {
-            FlockId = model.FlockId,
-            Name = model.Name,
-            Weight = model.Weight,
-            HealthStatus = model.HealthStatus,
-            Note = model.Note
-            
+            FlockId = model.FlockId, // Assigning FlockId
+            Name = model.Name, // Assigning Name
+            Weight = model.Weight, // Assigning Weight
+            HealthStatus = model.HealthStatus, // Assigning HealthStatus
+            Note = model.Note // Assigning Note
         };
 
         var result = await _service.CreateAsync(entity);
@@ -99,8 +98,8 @@ public class LargeChickenController : ControllerBase
         existing.FlockId = model.FlockId;
         existing.Name = model.Name;
         existing.Weight = model.Weight;
-        existing.HealthStatus = model.HealthStatus;
-        existing.Note = model.Note;
+        existing.HealthStatus = model.HealthStatus; // Updating HealthStatus
+        existing.Note = model.Note; // Updating Note
         existing.IsActive = existing.IsActive; // keep current status
 
         var ok = await _service.UpdateAsync(existing);

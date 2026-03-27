@@ -9,7 +9,7 @@ public partial class Request
 {
     public int RequestId { get; set; }
 
-    public int? UserId { get; set; }
+    public int UserId { get; set; }
 
     public string Type { get; set; }
 

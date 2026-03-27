@@ -11,13 +11,13 @@ public partial class FlockChicken
 
     public string Name { get; set; }
 
-    public int? Quantity { get; set; }
+    public int Quantity { get; set; }
 
-    public decimal? Weight { get; set; }
+    public decimal Weight { get; set; }
 
-    public DateOnly? DoB { get; set; }
+    public DateOnly DoB { get; set; }
 
-    public DateOnly? TransferDate { get; set; }
+    public DateOnly TransferDate { get; set; }
 
     public string HealthStatus { get; set; }
 

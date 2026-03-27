@@ -12,8 +12,8 @@ public class ScheduleResponse
     public string Note { get; set; }
     public string Priority { get; set; }
     public string Status { get; set; }
-    public DateTime? StartDate { get; set; }
-    public DateTime? EndDate { get; set; }
+    public DateOnly StartDate { get; set; }
+    public DateOnly? EndDate { get; set; }
     public int? BarnId { get; set; }
     public string TaskTitle { get; set; }
     public string Username { get; set; }
