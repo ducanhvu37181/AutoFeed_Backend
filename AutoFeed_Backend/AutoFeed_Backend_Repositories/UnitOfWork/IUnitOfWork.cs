@@ -5,6 +5,7 @@ namespace AutoFeed_Backend_Repositories.UnitOfWork;
 
 public interface IUnitOfWork
 {
+    FlockRepository Flocks { get; } 
     TaskRepository Tasks { get; }
     LargeChickenRepository LargeChickens { get; }
     UserRepository Users { get; }
@@ -13,7 +14,7 @@ public interface IUnitOfWork
     ChickenBarnRepository ChickenBarns { get; }
     IoTDeviceRepository IoTDevices { get; }
     RequestRepository Requests { get; }
-    BarnRepository Barns { get; } 
+    BarnRepository Barns { get; }
 
     int SaveChangesWithTransaction();
     Task<int> SaveChangesWithTransactionAsync();
