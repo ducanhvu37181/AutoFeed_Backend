@@ -16,8 +16,8 @@ public class UnitOfWork : IUnitOfWork
     private ChickenBarnRepository _chickenBarnRepository;
     private IoTDeviceRepository _ioTDeviceRepository;
     private RequestRepository _requestRepository;
-    // --- THÊM DÒNG NÀY ---
     private BarnRepository _barnRepository;
+    private FlockRepository _flockRepository;
 
     public UnitOfWork() => _context ??= new AutoFeedDBContext();
 
@@ -56,10 +56,20 @@ public class UnitOfWork : IUnitOfWork
         get { return _requestRepository ??= new RequestRepository(_context); }
     }
 
-    public IoTDeviceRepository IoTDevices => _ioTDeviceRepository ??= new IoTDeviceRepository(_context);
+    public IoTDeviceRepository IoTDevices
+    {
+        get { return _ioTDeviceRepository ??= new IoTDeviceRepository(_context); }
+    }
 
-    // --- THÊM DÒNG NÀY ---
-    public BarnRepository Barns => _barnRepository ??= new BarnRepository(_context);
+    public BarnRepository Barns
+    {
+        get { return _barnRepository ??= new BarnRepository(_context); }
+    }
+
+    public FlockRepository Flocks
+    {
+        get { return _flockRepository ??= new FlockRepository(_context); }
+    }
 
     public int SaveChangesWithTransaction()
     {

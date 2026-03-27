@@ -58,7 +58,6 @@ public static class ServiceProvider
         return services;
     }
 
-    // --- THÊM HÀM NÀY ĐỂ ĐĂNG KÝ BARN ---
     public static IServiceCollection AddBarnServices(this IServiceCollection services)
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -73,6 +72,13 @@ public static class ServiceProvider
         return services;
     }
 
+    public static IServiceCollection AddFlockServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IFlockService, FlockService>();
+        return services;
+    }
+
     public static IServiceCollection AddServiceProvider(this IServiceCollection services)
     {
         services.AddTaskServices();
@@ -84,6 +90,7 @@ public static class ServiceProvider
         services.AddRequestServices();
         services.AddBarnServices();
         services.AddChickenBarnService();
+        services.AddFlockServices();
 
         return services;
     }
