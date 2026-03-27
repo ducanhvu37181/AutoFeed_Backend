@@ -15,7 +15,6 @@ public class RequestRepository : GenericRepository<Request>
 
     public async Task<List<Request>> GetActiveAsync()
     {
-        // Active requests are those not rejected (pending or approved)
         return await _context.Set<Request>()
             .Where(r => r.Status != null && (r.Status.ToLower() == "pending" || r.Status.ToLower() == "approved"))
             .ToListAsync();
@@ -23,9 +22,15 @@ public class RequestRepository : GenericRepository<Request>
 
     public async Task<List<Request>> GetInactiveAsync()
     {
-        // Inactive requests are those explicitly rejected
         return await _context.Set<Request>()
             .Where(r => r.Status != null && r.Status.ToLower() == "rejected")
+            .ToListAsync();
+    }
+
+    public async Task<List<Request>> GetByUserIdAsync(int userId)   
+    {
+        return await _context.Set<Request>()
+            .Where(r => r.UserId == userId)
             .ToListAsync();
     }
 

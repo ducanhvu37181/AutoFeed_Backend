@@ -9,6 +9,7 @@ namespace AutoFeed_Backend_Services.Services;
 public class RequestService : IRequestService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private static readonly string[] AllowedStatuses = { "pending", "approved", "rejected" };
 
     public RequestService()
     {
@@ -23,7 +24,7 @@ public class RequestService : IRequestService
     // Create
     public async Task<int> CreateRequestAsync(Request request)
     {
-        request.Status = "pending";                          // default: pending
+        request.Status = "pending";
         request.CreatedAt = System.DateTime.UtcNow;
         _unitOfWork.Requests.PrepareCreate(request);
         return await _unitOfWork.SaveChangesWithTransactionAsync();
@@ -49,6 +50,10 @@ public class RequestService : IRequestService
     {
         return await _unitOfWork.Requests.GetInactiveAsync();
     }
+    public async Task<List<Request>> GetByUserIdAsync(int userId)   
+    {
+        return await _unitOfWork.Requests.GetByUserIdAsync(userId);
+    }
 
     // Update
     public async Task<bool> UpdateRequestAsync(Request request)
@@ -63,6 +68,22 @@ public class RequestService : IRequestService
         {
             return false;
         }
+    }
+    public async Task<bool> UpdateStatusAsync(int id, string status)    
+    {
+        if (string.IsNullOrWhiteSpace(status)) return false;
+
+        // Chỉ cho phép 3 giá trị hợp lệ
+        var normalized = status.Trim().ToLower();
+        if (!AllowedStatuses.Contains(normalized)) return false;
+
+        var entity = await _unitOfWork.Requests.GetByIdAsync(id);
+        if (entity == null) return false;
+
+        entity.Status = normalized;
+        _unitOfWork.Requests.PrepareUpdate(entity);
+        var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+        return result > 0;
     }
 
     // Soft delete: Status = false
