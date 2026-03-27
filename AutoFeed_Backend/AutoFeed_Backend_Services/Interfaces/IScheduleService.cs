@@ -38,4 +38,6 @@ public interface IScheduleService
     Task<List<ScheduleResponse>> GetSchedulesByUserResponsesAsync(int userId);
 
     Task<bool> UpdateScheduleStatusAsync(int id, string status);
+
+    Task<List<ScheduleResponse>> GetSchedulesByUserAndDateAsync(int userId, System.DateTime date);
 }

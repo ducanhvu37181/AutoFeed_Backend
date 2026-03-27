@@ -9,13 +9,13 @@ public partial class ChickenBarn
 {
     public int CbarnId { get; set; }
 
-    public int? BarnId { get; set; }
+    public int BarnId { get; set; }
 
     public int? ChickenLid { get; set; }
 
     public int? FlockId { get; set; }
 
-    public DateOnly? StartDate { get; set; }
+    public DateOnly StartDate { get; set; }
 
     public DateOnly? ExportDate { get; set; }
 

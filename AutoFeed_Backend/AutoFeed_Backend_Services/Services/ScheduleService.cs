@@ -101,7 +101,7 @@ public class ScheduleService : IScheduleService
         var result = new Dictionary<int, int>();
         if (!ids.Any()) return result;
         var cbarns = await _unitOfWork.ChickenBarns.GetByIdsAsync(ids);
-        return cbarns.ToDictionary(c => c.CbarnId, c => c.BarnId ?? 0);
+        return cbarns.ToDictionary(c => c.CbarnId, c => c.BarnId);
     }
 
     public async Task<Dictionary<int, string>> GetTaskTitleMapAsync(IEnumerable<int> taskIds)
@@ -161,6 +161,12 @@ public class ScheduleService : IScheduleService
         return await MapToResponsesAsync(items);
     }
 
+    public async Task<List<ScheduleResponse>> GetSchedulesByUserAndDateAsync(int userId, System.DateTime date)
+    {
+        var items = await _unitOfWork.Schedules.GetByUserAndDateAsync(userId, date);
+        return await MapToResponsesAsync(items);
+    }
+
     public async Task<bool> UpdateScheduleStatusAsync(int id, string status)
     {
         var entity = await _unitOfWork.Schedules.GetByIdAsync(id);
@@ -174,16 +180,16 @@ public class ScheduleService : IScheduleService
     private async Task<List<ScheduleResponse>> MapToResponsesAsync(IEnumerable<ScheduleModel> items)
     {
         var itemList = items.ToList();
-        var userIds = itemList.Where(i => i.UserId.HasValue).Select(i => i.UserId.Value).Distinct();
-        var cbarnIds = itemList.Where(i => i.CbarnId.HasValue).Select(i => i.CbarnId.Value).Distinct();
-        var taskIds = itemList.Where(i => i.TaskId.HasValue).Select(i => i.TaskId.Value).Distinct();
+        var userIds = itemList.Select(i => i.UserId).Distinct(); // No change
+        var cbarnIds = itemList.Select(i => i.CbarnId).Distinct(); // No change
+        var taskIds = itemList.Select(i => i.TaskId).Distinct(); // No change
 
         var userMap = await GetUserNameMapAsync(userIds);
         var cbarnMap = await GetBarnMapForSchedulesAsync(cbarnIds);
         var taskMap = await GetTaskTitleMapAsync(taskIds);
 
         var result = itemList.Select(s => {
-            var username = s.UserId.HasValue && userMap.ContainsKey(s.UserId.Value) ? userMap[s.UserId.Value] : null;
+            var username = userMap.ContainsKey(s.UserId) ? userMap[s.UserId] : null;
             var resp = new ScheduleResponse
             {
                 SchedId = s.SchedId,
@@ -194,11 +200,11 @@ public class ScheduleService : IScheduleService
                 Note = s.Note,
                 Priority = s.Priority,
                 Status = s.Status,
-                StartDate = s.StartDate,
-                EndDate = s.EndDate,
+                StartDate = s.StartDate, // No change
+                EndDate = s.EndDate, // No change
                 Username = username,
-                BarnId = s.CbarnId.HasValue && cbarnMap.ContainsKey(s.CbarnId.Value) ? cbarnMap[s.CbarnId.Value] : null,
-                TaskTitle = s.TaskId.HasValue && taskMap.ContainsKey(s.TaskId.Value) ? taskMap[s.TaskId.Value] : null
+                BarnId = cbarnMap.ContainsKey(s.CbarnId) ? cbarnMap[s.CbarnId] : (int?)null,
+                TaskTitle = taskMap.ContainsKey(s.TaskId) ? taskMap[s.TaskId] : null
             };
             return resp;
         }).ToList();

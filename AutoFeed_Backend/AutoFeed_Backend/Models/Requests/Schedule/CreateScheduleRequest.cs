@@ -4,14 +4,14 @@ namespace AutoFeed_Backend.Models.Requests.Schedule;
 
 public class CreateScheduleRequest
 {
-    public int? UserId { get; set; }
-    public int? TaskId { get; set; }
-    public int? CbarnId { get; set; }
+    public int UserId { get; set; }
+    public int TaskId { get; set; }
+    public int CbarnId { get; set; }
     public string Description { get; set; }
     // status values: "pending", "inprogress", "completed"
     public string Status { get; set; }
     public string Note { get; set; }
     public string Priority { get; set; }
-    public DateTime? StartDate { get; set; }
-    public DateTime? EndDate { get; set; }
+    public DateOnly StartDate { get; set; }
+    public DateOnly? EndDate { get; set; }
 }

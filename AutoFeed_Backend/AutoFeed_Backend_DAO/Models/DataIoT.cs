@@ -13,13 +13,13 @@ public partial class DataIoT
 
     public int DeviceId { get; set; }
 
-    public decimal? Value { get; set; }
+    public decimal Value { get; set; }
 
     public string Description { get; set; }
 
     public DateTime? RecordDate { get; set; }
 
-    public int? SequenceNumber { get; set; }
+    public int SequenceNumber { get; set; }
 
     public virtual Barn Barn { get; set; }
 

@@ -99,7 +99,7 @@ public class UserController : ControllerBase
 
         var entity = new User
         {
-            RoleId = model.RoleId,
+            RoleId = model.RoleId ?? 0,
             Email = model.Email,
             Password = model.Password,   // UserService sẽ hash
             FullName = model.FullName,
@@ -129,7 +129,7 @@ public class UserController : ControllerBase
         if (existing == null)
             return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
 
-        existing.RoleId = model.RoleId;
+        existing.RoleId = model.RoleId ?? existing.RoleId;
         existing.Email = model.Email;
         existing.FullName = model.FullName;
         existing.Phone = model.Phone;

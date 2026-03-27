@@ -9,11 +9,11 @@ public partial class Schedule
 {
     public int SchedId { get; set; }
 
-    public int? UserId { get; set; }
+    public int UserId { get; set; }
 
-    public int? TaskId { get; set; }
+    public int TaskId { get; set; }
 
-    public int? CbarnId { get; set; }
+    public int CbarnId { get; set; }
 
     public string Description { get; set; }
 
@@ -23,11 +23,11 @@ public partial class Schedule
 
     public string Status { get; set; }
 
-    public DateTime? StartDate { get; set; }
+    public DateOnly StartDate { get; set; }
 
-    public DateTime? EndDate { get; set; }
+    public DateOnly? EndDate { get; set; }
 
-    public DateTime? CreatedDate { get; set; }
+    public DateOnly? CreatedDate { get; set; }
 
     public virtual ChickenBarn Cbarn { get; set; }
 
