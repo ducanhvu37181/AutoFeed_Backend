@@ -15,6 +15,7 @@ public interface IUnitOfWork
     IoTDeviceRepository IoTDevices { get; }
     RequestRepository Requests { get; }
     BarnRepository Barns { get; }
+    InventoryRepository Inventories { get; }
 
     int SaveChangesWithTransaction();
     Task<int> SaveChangesWithTransactionAsync();
