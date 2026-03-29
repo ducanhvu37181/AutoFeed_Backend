@@ -15,7 +15,7 @@ public partial class Report
 
     public string Description { get; set; }
 
-    public bool? Status { get; set; }
+    public string Status { get; set; }
 
     public DateTime? CreateDate { get; set; }
 

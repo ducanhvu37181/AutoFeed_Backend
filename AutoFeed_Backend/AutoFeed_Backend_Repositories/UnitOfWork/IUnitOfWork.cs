@@ -16,6 +16,7 @@ public interface IUnitOfWork
     RequestRepository Requests { get; }
     BarnRepository Barns { get; }
     InventoryRepository Inventories { get; }
+    ReportRepository Reports { get; }
 
     int SaveChangesWithTransaction();
     Task<int> SaveChangesWithTransactionAsync();

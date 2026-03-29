@@ -19,6 +19,7 @@ public class UnitOfWork : IUnitOfWork
     private BarnRepository _barnRepository;
     private FlockRepository _flockRepository;
     private InventoryRepository _inventoryRepository;
+    private ReportRepository _reportRepository;
 
     public UnitOfWork() => _context ??= new AutoFeedDBContext();
 
@@ -74,6 +75,10 @@ public class UnitOfWork : IUnitOfWork
     public InventoryRepository Inventories 
     { 
         get { return _inventoryRepository ??= new InventoryRepository(_context); } 
+    }
+    public ReportRepository Reports
+    {
+        get { return _reportRepository ??= new ReportRepository(_context); }
     }
     public int SaveChangesWithTransaction()
     {
