@@ -60,15 +60,15 @@ CREATE TABLE [dbo].[FlockChicken] (
     [transferDate] DATE NOT NULL,        -- Ngày chuyển chuồng
     [healthStatus] NVARCHAR(100) NOT NULL,
     [note] NVARCHAR(MAX) NULL,
-    [isActive] BIT DEFAULT 1         
+    [isActive] BIT DEFAULT 1         -- Boolean presence track
 );
 
 CREATE TABLE [dbo].[Task] (
     [taskID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [title] NVARCHAR(100) NOT NULL,
     [description] NVARCHAR(MAX) NOT NULL,
-    [startTime] TIME NOT NULL,           -- Time only
-    [endTime] TIME NOT NULL,             -- Time only
+    [startTime] TIME NOT NULL,           -- Time only duration
+    [endTime] TIME NOT NULL,             -- Time only duration
     [status] BIT DEFAULT 1 
 );
 
@@ -106,7 +106,7 @@ CREATE TABLE [dbo].[Data_IoT] (
     [value] DECIMAL(18, 4) NOT NULL,
     [description] NVARCHAR(MAX) NOT NULL,
     [recordDate] DATETIME DEFAULT GETDATE(),
-    [sequenceNumber] INT NOT NULL, -- "Lan thu may"
+    [sequenceNumber] INT NOT NULL, -- Lan thu may
     CONSTRAINT [FK_DataIoT_Barn] FOREIGN KEY([barnID]) REFERENCES [dbo].[Barn] ([barnID]),
     CONSTRAINT [FK_DataIoT_Device] FOREIGN KEY([deviceID]) REFERENCES [dbo].[IoT_Device] ([deviceID])
 );
@@ -118,7 +118,7 @@ CREATE TABLE [dbo].[LargeChicken] (
     [weight] DECIMAL(18, 2) NOT NULL,
     [healthStatus] NVARCHAR(100) NOT NULL,
     [note] NVARCHAR(MAX) NULL,
-    [isActive] BIT DEFAULT 1, 
+    [isActive] BIT DEFAULT 1, -- Removed Age
     CONSTRAINT [FK_LargeChicken_Flock] FOREIGN KEY([flockID]) REFERENCES [dbo].[FlockChicken] ([flockID])
 );
 
@@ -160,7 +160,7 @@ CREATE TABLE [dbo].[ChickenBarn] (
     CONSTRAINT [FK_CBarn_LargeChicken] FOREIGN KEY([chickenLID]) REFERENCES [dbo].[LargeChicken] ([chickenLID])
 );
 
--- Filtered Indexes to handle unique constraints with multiple NULLs
+-- Filtered Indexes: ensures 1 entity per barn while allowing NULLs
 CREATE UNIQUE NONCLUSTERED INDEX UIX_CBarn_Flock ON ChickenBarn(flockID) WHERE flockID IS NOT NULL;
 CREATE UNIQUE NONCLUSTERED INDEX UIX_CBarn_Chicken ON ChickenBarn(chickenLID) WHERE chickenLID IS NOT NULL;
 
@@ -194,12 +194,13 @@ CREATE TABLE [dbo].[FeedingRuleDetail] (
     CONSTRAINT [FK_Detail_Rule] FOREIGN KEY([ruleID]) REFERENCES [dbo].[FeedingRule] ([ruleID])
 );
 
+-- UPDATED: Report Status as String
 CREATE TABLE [dbo].[Report] (
     [reportID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [userID] INT NOT NULL,
     [type] NVARCHAR(50) NOT NULL,
     [description] NVARCHAR(MAX) NOT NULL,
-    [status] BIT DEFAULT 1,
+    [status] NVARCHAR(50) DEFAULT 'submitted', -- Updated to String
     [createDate] DATETIME DEFAULT GETDATE(),
     CONSTRAINT [FK_Report_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID])
 );
@@ -214,7 +215,6 @@ CREATE TABLE [dbo].[Request] (
     CONSTRAINT [FK_Request_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID])
 );
 
--- UPDATED: Schedule using DATE only for date columns
 CREATE TABLE [dbo].[Schedule] (
     [schedID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [userID] INT NOT NULL,
@@ -224,9 +224,9 @@ CREATE TABLE [dbo].[Schedule] (
     [note] NVARCHAR(MAX) NOT NULL,
     [priority] NVARCHAR(10) DEFAULT 'medium',               
     [status] NVARCHAR(20) DEFAULT 'pending', -- 'pending', 'in progress', 'completed'
-    [startDate] DATE NOT NULL,               -- Updated from DATETIME to DATE
-    [endDate] DATE NULL,                     -- Updated from DATETIME to DATE
-    [createdDate] DATE DEFAULT CAST(GETDATE() AS DATE), -- Updated to DATE
+    [startDate] DATE NOT NULL,               -- Date type only
+    [endDate] DATE NULL,                     -- Date type only
+    [createdDate] DATE DEFAULT CAST(GETDATE() AS DATE),
     CONSTRAINT [FK_Sched_CBarn] FOREIGN KEY([CBarnID]) REFERENCES [dbo].[ChickenBarn] ([CBarnID]),
     CONSTRAINT [FK_Sched_Task] FOREIGN KEY([taskID]) REFERENCES [dbo].[Task] ([taskID]),
     CONSTRAINT [FK_Sched_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID]),
@@ -236,7 +236,7 @@ CREATE TABLE [dbo].[Schedule] (
 GO
 
 -- ======================================================
--- 6. FULL SAMPLE DATA (3 ROWS PER ENTITY)
+-- 6. FULL SAMPLE DATA (MIN 3 SAMPLES PER ENTITY)
 -- ======================================================
 
 INSERT INTO [Role] (description) VALUES ('Manager'), ('TechFarmer'), ('Farmer');
@@ -265,7 +265,8 @@ INSERT INTO [Task] (title, description, startTime, endTime) VALUES
 ('Sensor Check', 'Calibrate tech', '10:00', '11:00'), 
 ('Clean Barn', 'Sanitize floor', '13:00', '15:00');
 
-INSERT INTO [BarnIoT_Device] (barnID, deviceID, installationDate) VALUES (1,1,'2026-03-01'), (2,2,'2026-03-02'), (3,3,'2026-03-03');
+INSERT INTO [BarnIoT_Device] (barnID, deviceID, installationDate) VALUES 
+(1,1,'2026-03-01'), (2,2,'2026-03-02'), (3,3,'2026-03-03');
 
 INSERT INTO [Data_IoT] (barnID, deviceID, value, description, sequenceNumber) VALUES 
 (1,1,25.4,'Routine',1), (2,2,55.1,'Routine',1), (3,3,88.2,'Routine',1);
@@ -293,13 +294,15 @@ INSERT INTO [FeedingRuleDetail] (ruleID, foodID, startDate, endDate, description
 (2,2,'2026-03-01','2026-04-01','Protein Boost'), 
 (3,3,'2026-03-01','2026-04-01','Vitamins');
 
-INSERT INTO [Report] (userID, type, description) VALUES 
-(1, 'Admin', 'Weekly Review'), (2, 'Tech', 'Sensor Repair'), (3, 'Field', 'Barn cleaning complete');
+-- UPDATED: Report Samples with String Status
+INSERT INTO [Report] (userID, type, description, status) VALUES 
+(1, 'Admin', 'Weekly Review', 'archived'), 
+(2, 'Tech', 'Sensor Repair', 'reviewed'), 
+(3, 'Field', 'Barn cleaning complete', 'submitted');
 
 INSERT INTO [Request] (userID, type, description) VALUES 
 (2, 'Repair', 'Fix sensor 01'), (3, 'Supply', 'Need more Grain'), (1, 'Access', 'Add new farmer');
 
--- UPDATED Schedule Sample: Using only DATE format
 INSERT INTO [Schedule] (userID, taskID, CBarnID, description, note, priority, status, startDate) VALUES 
 (3, 1, 1, 'Morning feed', 'Check water too', 'high', 'pending', '2026-03-27'),
 (2, 2, 2, 'Tech check', 'Calibrated', 'medium', 'in progress', '2026-03-27'),

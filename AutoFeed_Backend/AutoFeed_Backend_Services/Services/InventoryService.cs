@@ -31,7 +31,7 @@ public class InventoryService : IInventoryService
             Quantity = i.Quantity,
             WeightPerBag = i.WeightPerBag,
             TotalWeight = i.Quantity * i.WeightPerBag,
-            ExpiredDate = i.ExpiredDate?.ToString("yyyy-MM-dd") ?? "N/A",
+            ExpiredDate = i.ExpiredDate.ToString("yyyy-MM-dd") ?? "N/A",
             Status = i.ExpiredDate == null
     ? "Unknown"
     : i.ExpiredDate <= DateOnly.FromDateTime(DateTime.Today)
@@ -55,8 +55,8 @@ public class InventoryService : IInventoryService
             FoodType = i.Food?.Type,
             Quantity = i.Quantity,
             WeightPerBag = i.WeightPerBag,
-            ExpiredDate = i.ExpiredDate?.ToString("yyyy-MM-dd") ?? "N/A",
-            DaysLeft = i.ExpiredDate?.DayNumber - DateOnly.FromDateTime(DateTime.Today).DayNumber
+            ExpiredDate = i.ExpiredDate.ToString("yyyy-MM-dd") ?? "N/A",
+            DaysLeft = i.ExpiredDate.DayNumber - DateOnly.FromDateTime(DateTime.Today).DayNumber
         });
     }
 
