@@ -187,6 +187,16 @@ public class ScheduleService : IScheduleService
         var userMap = await GetUserNameMapAsync(userIds);
         var cbarnMap = await GetBarnMapForSchedulesAsync(cbarnIds);
         var taskMap = await GetTaskTitleMapAsync(taskIds);
+        // fetch task times
+        var taskTimes = new Dictionary<int, (TimeOnly start, TimeOnly end)>();
+        if (taskIds.Any())
+        {
+            var tasks = await _unitOfWork.Tasks.GetAllAsync();
+            foreach (var t in tasks.Where(t => taskIds.Contains(t.TaskId)))
+            {
+                taskTimes[t.TaskId] = (t.StartTime, t.EndTime);
+            }
+        }
 
         var result = itemList.Select(s => {
             var username = userMap.ContainsKey(s.UserId) ? userMap[s.UserId] : null;
@@ -204,7 +214,9 @@ public class ScheduleService : IScheduleService
                 EndDate = s.EndDate, // No change
                 Username = username,
                 BarnId = cbarnMap.ContainsKey(s.CbarnId) ? cbarnMap[s.CbarnId] : (int?)null,
-                TaskTitle = taskMap.ContainsKey(s.TaskId) ? taskMap[s.TaskId] : null
+                TaskTitle = taskMap.ContainsKey(s.TaskId) ? taskMap[s.TaskId] : null,
+                StartTime = taskTimes.ContainsKey(s.TaskId) ? taskTimes[s.TaskId].start : (TimeOnly?)null,
+                EndTime = taskTimes.ContainsKey(s.TaskId) ? taskTimes[s.TaskId].end : (TimeOnly?)null
             };
             return resp;
         }).ToList();

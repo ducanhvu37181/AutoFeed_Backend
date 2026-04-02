@@ -41,6 +41,7 @@ public static class ServiceProvider
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IFoodService, FoodService>();
+        services.AddScoped<IInventoryService, InventoryService>();
         return services;
     }
 
@@ -78,6 +79,13 @@ public static class ServiceProvider
         services.AddScoped<IFlockService, FlockService>();
         return services;
     }
+    public static IServiceCollection AddReportServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IReportService, ReportService>();
+        return services;
+    }
+
 
     public static IServiceCollection AddServiceProvider(this IServiceCollection services)
     {
@@ -91,6 +99,7 @@ public static class ServiceProvider
         services.AddBarnServices();
         services.AddChickenBarnService();
         services.AddFlockServices();
+        services.AddReportServices();
 
         return services;
     }

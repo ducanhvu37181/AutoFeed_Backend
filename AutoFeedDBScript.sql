@@ -60,15 +60,15 @@ CREATE TABLE [dbo].[FlockChicken] (
     [transferDate] DATE NOT NULL,        -- Ngày chuyển chuồng
     [healthStatus] NVARCHAR(100) NOT NULL,
     [note] NVARCHAR(MAX) NULL,
-    [isActive] BIT DEFAULT 1         
+    [isActive] BIT DEFAULT 1         -- Boolean presence track
 );
 
 CREATE TABLE [dbo].[Task] (
     [taskID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [title] NVARCHAR(100) NOT NULL,
     [description] NVARCHAR(MAX) NOT NULL,
-    [startTime] TIME NOT NULL,           -- Time only
-    [endTime] TIME NOT NULL,             -- Time only
+    [startTime] TIME NOT NULL,           -- Time only duration
+    [endTime] TIME NOT NULL,             -- Time only duration
     [status] BIT DEFAULT 1 
 );
 
@@ -84,6 +84,7 @@ CREATE TABLE [dbo].[User] (
     [fullName] NVARCHAR(100) NOT NULL,
     [phone] NVARCHAR(20) NOT NULL,
     [username] NVARCHAR(50) NOT NULL UNIQUE,
+    [avatarURL] NVARCHAR(MAX) NULL,      -- User avatar
     [lastLogin] DATETIME NULL,
     [status] BIT DEFAULT 1,
     CONSTRAINT [FK_User_Role] FOREIGN KEY([roleID]) REFERENCES [dbo].[Role] ([roleID])
@@ -118,7 +119,7 @@ CREATE TABLE [dbo].[LargeChicken] (
     [weight] DECIMAL(18, 2) NOT NULL,
     [healthStatus] NVARCHAR(100) NOT NULL,
     [note] NVARCHAR(MAX) NULL,
-    [isActive] BIT DEFAULT 1, 
+    [isActive] BIT DEFAULT 1, -- Boolean tracking
     CONSTRAINT [FK_LargeChicken_Flock] FOREIGN KEY([flockID]) REFERENCES [dbo].[FlockChicken] ([flockID])
 );
 
@@ -160,7 +161,7 @@ CREATE TABLE [dbo].[ChickenBarn] (
     CONSTRAINT [FK_CBarn_LargeChicken] FOREIGN KEY([chickenLID]) REFERENCES [dbo].[LargeChicken] ([chickenLID])
 );
 
--- Filtered Indexes to handle unique constraints with multiple NULLs
+-- Filtered Unique Indexes to enforce 1 entity per barn
 CREATE UNIQUE NONCLUSTERED INDEX UIX_CBarn_Flock ON ChickenBarn(flockID) WHERE flockID IS NOT NULL;
 CREATE UNIQUE NONCLUSTERED INDEX UIX_CBarn_Chicken ON ChickenBarn(chickenLID) WHERE chickenLID IS NOT NULL;
 
@@ -194,14 +195,17 @@ CREATE TABLE [dbo].[FeedingRuleDetail] (
     CONSTRAINT [FK_Detail_Rule] FOREIGN KEY([ruleID]) REFERENCES [dbo].[FeedingRule] ([ruleID])
 );
 
+-- UPDATED: Report Status with Check Constraint and URL
 CREATE TABLE [dbo].[Report] (
     [reportID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [userID] INT NOT NULL,
     [type] NVARCHAR(50) NOT NULL,
     [description] NVARCHAR(MAX) NOT NULL,
-    [status] BIT DEFAULT 1,
+    [status] NVARCHAR(50) DEFAULT 'pending', -- Updated default
+    [url] NVARCHAR(MAX) NULL,                -- Document/Media link
     [createDate] DATETIME DEFAULT GETDATE(),
-    CONSTRAINT [FK_Report_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID])
+    CONSTRAINT [FK_Report_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID]),
+    CONSTRAINT [CK_Report_Status] CHECK ([status] IN ('pending', 'approved', 'rejected')) -- Status requirement
 );
 
 CREATE TABLE [dbo].[Request] (
@@ -210,11 +214,11 @@ CREATE TABLE [dbo].[Request] (
     [type] NVARCHAR(50) NOT NULL,
     [description] NVARCHAR(MAX) NOT NULL,
     [status] NVARCHAR(50) DEFAULT 'pending', -- Default 'pending'
+    [url] NVARCHAR(MAX) NULL,                -- Document/Media link
     [createdAt] DATETIME DEFAULT GETDATE(),
     CONSTRAINT [FK_Request_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID])
 );
 
--- UPDATED: Schedule using DATE only for date columns
 CREATE TABLE [dbo].[Schedule] (
     [schedID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [userID] INT NOT NULL,
@@ -223,10 +227,10 @@ CREATE TABLE [dbo].[Schedule] (
     [description] NVARCHAR(MAX) NOT NULL,
     [note] NVARCHAR(MAX) NOT NULL,
     [priority] NVARCHAR(10) DEFAULT 'medium',               
-    [status] NVARCHAR(20) DEFAULT 'pending', -- 'pending', 'in progress', 'completed'
-    [startDate] DATE NOT NULL,               -- Updated from DATETIME to DATE
-    [endDate] DATE NULL,                     -- Updated from DATETIME to DATE
-    [createdDate] DATE DEFAULT CAST(GETDATE() AS DATE), -- Updated to DATE
+    [status] NVARCHAR(20) DEFAULT 'pending', 
+    [startDate] DATE NOT NULL,               -- DATE only
+    [endDate] DATE NULL,                     -- DATE only
+    [createdDate] DATE DEFAULT CAST(GETDATE() AS DATE),
     CONSTRAINT [FK_Sched_CBarn] FOREIGN KEY([CBarnID]) REFERENCES [dbo].[ChickenBarn] ([CBarnID]),
     CONSTRAINT [FK_Sched_Task] FOREIGN KEY([taskID]) REFERENCES [dbo].[Task] ([taskID]),
     CONSTRAINT [FK_Sched_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID]),
@@ -236,15 +240,15 @@ CREATE TABLE [dbo].[Schedule] (
 GO
 
 -- ======================================================
--- 6. FULL SAMPLE DATA (3 ROWS PER ENTITY)
+-- 6. FULL SAMPLE DATA (3+ SAMPLES PER ENTITY)
 -- ======================================================
 
 INSERT INTO [Role] (description) VALUES ('Manager'), ('TechFarmer'), ('Farmer');
 
-INSERT INTO [User] (roleID, email, password, fullName, phone, username) VALUES 
-(1, 'mgr@farm.com', 'p1', 'Alice Johnson', '0123456789', 'alice_mgr'),
-(2, 'tech@farm.com', 'p2', 'Bob Smith', '0987654321', 'bob_tech'),
-(3, 'farmer@farm.com', 'p3', 'Charlie Brown', '0555666777', 'charlie_f');
+INSERT INTO [User] (roleID, email, password, fullName, phone, username, avatarURL) VALUES 
+(1, 'mgr@farm.com', 'p1', 'Alice Johnson', '0123456789', 'alice_mgr', 'https://autofeed.com/avatars/alice.png'),
+(2, 'tech@farm.com', 'p2', 'Bob Smith', '0987654321', 'bob_tech', 'https://autofeed.com/avatars/bob.png'),
+(3, 'farmer@farm.com', 'p3', 'Charlie Brown', '0555666777', 'charlie_f', 'https://autofeed.com/avatars/charlie.png');
 
 INSERT INTO [Food] (name, type, price, quantity) VALUES 
 ('Corn Mix', 'Grain', 12.5, 1000), ('Soy Protein', 'Supplement', 25.0, 500), ('Vitamin B', 'Liquid', 15.0, 200);
@@ -261,47 +265,53 @@ INSERT INTO [FlockChicken] (name, quantity, weight, DoB, transferDate, healthSta
 ('Flock Gamma', 150, 0.6, '2026-02-15', '2026-03-10', 'Healthy');
 
 INSERT INTO [Task] (title, description, startTime, endTime) VALUES 
-('Feeding A', 'Distribute grain', '07:00', '08:00'), 
-('Sensor Check', 'Calibrate tech', '10:00', '11:00'), 
-('Clean Barn', 'Sanitize floor', '13:00', '15:00');
+('Feeding Cycle', 'Standard Grain distribution', '07:00', '08:00'), 
+('Tech Check', 'IoT calibration', '10:00', '11:00'), 
+('Deep Clean', 'Barn Sanitization', '13:00', '15:00');
 
-INSERT INTO [BarnIoT_Device] (barnID, deviceID, installationDate) VALUES (1,1,'2026-03-01'), (2,2,'2026-03-02'), (3,3,'2026-03-03');
+INSERT INTO [BarnIoT_Device] (barnID, deviceID, installationDate) VALUES 
+(1,1,'2026-03-01'), (2,2,'2026-03-02'), (3,3,'2026-03-03');
 
 INSERT INTO [Data_IoT] (barnID, deviceID, value, description, sequenceNumber) VALUES 
-(1,1,25.4,'Routine',1), (2,2,55.1,'Routine',1), (3,3,88.2,'Routine',1);
+(1,1,25.4,'Regular Reading',1), (2,2,55.1,'Regular Reading',1), (3,3,88.2,'Regular Reading',1);
 
 INSERT INTO [LargeChicken] (flockID, name, weight, healthStatus) VALUES 
-(1, 'Hen-01', 2.5, 'Active'), (2, 'Hen-02', 2.3, 'Good'), (3, 'Hen-03', 2.8, 'Healthy');
+(1, 'Hero-01', 2.5, 'Excellent'), (2, 'Hero-02', 2.3, 'Good'), (3, 'Hero-03', 2.8, 'Stable');
 
 INSERT INTO [Inventory] (foodID, quantity, weightPerBag, expiredDate) VALUES 
-(1, 20, 50.0, '2027-01-01'), (2, 10, 25.0, '2026-12-01'), (3, 5, 10.0, '2026-11-01');
+(1, 50, 20.0, '2027-01-01'), (2, 20, 25.0, '2026-12-01'), (3, 10, 30.0, '2026-11-01');
 
 INSERT INTO [FoodStorage] (foodID, barnID, food_weight, leftover_food) VALUES 
-(1, 1, 100.0, 10.0), (2, 2, 250.0, 20.0), (3, 3, 150.0, 5.0);
+(1, 1, 500.0, 10.0), (2, 2, 250.0, 20.0), (3, 3, 150.0, 5.0);
 
--- Assignment Rule: 1 entity per barn
+-- Chicken Barn Assignments (1 entity per barn)
 INSERT INTO [ChickenBarn] (barnID, flockID, chickenLID, startDate) VALUES 
 (1, 1, NULL, '2026-03-01'), 
 (2, NULL, 1, '2026-03-01'), 
 (3, 2, NULL, '2026-03-01');
 
 INSERT INTO [FeedingRule] (flockID, chickenLID, times, description) VALUES 
-(1, NULL, 3, 'Flock Growth'), (NULL, 1, 2, 'Individual Boost'), (2, NULL, 3, 'Standard');
+(1, NULL, 3, 'Growth Phase'), (NULL, 1, 2, 'Individual Boost'), (2, NULL, 3, 'Maintenance');
 
 INSERT INTO [FeedingRuleDetail] (ruleID, foodID, startDate, endDate, description) VALUES 
-(1,1,'2026-03-01','2026-04-01','Morning Grain'), 
-(2,2,'2026-03-01','2026-04-01','Protein Boost'), 
-(3,3,'2026-03-01','2026-04-01','Vitamins');
+(1,1,'2026-03-01','2026-04-01','Phase 1 Grain'), 
+(2,2,'2026-03-01','2026-04-01','Supplement intake'), 
+(3,3,'2026-03-01','2026-04-01','Standard Liquid');
 
-INSERT INTO [Report] (userID, type, description) VALUES 
-(1, 'Admin', 'Weekly Review'), (2, 'Tech', 'Sensor Repair'), (3, 'Field', 'Barn cleaning complete');
+-- UPDATED: Report Samples with Required Statuses
+INSERT INTO [Report] (userID, type, description, status, url) VALUES 
+(1, 'Admin', 'Weekly Review - Barn 1', 'approved', 'https://autofeed.com/reports/r1.pdf'), 
+(2, 'Hardware', 'Sensor Malfunction', 'rejected', 'https://autofeed.com/reports/r2.jpg'), 
+(3, 'Operations', 'Barn cleaning log', 'pending', 'https://autofeed.com/reports/r3.pdf');
 
-INSERT INTO [Request] (userID, type, description) VALUES 
-(2, 'Repair', 'Fix sensor 01'), (3, 'Supply', 'Need more Grain'), (1, 'Access', 'Add new farmer');
+INSERT INTO [Request] (userID, type, description, url) VALUES 
+(2, 'Repair', 'Replace sensor 01', 'https://autofeed.com/reqs/q1.jpg'), 
+(3, 'Supplies', 'Grain restock', 'https://autofeed.com/reqs/q2.pdf'), 
+(1, 'Admin', 'User Role Change', 'https://autofeed.com/reqs/q3.pdf');
 
--- UPDATED Schedule Sample: Using only DATE format
-INSERT INTO [Schedule] (userID, taskID, CBarnID, description, note, priority, status, startDate) VALUES 
-(3, 1, 1, 'Morning feed', 'Check water too', 'high', 'pending', '2026-03-27'),
-(2, 2, 2, 'Tech check', 'Calibrated', 'medium', 'in progress', '2026-03-27'),
-(3, 3, 3, 'Afternoon clean', 'Used sanitizer', 'low', 'completed', '2026-03-26');
+-- UPDATED: Schedule Samples with Required Priority, Status, and endDate
+INSERT INTO [Schedule] (userID, taskID, CBarnID, description, note, priority, status, startDate, endDate) VALUES 
+(3, 1, 1, 'Standard Feed', 'Check silos', 'high', 'pending', '2026-04-02', '2026-04-05'),
+(2, 2, 2, 'IoT Calibrate', 'System re-sync', 'medium', 'in progress', '2026-04-02', '2026-04-03'),
+(3, 3, 3, 'Hygiene Cycle', 'Full sanitization', 'low', 'completed', '2026-04-01', '2026-04-01');
 GO
