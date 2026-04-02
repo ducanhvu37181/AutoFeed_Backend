@@ -21,6 +21,8 @@ public partial class User
 
     public string Username { get; set; }
 
+    public string AvatarUrl { get; set; }
+
     public DateTime? LastLogin { get; set; }
 
     public bool? Status { get; set; }
