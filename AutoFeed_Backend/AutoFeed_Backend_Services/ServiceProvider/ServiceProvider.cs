@@ -79,6 +79,7 @@ public static class ServiceProvider
         services.AddScoped<IFlockService, FlockService>();
         return services;
     }
+
     public static IServiceCollection AddReportServices(this IServiceCollection services)
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -86,6 +87,12 @@ public static class ServiceProvider
         return services;
     }
 
+    public static IServiceCollection AddDashboardTechServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IDashboardTechService, DashboardTechService>();
+        return services;
+    }
 
     public static IServiceCollection AddServiceProvider(this IServiceCollection services)
     {
@@ -100,6 +107,7 @@ public static class ServiceProvider
         services.AddChickenBarnService();
         services.AddFlockServices();
         services.AddReportServices();
+        services.AddDashboardTechServices();
 
         return services;
     }
