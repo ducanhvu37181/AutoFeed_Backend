@@ -17,6 +17,8 @@ public partial class Report
 
     public string Status { get; set; }
 
+    public string Url { get; set; }
+
     public DateTime? CreateDate { get; set; }
 
     public virtual User User { get; set; }
