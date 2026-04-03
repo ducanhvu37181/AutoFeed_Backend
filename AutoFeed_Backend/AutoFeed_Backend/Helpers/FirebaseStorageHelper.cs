@@ -1,0 +1,39 @@
+using Google.Apis.Auth.OAuth2;
+using Google.Cloud.Storage.V1;
+using Microsoft.AspNetCore.Http;
+using System;
+using System.IO;
+using System.Threading.Tasks;
+
+namespace AutoFeed_Backend.Helpers
+{
+    public static class FirebaseStorageHelper
+    {
+        // Uploads file to Firebase Storage (GCS) and returns a signed URL valid for the given ttl.
+        public static async Task<string> UploadFileAndGetSignedUrlAsync(IFormFile file, string bucketName, string serviceAccountPath, TimeSpan urlTtl)
+        {
+            if (file == null || file.Length == 0)
+                throw new ArgumentException("file is empty", nameof(file));
+
+            if (string.IsNullOrWhiteSpace(bucketName))
+                throw new ArgumentException("bucketName is required", nameof(bucketName));
+
+            if (string.IsNullOrWhiteSpace(serviceAccountPath))
+                throw new ArgumentException("serviceAccountPath is required", nameof(serviceAccountPath));
+
+            var credential = GoogleCredential.FromFile(serviceAccountPath);
+            var storageClient = StorageClient.Create(credential);
+
+            var ext = Path.GetExtension(file.FileName) ?? string.Empty;
+            var objectName = $"avatars/{Guid.NewGuid()}{ext}";
+
+            using var ms = new MemoryStream();
+            await file.CopyToAsync(ms);
+            ms.Position = 0;
+
+            var obj = await storageClient.UploadObjectAsync(bucketName, objectName, file.ContentType, ms);
+            // Return public URL pattern. If your bucket is private you should implement signed URL logic.
+            return $"https://storage.googleapis.com/{bucketName}/{objectName}";
+        }
+    }
+}
