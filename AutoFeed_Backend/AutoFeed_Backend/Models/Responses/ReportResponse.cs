@@ -1,5 +1,6 @@
 ﻿namespace AutoFeed_Backend.Models.Responses
-{   public class ReportResponse
+{
+    public class ReportResponse
     {
         public int ReportId { get; set; }
         public int UserId { get; set; }
@@ -8,6 +9,7 @@
         public string? Type { get; set; }
         public string? Description { get; set; }
         public string? Status { get; set; }      // pending | approved | rejected
+        public string? Url { get; set; }
         public DateTime? CreateDate { get; set; }
     }
 }

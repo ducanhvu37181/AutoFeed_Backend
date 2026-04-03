@@ -4,8 +4,8 @@
     {
         public int? UserId { get; set; }
         public string Type { get; set; }
-        public string Description { get; set; }
-        // status values: "pending", "approved", "rejected"
-        public string Status { get; set; }
+        public string? Description { get; set; }
+        public string? Status { get; set; }      // pending | approved | rejected
+        public string? Url { get; set; }
     }
 }
