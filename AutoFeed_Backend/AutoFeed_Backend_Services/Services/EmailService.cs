@@ -4,7 +4,7 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using System.Net.Mail;
+
 
 namespace AutoFeed_Backend_Services.Services;
 public class EmailService : IEmailService

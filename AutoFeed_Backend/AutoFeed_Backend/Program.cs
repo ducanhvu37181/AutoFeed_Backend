@@ -1,4 +1,7 @@
+using AutoFeed_Backend_DAO.Settings;
+using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Services.ServiceProvider;
+using AutoFeed_Backend_Services.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -8,6 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // register all services via service provider helper
 builder.Services.AddServiceProvider();
+
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddScoped<IEmailService, EmailService>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
