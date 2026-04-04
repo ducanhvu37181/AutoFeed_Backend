@@ -31,9 +31,26 @@ namespace AutoFeed_Backend.Helpers
             await file.CopyToAsync(ms);
             ms.Position = 0;
 
-            var obj = await storageClient.UploadObjectAsync(bucketName, objectName, file.ContentType, ms);
-            // Return public URL pattern. If your bucket is private you should implement signed URL logic.
-            return $"https://storage.googleapis.com/{bucketName}/{objectName}";
+            // generate a token so the object can be accessed via Firebase download URL
+            var token = Guid.NewGuid().ToString();
+
+            var storageObject = new Google.Apis.Storage.v1.Data.Object
+            {
+                Bucket = bucketName,
+                Name = objectName,
+                ContentType = file.ContentType,
+                Metadata = new System.Collections.Generic.Dictionary<string, string>
+                {
+                    { "firebaseStorageDownloadTokens", token }
+                }
+            };
+
+            // upload with metadata
+            await storageClient.UploadObjectAsync(storageObject, ms);
+
+            // build Firebase download URL format
+            var encodedName = Uri.EscapeDataString(objectName);
+            return $"https://firebasestorage.googleapis.com/v0/b/{bucketName}/o/{encodedName}?alt=media&token={token}";
         }
     }
 }
