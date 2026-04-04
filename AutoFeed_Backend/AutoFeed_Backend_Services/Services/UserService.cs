@@ -4,21 +4,25 @@ using AutoFeed_Backend_Services.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using Org.BouncyCastle.Crypto.Generators;
+using BCrypt.Net;
 
 namespace AutoFeed_Backend_Services.Services;
 
 public class UserService : IUserService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IEmailService _emailService;
 
     public UserService()
     {
         _unitOfWork = new UnitOfWork();
     }
 
-    public UserService(IUnitOfWork unitOfWork)
+    public UserService(IUnitOfWork unitOfWork, IEmailService emailService)
     {
         _unitOfWork = unitOfWork;
+        _emailService = emailService;
     }
 
     public async Task<List<User>> GetAllAsync()
@@ -46,16 +50,36 @@ public class UserService : IUserService
         return await _unitOfWork.Users.SearchAsync(keyword, roleId, includeInactive);
     }
 
-    public async Task<int> CreateAsync(User entity)
+    public async Task<int> CreateAsync(User entity, string plainPassword)
     {
         // Check duplicate email/username
         var exists = await _unitOfWork.Users.IsEmailOrUsernameExistsAsync(entity.Email, entity.Username);
         if (exists) return -1;
 
         entity.Status = true;
-        //entity.Password = BCrypt.Net.BCrypt.HashPassword(entity.Password);
+        entity.Password = BCrypt.Net.BCrypt.HashPassword(plainPassword);
+
         _unitOfWork.Users.PrepareCreate(entity);
-        return await _unitOfWork.SaveChangesWithTransactionAsync();
+        var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+
+        if (result > 0)
+        {
+            try
+            {
+                await _emailService.SendPasswordAsync(
+                    toEmail: entity.Email,
+                    fullName: entity.FullName ?? entity.Username ?? "User",
+                    plainPassword: plainPassword
+                );
+            }
+            catch (Exception ex)
+            {
+                // Gửi mail thất bại không ảnh hưởng việc tạo user
+                Console.WriteLine($"[EmailService] Gửi mail thất bại: {ex.Message}");
+            }
+        }
+
+        return result;
     }
 
     public async Task<bool> UpdateAsync(User entity)
@@ -119,5 +143,10 @@ public class UserService : IUserService
         if (!ids.Any()) return result;
         var all = await _unitOfWork.Users.GetAllAsync();
         return all.Where(u => ids.Contains(u.UserId)).ToDictionary(u => u.UserId, u => u.Username);
+    }
+
+    public Task<int> CreateAsync(User entity)
+    {
+        throw new NotImplementedException();
     }
 }
