@@ -69,6 +69,7 @@ public class UserController : ControllerBase
             FullName = u.FullName,
             Phone = u.Phone,
             Username = u.Username,
+            AvatarUrl = u.AvatarUrl,
             Status = u.Status
         }).ToList();
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
@@ -78,14 +79,34 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetActive()
     {
         var items = await _service.GetActiveAsync();
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = items, Description = "Success" });
+        var dto = items.Select(u => new AutoFeed_Backend.Models.Responses.UserResponse {
+            UserId = u.UserId,
+            RoleId = u.RoleId,
+            Email = u.Email,
+            FullName = u.FullName,
+            Phone = u.Phone,
+            Username = u.Username,
+            AvatarUrl = u.AvatarUrl,
+            Status = u.Status
+        }).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
 
     [HttpGet("inactive")]
     public async Task<IActionResult> GetInactive()
     {
         var items = await _service.GetInactiveAsync();
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = items, Description = "Success" });
+        var dto = items.Select(u => new AutoFeed_Backend.Models.Responses.UserResponse {
+            UserId = u.UserId,
+            RoleId = u.RoleId,
+            Email = u.Email,
+            FullName = u.FullName,
+            Phone = u.Phone,
+            Username = u.Username,
+            AvatarUrl = u.AvatarUrl,
+            Status = u.Status
+        }).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
 
     [HttpGet("{id:int}")]
@@ -104,6 +125,7 @@ public class UserController : ControllerBase
             FullName = item.FullName,
             Phone = item.Phone,
             Username = item.Username,
+            AvatarUrl = item.AvatarUrl,
             Status = item.Status
         };
 
@@ -125,6 +147,7 @@ public class UserController : ControllerBase
             FullName = u.FullName,
             Phone = u.Phone,
             Username = u.Username,
+            AvatarUrl = u.AvatarUrl,
             Status = u.Status
         }).ToList();
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
