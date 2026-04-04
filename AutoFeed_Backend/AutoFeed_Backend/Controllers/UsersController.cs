@@ -19,6 +19,45 @@ public class UserController : ControllerBase
         _service = service;
     }
 
+    // POST /api/user/{id}/avatar
+    // Content-Type: multipart/form-data
+    [HttpPost("{id:int}/avatar")]
+    public async Task<IActionResult> UploadAvatar(int id, IFormFile file, [FromServices] IConfiguration config)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "No file uploaded" });
+
+        var user = await _service.GetByIdAsync(id);
+        if (user == null)
+            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "User not found" });
+
+        var bucket = config.GetValue<string>("Firebase:Bucket");
+        var saPath = config.GetValue<string>("Firebase:ServiceAccountPath");
+        if (string.IsNullOrWhiteSpace(bucket) || string.IsNullOrWhiteSpace(saPath))
+            return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Firebase not configured" });
+
+        try
+        {
+            // allow common image types only
+            var allowed = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowed.Contains(ext))
+                return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid image type" });
+
+            var url = await AutoFeed_Backend.Helpers.FirebaseStorageHelper.UploadFileAndGetSignedUrlAsync(file, bucket, saPath, TimeSpan.FromDays(30));
+            user.AvatarUrl = url;
+            var ok = await _service.UpdateAsync(user);
+            if (!ok)
+                return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Save avatar failed" });
+
+            return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = url, Description = "Avatar uploaded" });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = ex.Message });
+        }
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -30,6 +69,7 @@ public class UserController : ControllerBase
             FullName = u.FullName,
             Phone = u.Phone,
             Username = u.Username,
+            AvatarUrl = u.AvatarUrl,
             Status = u.Status
         }).ToList();
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
@@ -39,14 +79,34 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetActive()
     {
         var items = await _service.GetActiveAsync();
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = items, Description = "Success" });
+        var dto = items.Select(u => new AutoFeed_Backend.Models.Responses.UserResponse {
+            UserId = u.UserId,
+            RoleId = u.RoleId,
+            Email = u.Email,
+            FullName = u.FullName,
+            Phone = u.Phone,
+            Username = u.Username,
+            AvatarUrl = u.AvatarUrl,
+            Status = u.Status
+        }).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
 
     [HttpGet("inactive")]
     public async Task<IActionResult> GetInactive()
     {
         var items = await _service.GetInactiveAsync();
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = items, Description = "Success" });
+        var dto = items.Select(u => new AutoFeed_Backend.Models.Responses.UserResponse {
+            UserId = u.UserId,
+            RoleId = u.RoleId,
+            Email = u.Email,
+            FullName = u.FullName,
+            Phone = u.Phone,
+            Username = u.Username,
+            AvatarUrl = u.AvatarUrl,
+            Status = u.Status
+        }).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
 
     [HttpGet("{id:int}")]
@@ -65,6 +125,7 @@ public class UserController : ControllerBase
             FullName = item.FullName,
             Phone = item.Phone,
             Username = item.Username,
+            AvatarUrl = item.AvatarUrl,
             Status = item.Status
         };
 
@@ -86,6 +147,7 @@ public class UserController : ControllerBase
             FullName = u.FullName,
             Phone = u.Phone,
             Username = u.Username,
+            AvatarUrl = u.AvatarUrl,
             Status = u.Status
         }).ToList();
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
