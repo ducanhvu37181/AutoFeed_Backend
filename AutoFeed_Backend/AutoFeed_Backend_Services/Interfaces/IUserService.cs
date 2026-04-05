@@ -17,6 +17,7 @@ public interface IUserService
     Task<Dictionary<int, string>> GetUserNameMapAsync(IEnumerable<int> userIds);
 
     // Create
+    //Task<int> CreateAsync(User entity);
     Task<int> CreateAsync(User entity);
 
     // Update

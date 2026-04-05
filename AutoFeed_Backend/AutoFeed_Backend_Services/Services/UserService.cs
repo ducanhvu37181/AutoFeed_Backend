@@ -50,8 +50,9 @@ public class UserService : IUserService
         return await _unitOfWork.Users.SearchAsync(keyword, roleId, includeInactive);
     }
 
-    public async Task<int> CreateAsync(User entity, string plainPassword)
+    public async Task<int> CreateAsync(User entity)
     {
+        string plainPassword = GenerateRandomPassword();
         // Check duplicate email/username
         var exists = await _unitOfWork.Users.IsEmailOrUsernameExistsAsync(entity.Email, entity.Username);
         if (exists) return -1;
@@ -144,9 +145,13 @@ public class UserService : IUserService
         var all = await _unitOfWork.Users.GetAllAsync();
         return all.Where(u => ids.Contains(u.UserId)).ToDictionary(u => u.UserId, u => u.Username);
     }
-
-    public Task<int> CreateAsync(User entity)
+    private string GenerateRandomPassword()
     {
-        throw new NotImplementedException();
+        const int passwordLength = 12;
+        const string validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()";
+        var random = new Random();
+        return new string(Enumerable.Repeat(validChars, passwordLength)
+                                    .Select(s => s[random.Next(s.Length)]).ToArray());
     }
+
 }

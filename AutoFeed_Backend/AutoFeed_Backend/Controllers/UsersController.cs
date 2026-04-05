@@ -156,19 +156,19 @@ public class UserController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateUserRequest model)
     {
-        if (model == null || string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.Password))
+        if (model == null || string.IsNullOrWhiteSpace(model.Email))
             return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
 
         var entity = new User
         {
             RoleId = model.RoleId ?? 0,
             Email = model.Email,
-            Password = model.Password,   // UserService sẽ hash
             FullName = model.FullName,
             Phone = model.Phone,
             Username = model.Username
         };
 
+        //var result = await _service.CreateAsync(entity);
         var result = await _service.CreateAsync(entity);
         if (result == -1)
             return Conflict(new ApiResponse<object> { Status = false, HttpCode = 409, Data = null, Description = "Email or Username already exists" });
