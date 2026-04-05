@@ -2,6 +2,7 @@
 using AutoFeed_Backend_Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace AutoFeed_Backend.Controllers;
@@ -17,47 +18,92 @@ public class BarnController : ControllerBase
         _barnService = barnService;
     }
 
-    // API lấy danh sách toàn bộ chuồng gà
+    // Class to define exactly what fields show up in Swagger POST/PUT
+    public class BarnRequest
+    {
+        public int BarnId { get; set; }
+        public decimal Temperature { get; set; }
+        public decimal Humidity { get; set; }
+        public string Type { get; set; }
+        public decimal Area { get; set; }
+        public System.DateTime? CreateDate { get; set; }
+    }
+
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Barn>>> GetAllBarns()
+    public async Task<IActionResult> GetAllBarns()
     {
         var barns = await _barnService.GetAllAsync();
-        return Ok(barns);
+        var result = barns.Select(b => new {
+            b.BarnId,
+            b.Temperature,
+            b.Humidity,
+            b.Type,
+            b.Area,
+            b.CreateDate
+        });
+        return Ok(result);
     }
 
-    // API lấy chi tiết 1 chuồng gà theo ID
     [HttpGet("{id}")]
-    public async Task<ActionResult<Barn>> GetBarnById(int id)
+    public async Task<IActionResult> GetBarnById(int id)
     {
-        var barn = await _barnService.GetByIdAsync(id);
-        if (barn == null) return NotFound("Không tìm thấy chuồng gà này.");
-        return Ok(barn);
+        var b = await _barnService.GetByIdAsync(id);
+        if (b == null) return NotFound("Barn not found.");
+
+        return Ok(new
+        {
+            b.BarnId,
+            b.Temperature,
+            b.Humidity,
+            b.Type,
+            b.Area,
+            b.CreateDate
+        });
     }
 
-    // API tạo mới một chuồng gà
     [HttpPost]
-    public async Task<ActionResult<bool>> CreateBarn(Barn barn)
+    public async Task<IActionResult> CreateBarn([FromBody] BarnRequest request)
     {
+        var barn = new Barn
+        {
+            Temperature = request.Temperature,
+            Humidity = request.Humidity,
+            Type = request.Type,
+            Area = request.Area,
+            CreateDate = request.CreateDate
+        };
+
         var result = await _barnService.CreateBarnAsync(barn);
-        if (!result) return BadRequest("Tạo chuồng gà thất bại.");
+        if (!result) return BadRequest("Failed to create barn.");
+
         return Ok(result);
     }
 
-    // API cập nhật thông tin chuồng gà
     [HttpPut]
-    public async Task<ActionResult<bool>> UpdateBarn(Barn barn)
+    public async Task<IActionResult> UpdateBarn([FromBody] BarnRequest request)
     {
+        var barn = new Barn
+        {
+            BarnId = request.BarnId,
+            Temperature = request.Temperature,
+            Humidity = request.Humidity,
+            Type = request.Type,
+            Area = request.Area,
+            CreateDate = request.CreateDate
+        };
+
         var result = await _barnService.UpdateBarnAsync(barn);
-        if (!result) return BadRequest("Cập nhật thất bại.");
+        if (!result) return BadRequest("Failed to update barn.");
+
         return Ok(result);
     }
 
-    // API xóa chuồng gà
     [HttpDelete("{id}")]
-    public async Task<ActionResult<bool>> DeleteBarn(int id)
+    public async Task<IActionResult> DeleteBarn(int id)
     {
         var result = await _barnService.DeleteBarnAsync(id);
-        if (!result) return BadRequest("Xóa thất bại.");
+        if (!result) return BadRequest("Failed to delete barn.");
+
         return Ok(result);
     }
 }
