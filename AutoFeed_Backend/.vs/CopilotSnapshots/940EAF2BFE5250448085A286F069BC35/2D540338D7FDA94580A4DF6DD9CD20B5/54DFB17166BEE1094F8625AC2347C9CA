@@ -1,4 +1,4 @@
-using AutoFeed_Backend_Services.Interfaces;
+﻿using AutoFeed_Backend_Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using ScheduleModel = AutoFeed_Backend_DAO.Models.Schedule;
@@ -199,7 +199,7 @@ public class ScheduleController : ControllerBase
             });
         }
 
-        var createdDtos = new List<object>();
+        var createdDtos = new List<ScheduleResponse>();
         var end = model.EndDate.Value;
 
         for (var date = model.StartDate; date <= end; date = date.AddDays(1))
