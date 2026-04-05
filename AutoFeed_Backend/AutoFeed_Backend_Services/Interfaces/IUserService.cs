@@ -17,13 +17,15 @@ public interface IUserService
     Task<Dictionary<int, string>> GetUserNameMapAsync(IEnumerable<int> userIds);
 
     // Create
+    //Task<int> CreateAsync(User entity);
     Task<int> CreateAsync(User entity);
 
     // Update
     Task<bool> UpdateAsync(User entity);
 
     // Change password
-    //Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword);
+    Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword);
+    Task<bool> ResetPasswordAsync(string email);
 
     // Soft delete / Restore
     Task<bool> DeleteAsync(int id);   // status = false

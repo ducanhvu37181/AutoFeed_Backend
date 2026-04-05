@@ -161,44 +161,62 @@ public class ReportController : ControllerBase
         });
     }
 
- 
     [HttpPost]
-    public async Task<IActionResult> CreateReport([FromBody] CreateReportRequest model)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> CreateReport([FromForm] CreateReportRequest model, [FromServices] IConfiguration config)
     {
         if (model == null || string.IsNullOrWhiteSpace(model.Type))
-            return BadRequest(new ApiResponse<object>
-            {
-                Status = false,
-                HttpCode = 400,
-                Data = null,
-                Description = "Invalid request"
-            });
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
 
-        var entity = new Report
+        string? url = null;
+
+        if (model.File != null && model.File.Length > 0)
         {
-            UserId = model.UserId,
-            Type = model.Type,
-            Description = model.Description
-        };
+            var allowedExt = new[] { ".jpg", ".jpeg", ".png", ".gif", ".pdf", ".doc", ".docx", ".xlsx", ".mp4", ".mp3" };
+            var ext = Path.GetExtension(model.File.FileName).ToLowerInvariant();
+            if (!allowedExt.Contains(ext))
+                return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = $"Invalid file type. Allowed: {string.Join(", ", allowedExt)}" });
 
-        var id = await _service.CreateReportAsync(entity);
-        if (id <= 0)
-            return StatusCode(500, new ApiResponse<object>
+            try
             {
-                Status = false,
-                HttpCode = 500,
-                Data = null,
-                Description = "Create failed"
-            });
+                var bucket = config.GetValue<string>("Firebase:Bucket");
+                var saPath = config.GetValue<string>("Firebase:ServiceAccountPath");
 
-        return CreatedAtAction(nameof(GetReportById), new { id = entity.ReportId },
-            new ApiResponse<object>
+                if (string.IsNullOrWhiteSpace(bucket) || string.IsNullOrWhiteSpace(saPath))
+                    return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Firebase not configured" });
+
+                url = await AutoFeed_Backend.Helpers.FirebaseStorageHelper
+                    .UploadFileAndGetSignedUrlAsync(model.File, bucket, saPath, TimeSpan.FromDays(30));
+            }
+            catch (Exception ex)
             {
-                Status = true,
-                HttpCode = 201,
-                Data = ToDto(entity),
-                Description = "Created"
-            });
+                Console.WriteLine($"[FirebaseUpload] Upload failed: {ex.Message}");
+                return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = $"File upload failed: {ex.Message}" });
+            }
+        }
+
+        try
+        {
+            var entity = new Report
+            {
+                UserId = model.UserId,
+                Type = model.Type,
+                Description = model.Description,
+                Url = url
+            };
+
+            var id = await _service.CreateReportAsync(entity);
+            if (id <= 0)
+                return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Create report failed" });
+
+            return CreatedAtAction(nameof(GetReportById), new { id = entity.ReportId },
+                new ApiResponse<object> { Status = true, HttpCode = 201, Data = ToDto(entity), Description = "Created" });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[CreateReport] Error: {ex.Message}");
+            return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = $"Internal error: {ex.Message}" });
+        }
     }
 
 

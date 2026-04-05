@@ -156,19 +156,19 @@ public class UserController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateUserRequest model)
     {
-        if (model == null || string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.Password))
+        if (model == null || string.IsNullOrWhiteSpace(model.Email))
             return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
 
         var entity = new User
         {
             RoleId = model.RoleId ?? 0,
             Email = model.Email,
-            Password = model.Password,   // UserService sẽ hash
             FullName = model.FullName,
             Phone = model.Phone,
             Username = model.Username
         };
 
+        //var result = await _service.CreateAsync(entity);
         var result = await _service.CreateAsync(entity);
         if (result == -1)
             return Conflict(new ApiResponse<object> { Status = false, HttpCode = 409, Data = null, Description = "Email or Username already exists" });
@@ -204,18 +204,21 @@ public class UserController : ControllerBase
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Update success" });
     }
 
-    //[HttpPatch("{id:int}/change-password")]
-    //public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordRequest model)
-    //{
-    //    if (model == null)
-    //        return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
+    [HttpPatch("{id:int}/change-password")]
+    public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordRequest model)
+    {
+        if (model == null || string.IsNullOrWhiteSpace(model.OldPassword) || string.IsNullOrWhiteSpace(model.NewPassword))
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
 
-    //    var ok = await _service.ChangePasswordAsync(id, model.OldPassword, model.NewPassword);
-    //    if (!ok)
-    //        return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid user or wrong old password" });
+        if (model.OldPassword == model.NewPassword)
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "New password must be different from old password" });
 
-    //    return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Password changed" });
-    //}
+        var ok = await _service.ChangePasswordAsync(id, model.OldPassword, model.NewPassword);
+        if (!ok)
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "User not found or wrong old password" });
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Password changed successfully" });
+    }
 
     // Soft delete
     [HttpDelete("{id:int}")]
@@ -226,6 +229,19 @@ public class UserController : ControllerBase
             return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found or Delete failed" });
 
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Delete success" });
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest model)
+    {
+        if (model == null || string.IsNullOrWhiteSpace(model.Email))
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Email is required" });
+
+        var ok = await _service.ResetPasswordAsync(model.Email);
+        if (!ok)
+            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "User not found or inactive" });
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "New password sent to email" });
     }
 
     // Restore

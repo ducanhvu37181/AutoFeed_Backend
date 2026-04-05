@@ -4,21 +4,25 @@ using AutoFeed_Backend_Services.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using Org.BouncyCastle.Crypto.Generators;
+using BCrypt.Net;
 
 namespace AutoFeed_Backend_Services.Services;
 
 public class UserService : IUserService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IEmailService _emailService;
 
     public UserService()
     {
         _unitOfWork = new UnitOfWork();
     }
 
-    public UserService(IUnitOfWork unitOfWork)
+    public UserService(IUnitOfWork unitOfWork, IEmailService emailService)
     {
         _unitOfWork = unitOfWork;
+        _emailService = emailService;
     }
 
     public async Task<List<User>> GetAllAsync()
@@ -48,14 +52,35 @@ public class UserService : IUserService
 
     public async Task<int> CreateAsync(User entity)
     {
+        string plainPassword = GenerateRandomPassword();
         // Check duplicate email/username
         var exists = await _unitOfWork.Users.IsEmailOrUsernameExistsAsync(entity.Email, entity.Username);
         if (exists) return -1;
 
         entity.Status = true;
-        //entity.Password = BCrypt.Net.BCrypt.HashPassword(entity.Password);
+        entity.Password = BCrypt.Net.BCrypt.HashPassword(plainPassword);
+
         _unitOfWork.Users.PrepareCreate(entity);
-        return await _unitOfWork.SaveChangesWithTransactionAsync();
+        var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+
+        if (result > 0)
+        {
+            try
+            {
+                await _emailService.SendPasswordAsync(
+                    toEmail: entity.Email,
+                    fullName: entity.FullName ?? entity.Username ?? "User",
+                    plainPassword: plainPassword
+                );
+            }
+            catch (Exception ex)
+            {
+                // Gửi mail thất bại không ảnh hưởng việc tạo user
+                Console.WriteLine($"[EmailService] Gửi mail thất bại: {ex.Message}");
+            }
+        }
+
+        return result;
     }
 
     public async Task<bool> UpdateAsync(User entity)
@@ -77,18 +102,53 @@ public class UserService : IUserService
         }
     }
 
-    //public async Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword)
-    //{
-    //    var entity = await _unitOfWork.Users.GetByIdAsync(userId);
-    //    if (entity == null || entity.Status != true) return false;
+    public async Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword)
+    {
+        var entity = await _unitOfWork.Users.GetByIdAsync(userId);
+        if (entity == null || entity.Status != true) return false;
 
-    //    if (!BCrypt.Net.BCrypt.Verify(oldPassword, entity.Password)) return false;
+        // Kiểm tra old password có đúng không
+        if (!BCrypt.Net.BCrypt.Verify(oldPassword, entity.Password)) return false;
 
-    //    entity.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
-    //    _unitOfWork.Users.PrepareUpdate(entity);
-    //    var result = await _unitOfWork.SaveChangesWithTransactionAsync();
-    //    return result > 0;
-    //}
+        // Kiểm tra new password không được trùng old password
+        if (BCrypt.Net.BCrypt.Verify(newPassword, entity.Password)) return false;
+
+        entity.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        _unitOfWork.Users.PrepareUpdate(entity);
+        var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+        return result > 0;
+    }
+
+    public async Task<bool> ResetPasswordAsync(string email)
+    {
+        var entity = await _unitOfWork.Users.GetByEmailAsync(email);
+        if (entity == null || entity.Status != true) return false;
+
+        // Generate password mới
+        var newPassword = GenerateRandomPassword();
+
+        // Hash và lưu vào DB
+        entity.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        _unitOfWork.Users.PrepareUpdate(entity);
+        var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+        if (result <= 0) return false;
+
+        // Gửi mail password mới
+        try
+        {
+            await _emailService.SendPasswordAsync(
+                toEmail: entity.Email,
+                fullName: entity.FullName ?? entity.Username ?? "User",
+                plainPassword: newPassword
+            );
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[EmailService] Gửi mail thất bại: {ex.Message}");
+        }
+
+        return true;
+    }
 
     public async Task<bool> DeleteAsync(int id)
     {
@@ -120,4 +180,13 @@ public class UserService : IUserService
         var all = await _unitOfWork.Users.GetAllAsync();
         return all.Where(u => ids.Contains(u.UserId)).ToDictionary(u => u.UserId, u => u.Username);
     }
+    private string GenerateRandomPassword()
+    {
+        const int passwordLength = 12;
+        const string validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()";
+        var random = new Random();
+        return new string(Enumerable.Repeat(validChars, passwordLength)
+                                    .Select(s => s[random.Next(s.Length)]).ToArray());
+    }
+
 }
