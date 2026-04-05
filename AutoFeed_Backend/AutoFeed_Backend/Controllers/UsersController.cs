@@ -204,18 +204,21 @@ public class UserController : ControllerBase
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Update success" });
     }
 
-    //[HttpPatch("{id:int}/change-password")]
-    //public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordRequest model)
-    //{
-    //    if (model == null)
-    //        return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
+    [HttpPatch("{id:int}/change-password")]
+    public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordRequest model)
+    {
+        if (model == null || string.IsNullOrWhiteSpace(model.OldPassword) || string.IsNullOrWhiteSpace(model.NewPassword))
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
 
-    //    var ok = await _service.ChangePasswordAsync(id, model.OldPassword, model.NewPassword);
-    //    if (!ok)
-    //        return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid user or wrong old password" });
+        if (model.OldPassword == model.NewPassword)
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "New password must be different from old password" });
 
-    //    return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Password changed" });
-    //}
+        var ok = await _service.ChangePasswordAsync(id, model.OldPassword, model.NewPassword);
+        if (!ok)
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "User not found or wrong old password" });
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Password changed successfully" });
+    }
 
     // Soft delete
     [HttpDelete("{id:int}")]

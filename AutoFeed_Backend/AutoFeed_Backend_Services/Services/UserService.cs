@@ -102,18 +102,22 @@ public class UserService : IUserService
         }
     }
 
-    //public async Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword)
-    //{
-    //    var entity = await _unitOfWork.Users.GetByIdAsync(userId);
-    //    if (entity == null || entity.Status != true) return false;
+    public async Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword)
+    {
+        var entity = await _unitOfWork.Users.GetByIdAsync(userId);
+        if (entity == null || entity.Status != true) return false;
 
-    //    if (!BCrypt.Net.BCrypt.Verify(oldPassword, entity.Password)) return false;
+        // Kiểm tra old password có đúng không
+        if (!BCrypt.Net.BCrypt.Verify(oldPassword, entity.Password)) return false;
 
-    //    entity.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
-    //    _unitOfWork.Users.PrepareUpdate(entity);
-    //    var result = await _unitOfWork.SaveChangesWithTransactionAsync();
-    //    return result > 0;
-    //}
+        // Kiểm tra new password không được trùng old password
+        if (BCrypt.Net.BCrypt.Verify(newPassword, entity.Password)) return false;
+
+        entity.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        _unitOfWork.Users.PrepareUpdate(entity);
+        var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+        return result > 0;
+    }
 
     public async Task<bool> DeleteAsync(int id)
     {

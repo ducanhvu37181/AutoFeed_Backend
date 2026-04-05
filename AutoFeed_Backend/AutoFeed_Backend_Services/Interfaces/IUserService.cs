@@ -24,7 +24,7 @@ public interface IUserService
     Task<bool> UpdateAsync(User entity);
 
     // Change password
-    //Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword);
+    Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword);
 
     // Soft delete / Restore
     Task<bool> DeleteAsync(int id);   // status = false
