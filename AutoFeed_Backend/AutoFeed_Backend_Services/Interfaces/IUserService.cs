@@ -25,6 +25,7 @@ public interface IUserService
 
     // Change password
     Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword);
+    Task<bool> ResetPasswordAsync(string email);
 
     // Soft delete / Restore
     Task<bool> DeleteAsync(int id);   // status = false

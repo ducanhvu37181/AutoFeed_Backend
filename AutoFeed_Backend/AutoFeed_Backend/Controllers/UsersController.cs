@@ -231,6 +231,19 @@ public class UserController : ControllerBase
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Delete success" });
     }
 
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest model)
+    {
+        if (model == null || string.IsNullOrWhiteSpace(model.Email))
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Email is required" });
+
+        var ok = await _service.ResetPasswordAsync(model.Email);
+        if (!ok)
+            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "User not found or inactive" });
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "New password sent to email" });
+    }
+
     // Restore
     [HttpPatch("{id:int}/restore")]
     public async Task<IActionResult> Restore(int id)

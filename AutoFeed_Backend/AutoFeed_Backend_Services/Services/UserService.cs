@@ -119,6 +119,37 @@ public class UserService : IUserService
         return result > 0;
     }
 
+    public async Task<bool> ResetPasswordAsync(string email)
+    {
+        var entity = await _unitOfWork.Users.GetByEmailAsync(email);
+        if (entity == null || entity.Status != true) return false;
+
+        // Generate password mới
+        var newPassword = GenerateRandomPassword();
+
+        // Hash và lưu vào DB
+        entity.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        _unitOfWork.Users.PrepareUpdate(entity);
+        var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+        if (result <= 0) return false;
+
+        // Gửi mail password mới
+        try
+        {
+            await _emailService.SendPasswordAsync(
+                toEmail: entity.Email,
+                fullName: entity.FullName ?? entity.Username ?? "User",
+                plainPassword: newPassword
+            );
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[EmailService] Gửi mail thất bại: {ex.Message}");
+        }
+
+        return true;
+    }
+
     public async Task<bool> DeleteAsync(int id)
     {
         var entity = await _unitOfWork.Users.GetByIdAsync(id);
