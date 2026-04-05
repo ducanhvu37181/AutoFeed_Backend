@@ -141,10 +141,9 @@ public class RequestController : ControllerBase
                 return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = ex.Message });
             }
         }
-        else
+        else if (!string.IsNullOrWhiteSpace(model.Url))
         {
-            // No file was sent; explicitly set Url to null
-            entity.Url = null;
+            entity.Url = model.Url;
         }
 
         var id = await _service.CreateRequestAsync(entity);

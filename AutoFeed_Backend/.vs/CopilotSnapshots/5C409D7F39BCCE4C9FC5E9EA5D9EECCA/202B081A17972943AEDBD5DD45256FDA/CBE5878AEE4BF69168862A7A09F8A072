@@ -9,9 +9,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
-using System.Text;
-using System.Text.Json;
-using System.IO;
 using AutoFeed_Backend.Helpers;
 
 namespace AutoFeed_Backend.Controllers;
@@ -94,25 +91,6 @@ public class RequestController : ControllerBase
     // Firebase Storage and the returned URL saved in the request's Url field.
     public async Task<IActionResult> Create([FromForm] CreateRequestRequest model, IFormFile file, [FromServices] IConfiguration config)
     {
-        // If caller sent application/json instead of multipart/form-data, the model will be null here.
-        // Try to read and deserialize JSON body as a fallback so file upload remains optional.
-        if (model == null)
-        {
-            try
-            {
-                Request.EnableBuffering();
-                using var reader = new StreamReader(Request.Body, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
-                var body = await reader.ReadToEndAsync();
-                Request.Body.Position = 0;
-                if (!string.IsNullOrWhiteSpace(body))
-                    model = JsonSerializer.Deserialize<CreateRequestRequest>(body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            }
-            catch
-            {
-                // ignore deserialization errors and let validation handle null model
-            }
-        }
-
         if (model == null || string.IsNullOrWhiteSpace(model.Type))
             return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
 
@@ -141,10 +119,9 @@ public class RequestController : ControllerBase
                 return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = ex.Message });
             }
         }
-        else
+        else if (!string.IsNullOrWhiteSpace(model.Url))
         {
-            // No file was sent; explicitly set Url to null
-            entity.Url = null;
+            entity.Url = model.Url;
         }
 
         var id = await _service.CreateRequestAsync(entity);

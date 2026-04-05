@@ -1,4 +1,4 @@
-using AutoFeed_Backend_Services.Interfaces;
+﻿using AutoFeed_Backend_Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using ScheduleModel = AutoFeed_Backend_DAO.Models.Schedule;
@@ -130,65 +130,8 @@ public class ScheduleController : ControllerBase
             return BadRequest(error);
         }
 
-        var schedule = new ScheduleModel
-        {
-            UserId = model.UserId,
-            TaskId = model.TaskId,
-            CbarnId = model.CbarnId,
-            Description = model.Description,
-            Note = model.Note,
-            Priority = model.Priority,
-            Status = model.Status ?? "pending",
-            StartDate = model.StartDate,
-            EndDate = model.EndDate
-        };
-
-        var id = await _service.CreateScheduleAsync(schedule);
-        if (id <= 0)
-        {
-            var error = new ApiResponse<object>
-            {
-                Status = false,
-                HttpCode = 500,
-                Data = null,
-                Description = "Create failed"
-            };
-            return StatusCode(500, error);
-        }
-
-        var responseDto = await _service.GetScheduleResponseByIdAsync(id);
-        var response = new ApiResponse<object>
-        {
-            Status = true,
-            HttpCode = 201,
-            Data = responseDto,
-            Description = "Created"
-        };
-        return CreatedAtAction(nameof(Get), new { id = schedule.SchedId }, response);
-    }
-
-    // New endpoint: create multiple schedules for each day in range
-    [HttpPost("multiple")]
-    public async Task<IActionResult> CreateMultiple([FromBody] CreateScheduleRequest model)
-    {
-        if (model == null)
-        {
-            return BadRequest(new ApiResponse<object>
-            {
-                Status = false,
-                HttpCode = 400,
-                Data = null,
-                Description = "Invalid request"
-            });
-        }
-
-        if (!model.EndDate.HasValue)
-        {
-            // No end date provided — treat as single create
-            return await Create(model);
-        }
-
-        if (model.EndDate.Value < model.StartDate)
+        // Validate date range
+        if (model.EndDate.HasValue && model.EndDate.Value < model.StartDate)
         {
             return BadRequest(new ApiResponse<object>
             {
@@ -199,8 +142,10 @@ public class ScheduleController : ControllerBase
             });
         }
 
-        var createdDtos = new List<object>();
-        var end = model.EndDate.Value;
+        var createdDtos = new List<ScheduleResponse>();
+
+        // Use EndDate if provided, otherwise create for StartDate only
+        var end = model.EndDate ?? model.StartDate;
 
         for (var date = model.StartDate; date <= end; date = date.AddDays(1))
         {
@@ -220,13 +165,14 @@ public class ScheduleController : ControllerBase
             var id = await _service.CreateScheduleAsync(schedule);
             if (id <= 0)
             {
-                return StatusCode(500, new ApiResponse<object>
+                var error = new ApiResponse<object>
                 {
                     Status = false,
                     HttpCode = 500,
                     Data = null,
                     Description = "Create failed"
-                });
+                };
+                return StatusCode(500, error);
             }
 
             var responseDto = await _service.GetScheduleResponseByIdAsync(id);
@@ -234,13 +180,15 @@ public class ScheduleController : ControllerBase
                 createdDtos.Add(responseDto);
         }
 
-        return StatusCode(201, new ApiResponse<object>
+        var response = new ApiResponse<object>
         {
             Status = true,
             HttpCode = 201,
             Data = createdDtos,
             Description = "Created"
-        });
+        };
+
+        return StatusCode(201, response);
     }
 
     [HttpPut("{id:int}")]
