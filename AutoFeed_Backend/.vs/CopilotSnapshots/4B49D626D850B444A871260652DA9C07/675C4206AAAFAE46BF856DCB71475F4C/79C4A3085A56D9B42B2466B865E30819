@@ -1,4 +1,4 @@
-using AutoFeed_Backend_DAO.Models;
+﻿using AutoFeed_Backend_DAO.Models;
 using AutoFeed_Backend_Repositories.BasicRepo;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -66,17 +66,6 @@ public class ScheduleRepository : GenericRepository<Schedule>
             .Where(s => s.UserId == userId
                 && s.StartDate <= d
                 && (s.EndDate == null || s.EndDate >= d))
-            .ToListAsync();
-    }
-
-    public async Task<List<Schedule>> GetByCbarnTaskAndDateAsync(int cbarnId, int taskId, DateOnly date)
-    {
-        return await _context.Set<Schedule>()
-            .Where(s => s.CbarnId == cbarnId
-                && s.TaskId == taskId
-                && s.StartDate <= date
-                && (s.EndDate == null || s.EndDate >= date)
-                && (s.Status == null || s.Status.ToLower() != "completed"))
             .ToListAsync();
     }
 }
