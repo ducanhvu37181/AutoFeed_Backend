@@ -26,16 +26,16 @@ public class EmailService : IEmailService
         // Người nhận
         message.To.Add(new MailboxAddress(fullName, toEmail));
 
-        message.Subject = "[AutoFeed] Thông tin đăng nhập hệ thống";
+        message.Subject = "[AutoFeed] Thông tin tài khoản đăng nhập hệ thống";
 
         // Nội dung email
         message.Body = new TextPart("html")
         {
             Text = $@"
                 <div style='font-family: Arial, sans-serif; max-width: 600px; margin: auto;'>
-                    <h2 style='color: #4CAF50;'>Chào mừng đến với AutoFeed!</h2>
+                    <h2 style='color: #4CAF50;'>Chào mừng đến với hệ thống AutoFeed!</h2>
                     <p>Xin chào <b>{fullName}</b>,</p>
-                    <p>Tài khoản của bạn đã được tạo thành công. Dưới đây là thông tin đăng nhập:</p>
+                    <p>Tài khoản của bạn đã được tạo thành công. Dưới đây là thông tin tài khoản đăng nhập:</p>
                     <table style='border-collapse: collapse; width: 100%;'>
                         <tr>
                             <td style='padding: 8px; border: 1px solid #ddd;'><b>Email</b></td>
