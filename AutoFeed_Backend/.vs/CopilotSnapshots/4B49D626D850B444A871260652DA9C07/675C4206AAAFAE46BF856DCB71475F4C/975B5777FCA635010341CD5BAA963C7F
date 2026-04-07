@@ -1,4 +1,4 @@
-using AutoFeed_Backend_Services.Interfaces;
+﻿using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Repositories.UnitOfWork;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -23,19 +23,6 @@ public class ScheduleService : IScheduleService
 
     public async Task<int> CreateScheduleAsync(ScheduleModel schedule)
     {
-        // Check for conflicts: ensure no existing schedule for the same barn + task overlaps any date in the new schedule
-        var start = schedule.StartDate;
-        var end = schedule.EndDate ?? schedule.StartDate;
-        for (var d = start; d <= end; d = d.AddDays(1))
-        {
-            var existing = await _unitOfWork.Schedules.GetByCbarnTaskAndDateAsync(schedule.CbarnId, schedule.TaskId, d);
-            if (existing != null && existing.Count > 0)
-            {
-                // indicate conflict
-                return -1;
-            }
-        }
-
         _unitOfWork.Schedules.PrepareCreate(schedule);
         var result = await _unitOfWork.SaveChangesWithTransactionAsync();
         if (result > 0)
@@ -188,18 +175,6 @@ public class ScheduleService : IScheduleService
         _unitOfWork.Schedules.PrepareUpdate(entity);
         var r = await _unitOfWork.SaveChangesWithTransactionAsync();
         return r > 0;
-    }
-
-    public async Task<bool> HasConflictAsync(int cbarnId, int taskId, DateOnly startDate, DateOnly? endDate)
-    {
-        var end = endDate ?? startDate;
-        for (var d = startDate; d <= end; d = d.AddDays(1))
-        {
-            var existing = await _unitOfWork.Schedules.GetByCbarnTaskAndDateAsync(cbarnId, taskId, d);
-            if (existing != null && existing.Count > 0)
-                return true;
-        }
-        return false;
     }
 
     private async Task<List<ScheduleResponse>> MapToResponsesAsync(IEnumerable<ScheduleModel> items)
