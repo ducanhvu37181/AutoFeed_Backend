@@ -21,7 +21,7 @@ public partial class ChickenBarn
 
     public string Note { get; set; }
 
-    public bool? Status { get; set; }
+    public string Status { get; set; }
 
     public virtual Barn Barn { get; set; }
 
