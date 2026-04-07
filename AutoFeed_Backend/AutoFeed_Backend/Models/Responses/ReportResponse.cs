@@ -8,7 +8,7 @@
         public string? UserRole { get; set; }
         public string? Type { get; set; }
         public string? Description { get; set; }
-        public string? Status { get; set; }      // pending | approved | rejected
+        public string? Status { get; set; }      // pending | reviewed | rejected
         public string? Url { get; set; }
         public DateTime? CreateDate { get; set; }
     }

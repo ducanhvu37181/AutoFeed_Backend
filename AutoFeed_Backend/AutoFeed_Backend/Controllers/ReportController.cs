@@ -76,14 +76,14 @@ public class ReportController : ControllerBase
     [HttpGet("status/{status}")]
     public async Task<IActionResult> GetReportsByStatus(string status)
     {
-        var allowed = new[] { "pending", "approved", "rejected" };
+        var allowed = new[] { "pending", "reviewed", "rejected" };
         if (!allowed.Contains(status.ToLower()))
             return BadRequest(new ApiResponse<object>
             {
                 Status = false,
                 HttpCode = 400,
                 Data = null,
-                Description = "Invalid status. Allowed: pending, approved, rejected"
+                Description = "Invalid status. Allowed: pending, reviewed, rejected"
             });
 
         var items = await _service.GetReportsByStatusAsync(status);
@@ -267,7 +267,7 @@ public class ReportController : ControllerBase
     }
 
 
-    /// Cập nhật trạng thái report pending | approved | rejected
+    /// Cập nhật trạng thái report pending | reviewed | rejected
 
     [HttpPatch("{id:int}/status")]
     public async Task<IActionResult> UpdateReportStatus(int id, [FromBody] UpdateReportStatusRequest model)
@@ -288,7 +288,7 @@ public class ReportController : ControllerBase
                 Status = false,
                 HttpCode = 400,
                 Data = null,
-                Description = "Report not found or invalid status. Allowed: pending, approved, rejected"
+                Description = "Report not found or invalid status. Allowed: pending, reviewed, rejected"
             });
 
         return Ok(new ApiResponse<object>
