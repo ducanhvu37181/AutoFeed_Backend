@@ -1,4 +1,4 @@
-using AutoFeed_Backend_Services.Interfaces;
+﻿using AutoFeed_Backend_Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using ChickenBarnModel = AutoFeed_Backend_DAO.Models.ChickenBarn;
@@ -22,18 +22,7 @@ public class ChickenBarnController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var items = await _service.GetAllAsync();
-        var dto = items.Select(i => new AutoFeed_Backend.Models.Responses.ChickenBarnResponse
-        {
-            CbarnId = i.CbarnId,
-            BarnId = i.BarnId,
-            ChickenLid = i.ChickenLid,
-            FlockId = i.FlockId,
-            StartDate = i.StartDate,
-            ExportDate = i.ExportDate,
-            Note = i.Note,
-            Status = i.Status
-        }).ToList();
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = items, Description = "Success" });
     }
 
     [HttpGet("{id:int}")]
@@ -41,18 +30,7 @@ public class ChickenBarnController : ControllerBase
     {
         var item = await _service.GetByIdAsync(id);
         if (item == null) return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
-        var dto = new AutoFeed_Backend.Models.Responses.ChickenBarnResponse
-        {
-            CbarnId = item.CbarnId,
-            BarnId = item.BarnId,
-            ChickenLid = item.ChickenLid,
-            FlockId = item.FlockId,
-            StartDate = item.StartDate,
-            ExportDate = item.ExportDate,
-            Note = item.Note,
-            Status = item.Status
-        };
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = item, Description = "Success" });
     }
 
     [HttpPost]
@@ -61,18 +39,7 @@ public class ChickenBarnController : ControllerBase
         if (model == null) return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
         var res = await _service.CreateAsync(model);
         if (res <= 0) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Create failed" });
-        var dto = new AutoFeed_Backend.Models.Responses.ChickenBarnResponse
-        {
-            CbarnId = model.CbarnId,
-            BarnId = model.BarnId,
-            ChickenLid = model.ChickenLid,
-            FlockId = model.FlockId,
-            StartDate = model.StartDate,
-            ExportDate = model.ExportDate,
-            Note = model.Note,
-            Status = model.Status
-        };
-        return CreatedAtAction(nameof(Get), new { id = model.CbarnId }, new ApiResponse<object> { Status = true, HttpCode = 201, Data = dto, Description = "Created" });
+        return CreatedAtAction(nameof(Get), new { id = model.CbarnId }, new ApiResponse<object> { Status = true, HttpCode = 201, Data = model, Description = "Created" });
     }
 
     [HttpPut("{id:int}")]
@@ -84,18 +51,7 @@ public class ChickenBarnController : ControllerBase
         if (existing == null) return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
         var ok = await _service.UpdateAsync(model);
         if (!ok) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Update failed" });
-        var dto = new AutoFeed_Backend.Models.Responses.ChickenBarnResponse
-        {
-            CbarnId = model.CbarnId,
-            BarnId = model.BarnId,
-            ChickenLid = model.ChickenLid,
-            FlockId = model.FlockId,
-            StartDate = model.StartDate,
-            ExportDate = model.ExportDate,
-            Note = model.Note,
-            Status = model.Status
-        };
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Update success" });
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = model, Description = "Update success" });
     }
 
     [HttpDelete("{id:int}")]
