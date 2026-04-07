@@ -19,6 +19,8 @@ public partial class LargeChicken
 
     public string Note { get; set; }
 
+    public string Url { get; set; }
+
     public bool? IsActive { get; set; }
 
     public virtual ChickenBarn ChickenBarn { get; set; }

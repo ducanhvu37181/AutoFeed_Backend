@@ -11,5 +11,6 @@ public class ChickenBarnResponse
     public DateOnly StartDate { get; set; }
     public DateOnly? ExportDate { get; set; }
     public string Note { get; set; }
-    public bool? Status { get; set; }
+    // Status values: "active", "exported", or "inactive"
+    public string Status { get; set; }
 }
