@@ -3,11 +3,6 @@ using AutoFeed_Backend.Models.Responses;
 using AutoFeed_Backend_DAO.Models;
 using AutoFeed_Backend_Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System.Text;
-using System.Text.Json;
-using System.IO;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 
 namespace AutoFeed_Backend.Controllers;
 
@@ -169,36 +164,17 @@ public class ReportController : ControllerBase
 
     [HttpPost]
     [Consumes("multipart/form-data")]
-    public async Task<IActionResult> CreateReport([FromForm] CreateReportRequest model, [FromServices] IConfiguration config)
+    public async Task<IActionResult> CreateReport([FromForm] CreateReportRequest model, IFormFile file, [FromServices] IConfiguration config)
     {
-        // If caller sent application/json instead of multipart/form-data, try to deserialize JSON body as fallback
-        if (model == null)
-        {
-            try
-            {
-                Request.EnableBuffering();
-                using var reader = new StreamReader(Request.Body, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
-                var body = await reader.ReadToEndAsync();
-                Request.Body.Position = 0;
-                if (!string.IsNullOrWhiteSpace(body))
-                    model = JsonSerializer.Deserialize<CreateReportRequest>(body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            }
-            catch
-            {
-                // ignore
-            }
-        }
-
         if (model == null || string.IsNullOrWhiteSpace(model.Type))
             return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
 
-        string? url = null;
-
-        var uploadFile = model?.File;
+        // use the single file property on the model
+        var uploadFile = file;
         if (uploadFile != null && uploadFile.Length > 0)
         {
             var allowedExt = new[] { ".jpg", ".jpeg", ".png", ".gif", ".pdf", ".doc", ".docx", ".xlsx", ".mp4", ".mp3" };
-                var ext = Path.GetExtension(uploadFile.FileName).ToLowerInvariant();
+            var ext = Path.GetExtension(uploadFile.FileName).ToLowerInvariant();
             if (!allowedExt.Contains(ext))
                 return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = $"Invalid file type. Allowed: {string.Join(", ", allowedExt)}" });
 
@@ -210,7 +186,7 @@ public class ReportController : ControllerBase
                 if (string.IsNullOrWhiteSpace(bucket) || string.IsNullOrWhiteSpace(saPath))
                     return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Firebase not configured" });
 
-                url = await AutoFeed_Backend.Helpers.FirebaseStorageHelper
+                var url = await AutoFeed_Backend.Helpers.FirebaseStorageHelper
                     .UploadFileAndGetSignedUrlAsync(uploadFile, bucket, saPath, TimeSpan.FromDays(30));
             }
             catch (Exception ex)
@@ -227,15 +203,15 @@ public class ReportController : ControllerBase
                 UserId = model.UserId,
                 Type = model.Type,
                 Description = model.Description,
-                Url = url
             };
 
             var id = await _service.CreateReportAsync(entity);
             if (id <= 0)
                 return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Create report failed" });
-
-            return CreatedAtAction(nameof(GetReportById), new { id = entity.ReportId },
-                new ApiResponse<object> { Status = true, HttpCode = 201, Data = ToDto(entity), Description = "Created" });
+            // refetch saved entity to ensure navigation properties and fields (including Url) are present
+            var saved = await _service.GetReportByIdAsync(id);
+            return CreatedAtAction(nameof(GetReportById), new { id = id },
+                new ApiResponse<object> { Status = true, HttpCode = 201, Data = ToDto(saved!), Description = "Created" });
         }
         catch (Exception ex)
         {
