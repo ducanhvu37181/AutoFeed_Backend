@@ -1,62 +1,69 @@
 ﻿<Properties StartupConfiguration="{595447D5-E8B3-4CEA-A806-FBE53645CD98}|https">
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.ItemProperties.AutoFeed__Backend PreferredExecutionTarget="/Applications/Google Chrome.app" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="AutoFeed_Backend_Services/Services/ScheduleService.cs">
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.Workbench ActiveDocument="AutoFeed_Backend/Controllers/FeedingRuleController.cs">
     <Files>
-      <File FileName="AutoFeed_Backend/appsettings.json" Line="12" Column="2" />
-      <File FileName="AutoFeed_Backend/Controllers/AuthController.cs" Line="27" Column="2" />
-      <File FileName="AutoFeed_Backend/Controllers/FoodController.cs" Line="25" Column="2" />
-      <File FileName="AutoFeed_Backend_Services/Interfaces/IUserService.cs" Line="21" Column="1" />
-      <File FileName="AutoFeed_Backend_Services/Services/UserService.cs" Line="21" Column="6" />
-      <File FileName="AutoFeed_Backend/Program.cs" Line="59" Column="11" />
-      <File FileName="AutoFeed_Backend_Services/Interfaces/IAuthService.cs" Line="9" Column="2" />
-      <File FileName="AutoFeed_Backend_Services/Interfaces/IFoodService.cs" Line="9" Column="2" />
-      <File FileName="AutoFeed_Backend_Services/Interfaces/IIoTDeviceService.cs" Line="11" Column="2" />
-      <File FileName="AutoFeed_Backend_Services/Services/IoTDeviceService.cs" Line="66" Column="2" />
-      <File FileName="AutoFeed_Backend_Services/Services/AuthService.cs" Line="43" Column="2" />
-      <File FileName="AutoFeed_Backend_Services/Services/FoodService.cs" Line="36" Column="2" />
-      <File FileName="AutoFeed_Backend_Services/ServiceProvider/ServiceProvider.cs" Line="64" Column="1" />
-      <File FileName="AutoFeed_Backend_Services/Interfaces/IScheduleService.cs" Line="25" Column="1" />
+      <File FileName="AutoFeed_Backend/appsettings.json" Line="10" Column="158" />
+      <File FileName="AutoFeed_Backend/Controllers/AuthController.cs" />
+      <File FileName="AutoFeed_Backend/Controllers/FoodController.cs" />
+      <File FileName="AutoFeed_Backend_Services/Interfaces/IUserService.cs" />
+      <File FileName="AutoFeed_Backend_Services/Services/UserService.cs" />
+      <File FileName="AutoFeed_Backend/Program.cs" Line="77" Column="11" />
+      <File FileName="AutoFeed_Backend_Services/Interfaces/IAuthService.cs" />
+      <File FileName="AutoFeed_Backend_Services/Interfaces/IFoodService.cs" />
+      <File FileName="AutoFeed_Backend_Services/Interfaces/IIoTDeviceService.cs" />
+      <File FileName="AutoFeed_Backend_Services/Services/IoTDeviceService.cs" />
+      <File FileName="AutoFeed_Backend_Services/Services/AuthService.cs" />
+      <File FileName="AutoFeed_Backend_Services/Services/FoodService.cs" />
+      <File FileName="AutoFeed_Backend_Services/ServiceProvider/ServiceProvider.cs" Line="122" Column="2" />
+      <File FileName="AutoFeed_Backend_Services/Interfaces/IScheduleService.cs" />
       <File FileName="AutoFeed_Backend_Services/Services/ScheduleService.cs" Line="102" Column="1" />
+      <File FileName="AutoFeed_Backend_DAO/Models/AutoFeedDBContext.cs" Line="15" Column="1" />
+      <File FileName="AutoFeed_Backend_DAO/Models/FeedingRule.cs" Line="19" Column="1" />
+      <File FileName="AutoFeed_Backend_DAO/Models/FeedingRuleDetail.cs" Line="20" Column="24" />
+      <File FileName="AutoFeed_Backend_DAO/Models/BarnIoTDevice.cs" Line="20" Column="10" />
+      <File FileName="AutoFeed_Backend_DAO/Models/IoTDevice.cs" Line="21" Column="2" />
+      <File FileName="AutoFeed_Backend_DAO/Models/FeedingRuleDto.cs" Line="12" Column="2" />
+      <File FileName="AutoFeed_Backend_Services/Interfaces/IFeedingRuleService.cs" Line="12" Column="2" />
+      <File FileName="AutoFeed_Backend_Services/Services/FeedingRuleService.cs" Line="55" Column="2" />
+      <File FileName="AutoFeed_Backend_Services/Services/DashboardTechService.cs" Line="1" Column="1" />
+      <File FileName="AutoFeed_Backend/Controllers/FeedingRuleController.cs" Line="16" Column="6" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
-          <Node name="AutoFeed_Backend" expanded="True">
-            <Node name="AutoFeed_Backend" expanded="True">
+          <Node name="AutoFeed_Backend">
+            <Node name="AutoFeed_Backend">
               <Node name="Dependencies" expanded="True" />
-              <Node name="Controllers" expanded="True" />
+              <Node name="Controllers" expanded="True">
+                <Node name="FeedingRuleController.cs" selected="True" />
+              </Node>
               <Node name="Models" expanded="True" />
             </Node>
-            <Node name="AutoFeed_Backend_DAO" expanded="True">
+            <Node name="AutoFeed_Backend_DAO">
               <Node name="Dependencies" expanded="True" />
+              <Node name="Models" expanded="True" />
             </Node>
-            <Node name="AutoFeed_Backend_Repositories" expanded="True">
+            <Node name="AutoFeed_Backend_Repositories">
               <Node name="Repositories" expanded="True" />
               <Node name="UnitOfWork" expanded="True" />
             </Node>
-            <Node name="AutoFeed_Backend_Services" expanded="True">
+            <Node name="AutoFeed_Backend_Services">
               <Node name="Dependencies" expanded="True">
                 <Node name="FrameworkReferences" expanded="True" />
                 <Node name="ProjectDependencies" expanded="True" />
               </Node>
               <Node name="Interfaces" expanded="True" />
-              <Node name="ServiceProvider" expanded="True" />
-              <Node name="Services" expanded="True">
-                <Node name="ScheduleService.cs" selected="True" />
-              </Node>
+              <Node name="Services" expanded="True" />
             </Node>
           </Node>
         </State>
       </Pad>
-      <Pad Id="MonoDevelop.Debugger.WatchPad">
-        <State />
-      </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
   <MultiItemStartupConfigurations />
-  <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
-  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.ItemProperties.AutoFeed__Backend PreferredExecutionTarget="/Applications/Google Chrome.app" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
 </Properties>
