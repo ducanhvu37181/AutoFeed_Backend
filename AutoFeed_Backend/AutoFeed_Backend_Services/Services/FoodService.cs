@@ -27,19 +27,20 @@ namespace AutoFeed_Backend_Services.Services
 
         public async Task<bool> AddFoodItemAsync(Food item)
         {
-            // Sử dụng CreateAsync theo gợi ý từ Repository của bạn
-            await _unitOfWork.Foods.CreateAsync(item);
+                     await _unitOfWork.Foods.CreateAsync(item);
 
-            // Ép lưu xuống DB và kiểm tra kết quả
             var result = await _unitOfWork.SaveChangesWithTransactionAsync();
             return result > 0;
         }
 
         public async Task<bool> UpdateFoodAsync(Food item)
         {
+            var existingFood = await _unitOfWork.Foods.GetByIdAsync(item.FoodId);
+            if (existingFood == null) return false;
+
             await _unitOfWork.Foods.UpdateAsync(item);
-            var result = await _unitOfWork.SaveChangesWithTransactionAsync();
-            return result > 0;
+            await _unitOfWork.SaveChangesWithTransactionAsync();
+            return true;
         }
 
         public async Task<bool> DeleteFoodAsync(int id)
@@ -47,10 +48,10 @@ namespace AutoFeed_Backend_Services.Services
             var food = await _unitOfWork.Foods.GetByIdAsync(id);
             if (food == null) return false;
 
-            // Kiểm tra xem Repo dùng Remove hay Delete, thường là Remove
             _unitOfWork.Foods.Remove(food);
-            var result = await _unitOfWork.SaveChangesWithTransactionAsync();
-            return result > 0;
+            await _unitOfWork.SaveChangesWithTransactionAsync();
+
+            return true;
         }
     }
 }

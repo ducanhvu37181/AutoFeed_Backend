@@ -8,7 +8,6 @@
         public string? Note { get; set; }
     }
 
-    // Class để cập nhật (BẮT BUỘC CÓ ID) - Kiên thêm đoạn này nhé
     public class FoodUpdateRequest
     {
         public int FoodId { get; set; } // Phải có cái này để hết lỗi Build

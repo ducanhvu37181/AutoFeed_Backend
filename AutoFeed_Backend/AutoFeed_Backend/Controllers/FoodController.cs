@@ -21,6 +21,7 @@ namespace AutoFeed_Backend.Controllers
         public async Task<IActionResult> GetAll()
         {
             var foods = await _foodService.GetAllFoodsAsync();
+
             var response = foods.Select(f => new FoodResponse
             {
                 FoodId = f.FoodId.ToString(),
@@ -28,34 +29,25 @@ namespace AutoFeed_Backend.Controllers
                 Type = f.Type,
                 Note = f.Note
             }).ToList();
+
             return Ok(response);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] FoodCreateRequest request)
         {
-            var food = new Food
-            {
-                Name = request.Name,
-                Type = request.Type,
-                Note = request.Note
-            };
-
-            // Gọi service lưu
+            var food = new Food { Name = request.Name, Type = request.Type, Note = request.Note };
             await _foodService.AddFoodItemAsync(food);
 
-            // Mẹo: Nếu DB đã ghi được, food.FoodId sẽ khác 0 (vì nó tự tăng)
-            // Mình check trực tiếp vào con số này cho chắc ăn Kiên nhé!
-            if (food.FoodId > 0)
+            var response = new FoodResponse
             {
-                return Ok(new
-                {
-                    message = "Food item created successfully!",
-                    data = food
-                });
-            }
+                FoodId = food.FoodId.ToString(),
+                Name = food.Name,
+                Type = food.Type,
+                Note = food.Note
+            };
 
-            return BadRequest(new { message = "Thực sự không lưu được vào DB!" });
+            return Ok(new { message = "Thêm thành công!", data = response });
         }
 
         [HttpPut("{id}")]
