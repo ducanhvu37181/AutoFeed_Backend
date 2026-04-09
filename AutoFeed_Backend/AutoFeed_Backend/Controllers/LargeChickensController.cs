@@ -23,21 +23,54 @@ public class LargeChickenController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var items = await _service.GetAllAsync();
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = items, Description = "Success" });
+        var dto = items.Select(i => new AutoFeed_Backend.Models.Responses.LargeChickenResponse
+        {
+            ChickenLid = i.ChickenLid,
+            FlockId = i.FlockId,
+            Name = i.Name,
+            Weight = i.Weight,
+            HealthStatus = i.HealthStatus,
+            Note = i.Note,
+            Url = i.Url,
+            IsActive = i.IsActive
+        }).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
 
     [HttpGet("active")]
     public async Task<IActionResult> GetActive()
     {
         var items = await _service.GetActiveAsync();
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = items, Description = "Success" });
+        var dto = items.Select(i => new AutoFeed_Backend.Models.Responses.LargeChickenResponse
+        {
+            ChickenLid = i.ChickenLid,
+            FlockId = i.FlockId,
+            Name = i.Name,
+            Weight = i.Weight,
+            HealthStatus = i.HealthStatus,
+            Note = i.Note,
+            Url = i.Url,
+            IsActive = i.IsActive
+        }).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
 
     [HttpGet("inactive")]
     public async Task<IActionResult> GetInactive()
     {
         var items = await _service.GetInactiveAsync();
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = items, Description = "Success" });
+        var dto = items.Select(i => new AutoFeed_Backend.Models.Responses.LargeChickenResponse
+        {
+            ChickenLid = i.ChickenLid,
+            FlockId = i.FlockId,
+            Name = i.Name,
+            Weight = i.Weight,
+            HealthStatus = i.HealthStatus,
+            Note = i.Note,
+            Url = i.Url,
+            IsActive = i.IsActive
+        }).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
 
     [HttpGet("{id:int}")]
@@ -46,8 +79,19 @@ public class LargeChickenController : ControllerBase
         var item = await _service.GetByIdAsync(id);
         if (item == null)
             return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
+        var dto = new AutoFeed_Backend.Models.Responses.LargeChickenResponse
+        {
+            ChickenLid = item.ChickenLid,
+            FlockId = item.FlockId,
+            Name = item.Name,
+            Weight = item.Weight,
+            HealthStatus = item.HealthStatus,
+            Note = item.Note,
+            Url = item.Url,
+            IsActive = item.IsActive
+        };
 
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = item, Description = "Success" });
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
 
     // GET api/largechicken/search?name=xxx&healthStatus=yyy&flockId=1&includeInactive=false
@@ -74,15 +118,28 @@ public class LargeChickenController : ControllerBase
             Name = model.Name, // Assigning Name
             Weight = model.Weight, // Assigning Weight
             HealthStatus = model.HealthStatus, // Assigning HealthStatus
-            Note = model.Note // Assigning Note
+            Note = model.Note, // Assigning Note
+            Url = model.Url
         };
 
         var result = await _service.CreateAsync(entity);
         if (result <= 0)
             return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Create failed" });
 
+        var dto = new AutoFeed_Backend.Models.Responses.LargeChickenResponse
+        {
+            ChickenLid = entity.ChickenLid,
+            FlockId = entity.FlockId,
+            Name = entity.Name,
+            Weight = entity.Weight,
+            HealthStatus = entity.HealthStatus,
+            Note = entity.Note,
+            Url = entity.Url,
+            IsActive = entity.IsActive
+        };
+
         return CreatedAtAction(nameof(Get), new { id = entity.ChickenLid },
-            new ApiResponse<object> { Status = true, HttpCode = 201, Data = entity, Description = "Created" });
+            new ApiResponse<object> { Status = true, HttpCode = 201, Data = dto, Description = "Created" });
     }
 
     [HttpPut("{id:int}")]
@@ -101,12 +158,13 @@ public class LargeChickenController : ControllerBase
         existing.HealthStatus = model.HealthStatus; // Updating HealthStatus
         existing.Note = model.Note; // Updating Note
         existing.IsActive = existing.IsActive; // keep current status
+        if (!string.IsNullOrWhiteSpace(model.Url)) existing.Url = model.Url; // update image url if provided
 
         var ok = await _service.UpdateAsync(existing);
         if (!ok)
             return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Update failed" });
 
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Update success" });
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = new { id = existing.ChickenLid }, Description = "Update success" });
     }
 
     // Soft delete

@@ -8,7 +8,7 @@ public class ReportService : IReportService
 {
     private readonly IUnitOfWork _unitOfWork;
 
-    private static readonly string[] AllowedStatuses = { "pending", "approved", "rejected" };
+    private static readonly string[] AllowedStatuses = { "pending", "reviewed", "rejected" };
 
     public ReportService()
     {

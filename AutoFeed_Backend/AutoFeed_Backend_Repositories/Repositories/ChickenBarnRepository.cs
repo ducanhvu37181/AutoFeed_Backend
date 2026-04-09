@@ -16,14 +16,21 @@ public class ChickenBarnRepository : GenericRepository<ChickenBarn>
     public async Task<List<ChickenBarn>> GetActiveAsync()
     {
         return await _context.Set<ChickenBarn>()
-            .Where(x => x.Status == true)
+            .Where(x => x.Status != null && x.Status.ToLower() == "active")
             .ToListAsync();
     }
 
     public async Task<List<ChickenBarn>> GetInactiveAsync()
     {
         return await _context.Set<ChickenBarn>()
-            .Where(x => x.Status != true)
+            .Where(x => x.Status == null || x.Status.ToLower() != "active")
+            .ToListAsync();
+    }
+
+    public async Task<List<ChickenBarn>> GetExportedAsync()
+    {
+        return await _context.Set<ChickenBarn>()
+            .Where(x => x.ExportDate != null)
             .ToListAsync();
     }
 
@@ -32,7 +39,7 @@ public class ChickenBarnRepository : GenericRepository<ChickenBarn>
         var query = _context.Set<ChickenBarn>().AsQueryable();
 
         if (!includeInactive)
-            query = query.Where(x => x.Status == true);
+            query = query.Where(x => x.Status != null && x.Status.ToLower() == "active");
 
         if (barnId.HasValue)
             query = query.Where(x => x.BarnId == barnId.Value);

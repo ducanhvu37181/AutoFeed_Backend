@@ -8,4 +8,5 @@ public class UpdateLargeChickenRequest
     public int? Age { get; set; }
     public string HealthStatus { get; set; }
     public string Note { get; set; }
+    public string? Url { get; set; }
 }

@@ -1,0 +1,10 @@
+﻿using System;
+
+namespace AutoFeed_Backend.Models.Requests.ChickenBarn;
+
+public class UpdateChickenBarnRequest
+{
+    public DateOnly? ExportDate { get; set; }
+    public string? Note { get; set; }
+    public bool? Status { get; set; }
+}

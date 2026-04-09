@@ -144,6 +144,17 @@ public class ScheduleController : ControllerBase
         };
 
         var id = await _service.CreateScheduleAsync(schedule);
+        if (id == -1)
+        {
+            return StatusCode(409, new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 409,
+                Data = null,
+                Description = "Schedule conflict: overlapping schedule exists"
+            });
+        }
+
         if (id <= 0)
         {
             var error = new ApiResponse<object>
@@ -201,6 +212,18 @@ public class ScheduleController : ControllerBase
 
         var createdDtos = new List<object>();
         var end = model.EndDate.Value;
+        // Pre-check whole range for conflicts to avoid partial creations
+        var hasConflict = await _service.HasConflictAsync(model.CbarnId, model.TaskId, model.StartDate, model.EndDate);
+        if (hasConflict)
+        {
+            return StatusCode(409, new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 409,
+                Data = null,
+                Description = "Schedule conflict: overlapping schedule exists in the requested range"
+            });
+        }
 
         for (var date = model.StartDate; date <= end; date = date.AddDays(1))
         {
@@ -218,6 +241,7 @@ public class ScheduleController : ControllerBase
             };
 
             var id = await _service.CreateScheduleAsync(schedule);
+
             if (id <= 0)
             {
                 return StatusCode(500, new ApiResponse<object>

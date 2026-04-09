@@ -36,6 +36,16 @@ public class ChickenBarnService : IChickenBarnService
         return await _unitOfWork.ChickenBarns.GetAllAsync();
     }
 
+    public async Task<List<ChickenBarnModel>> GetActiveAsync()
+    {
+        return await _unitOfWork.ChickenBarns.GetActiveAsync();
+    }
+
+    public async Task<List<ChickenBarnModel>> GetExportedAsync()
+    {
+        return await _unitOfWork.ChickenBarns.GetExportedAsync();
+    }
+
     public async Task<bool> UpdateAsync(ChickenBarnModel entity)
     {
         try
@@ -54,7 +64,7 @@ public class ChickenBarnService : IChickenBarnService
     {
         var entity = await _unitOfWork.ChickenBarns.GetByIdAsync(id);
         if (entity == null) return false;
-        entity.Status = false;
+        entity.Status = "inactive";
         _unitOfWork.ChickenBarns.PrepareUpdate(entity);
         var r = await _unitOfWork.SaveChangesWithTransactionAsync();
         return r > 0;

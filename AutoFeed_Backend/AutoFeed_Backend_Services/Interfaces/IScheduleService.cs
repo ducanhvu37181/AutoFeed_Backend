@@ -39,5 +39,8 @@ public interface IScheduleService
 
     Task<bool> UpdateScheduleStatusAsync(int id, string status);
 
+    // Check whether a schedule for the same barn and task conflicts with existing schedules in the given date range
+    Task<bool> HasConflictAsync(int cbarnId, int taskId, DateOnly startDate, DateOnly? endDate);
+
     Task<List<ScheduleResponse>> GetSchedulesByUserAndDateAsync(int userId, System.DateTime date);
 }

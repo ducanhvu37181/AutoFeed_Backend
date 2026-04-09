@@ -68,4 +68,15 @@ public class ScheduleRepository : GenericRepository<Schedule>
                 && (s.EndDate == null || s.EndDate >= d))
             .ToListAsync();
     }
+
+    public async Task<List<Schedule>> GetByCbarnTaskAndDateAsync(int cbarnId, int taskId, DateOnly date)
+    {
+        return await _context.Set<Schedule>()
+            .Where(s => s.CbarnId == cbarnId
+                && s.TaskId == taskId
+                && s.StartDate <= date
+                && (s.EndDate == null || s.EndDate >= date)
+                && (s.Status == null || s.Status.ToLower() != "completed"))
+            .ToListAsync();
+    }
 }

@@ -96,7 +96,7 @@ public class FlockService : IFlockService
         bool res = await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
         if (res)
         {
-            var cb = new ChickenBarn { FlockId = flock.FlockId, BarnId = barnId, StartDate = flock.DoB, Status = true };
+            var cb = new ChickenBarn { FlockId = flock.FlockId, BarnId = barnId, StartDate = flock.DoB, Status = "active" };
             _unitOfWork.ChickenBarns.PrepareCreate(cb);
             await _unitOfWork.SaveChangesWithTransactionAsync();
         }

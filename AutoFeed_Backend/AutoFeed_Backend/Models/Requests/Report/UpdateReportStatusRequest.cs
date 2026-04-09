@@ -2,6 +2,6 @@
 {
     public class UpdateReportStatusRequest
     {
-        public string Status { get; set; } = null!;   // pending | approved | rejected
+        public string Status { get; set; } = null!;   // pending | reviewed | rejected
     }
 }
