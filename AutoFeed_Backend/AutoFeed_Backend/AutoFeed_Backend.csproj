@@ -21,8 +21,10 @@
 
   <ItemGroup>
     <None Remove="Models\Requests\Food\" />
+    <None Remove="Models\Requests\IotDevice\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\Requests\Food\" />
+    <Folder Include="Models\Requests\IotDevice\" />
   </ItemGroup>
 </Project>

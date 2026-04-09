@@ -1,80 +1,68 @@
-﻿using AutoFeed_Backend_DAO.Models;
-using Microsoft.AspNetCore.Authorization;
-using AutoFeed_Backend_Repositories.UnitOfWork;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using AutoFeed_Backend.Models.Requests.Device;
+using AutoFeed_Backend_Services.Interfaces;
 
-namespace AutoFeed_Backend.Controllers;
-
-[Route("api/[controller]")]
-[ApiController]
-//[Authorize]
-public class DeviceController : ControllerBase
+namespace AutoFeed_Backend.Controllers
 {
-    private readonly IUnitOfWork _unitOfWork;
-    public DeviceController(IUnitOfWork unitOfWork) => _unitOfWork = unitOfWork;
-
-    [HttpGet]
-    public async Task<IActionResult> GetAll(string search = "", string type = "All Types", string status = "All Status")
+    [Route("api/[controller]")]
+    [ApiController]
+    public class IoTDeviceController : ControllerBase
     {
-        var devices = await _unitOfWork.IoTDevices.GetDevicesWithBarnAsync(search, type, status);
-        var result = devices.Select(d => new {
-            DeviceID = "DEV" + d.DeviceId.ToString("D3"),
-            DeviceType = d.Name,
-            AssignedTo = d.BarnIoTDevices.OrderByDescending(b => b.InstallationDate).FirstOrDefault()?.Barn?.Type ?? "Unassigned",
-            Status = d.Status == true ? "Online" : "Offline",
-            Battery = "85%",
-            LastUpdate = "2 min ago"
-        });
-        return Ok(result);
-    }
+        private readonly IIoTDeviceService _deviceService;
 
-    [HttpPost("register")]
-    public async Task<IActionResult> Register(string name, string description)
-    {
-        var device = new IoTDevice
+        public IoTDeviceController(IIoTDeviceService deviceService)
         {
-            Name = name,
-            Description = description,
-            Status = true
-        };
-        await _unitOfWork.IoTDevices.CreateAsync(device);
-        return Ok(new { message = "Success" });
-    }
+            _deviceService = deviceService;
+        }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, string name, string description, bool status)
-    {
-        var device = await _unitOfWork.IoTDevices.GetByIdAsync(id);
-        if (device == null) return NotFound();
+        [HttpGet]
+        public async Task<IActionResult> GetAll(string? search, string? type, string? status)
+        {
+            var result = await _deviceService.GetAllDevicesAsync(search ?? "", type ?? "", status ?? "");
+            return Ok(result);
+        }
 
-        device.Name = name;
-        device.Description = description;
-        device.Status = status;
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] DeviceCreateRequest request)
+        {
+            var success = await _deviceService.RegisterDeviceAsync(request.Name, request.Description);
+            if (success)
+                return Ok(new { message = "Device registered successfully!" });
 
-        await _unitOfWork.IoTDevices.UpdateAsync(device);
-        return Ok(new { message = "Success" });
-    }
+            return BadRequest(new { message = "Failed to register device." });
+        }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var device = await _unitOfWork.IoTDevices.GetByIdAsync(id);
-        if (device == null) return NotFound();
-        await _unitOfWork.IoTDevices.RemoveAsync(device);
-        return Ok(new { message = "Success" });
-    }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] DeviceUpdateRequest request)
+        {
+            if (id != request.DeviceID)
+                return BadRequest(new { message = "ID mismatch!" });
 
-    [HttpGet("barns")]
-    public async Task<IActionResult> GetBarns()
-    {
-        var barns = await _unitOfWork.IoTDevices.GetAllBarnsAsync();
-        return Ok(barns.Select(b => new { b.BarnId, b.Type }));
-    }
+            var success = await _deviceService.UpdateDeviceAsync(id, request.Name, request.Description, request.Status);
+            if (success)
+                return Ok(new { message = "Device updated successfully!" });
 
-    [HttpPost("reassign")]
-    public async Task<IActionResult> Reassign(int deviceId, int barnId)
-    {
-        await _unitOfWork.IoTDevices.ReassignDeviceAsync(deviceId, barnId);
-        return Ok(new { message = "Update Assignment Success!" });
+            return NotFound(new { message = "Device not found." });
+        }
+
+        [HttpPut("{id}/assign-barn")]
+        public async Task<IActionResult> AssignToBarn(int id, [FromBody] DeviceAssignRequest request)
+        {
+            var success = await _deviceService.ReassignDeviceAsync(id, request.BarnID);
+            if (success)
+                return Ok(new { message = $"Device {id} assigned to barn {request.BarnID} successfully!" });
+
+            return BadRequest(new { message = "Assignment failed." });
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _deviceService.DeleteDeviceAsync(id);
+            if (success)
+                return Ok(new { message = "Device deleted successfully!" });
+
+            return NotFound(new { message = "Device not found for deletion." });
+        }
     }
 }

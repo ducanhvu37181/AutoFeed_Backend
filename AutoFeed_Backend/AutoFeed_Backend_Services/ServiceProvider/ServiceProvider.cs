@@ -95,7 +95,6 @@ public static class ServiceProvider
 
     public static IServiceCollection AddFeedingRuleServices(this IServiceCollection services)
     {
-        // Đăng ký trực tiếp Service để dùng DbContext như file bạn vừa gửi
         services.AddScoped<IFeedingRuleService, FeedingRuleService>();
         return services;
     }
