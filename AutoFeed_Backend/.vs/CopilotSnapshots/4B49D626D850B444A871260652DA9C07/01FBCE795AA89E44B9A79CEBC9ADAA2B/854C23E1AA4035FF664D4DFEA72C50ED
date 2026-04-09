@@ -1,0 +1,109 @@
+﻿using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace AutoFeed_Backend.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class BarnController : ControllerBase
+{
+    private readonly IBarnService _barnService;
+
+    public BarnController(IBarnService barnService)
+    {
+        _barnService = barnService;
+    }
+
+    // Class to define exactly what fields show up in Swagger POST/PUT
+    public class BarnRequest
+    {
+        public int BarnId { get; set; }
+        public decimal Temperature { get; set; }
+        public decimal Humidity { get; set; }
+        public string Type { get; set; }
+        public decimal Area { get; set; }
+        public System.DateTime? CreateDate { get; set; }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllBarns()
+    {
+        var barns = await _barnService.GetAllAsync();
+        var result = barns.Select(b => new {
+            b.BarnId,
+            b.Temperature,
+            b.Humidity,
+            b.Type,
+            b.Area,
+            b.CreateDate
+        });
+        return Ok(result);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetBarnById(int id)
+    {
+        var b = await _barnService.GetByIdAsync(id);
+        if (b == null) return NotFound("Barn not found.");
+
+        return Ok(new
+        {
+            b.BarnId,
+            b.Temperature,
+            b.Humidity,
+            b.Type,
+            b.Area,
+            b.CreateDate
+        });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateBarn([FromBody] BarnRequest request)
+    {
+        var barn = new Barn
+        {
+            Temperature = request.Temperature,
+            Humidity = request.Humidity,
+            Type = request.Type,
+            Area = request.Area,
+            CreateDate = request.CreateDate
+        };
+
+        var result = await _barnService.CreateBarnAsync(barn);
+        if (!result) return BadRequest("Failed to create barn.");
+
+        return Ok(result);
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> UpdateBarn([FromBody] BarnRequest request)
+    {
+        var barn = new Barn
+        {
+            BarnId = request.BarnId,
+            Temperature = request.Temperature,
+            Humidity = request.Humidity,
+            Type = request.Type,
+            Area = request.Area,
+            CreateDate = request.CreateDate
+        };
+
+        var result = await _barnService.UpdateBarnAsync(barn);
+        if (!result) return BadRequest("Failed to update barn.");
+
+        return Ok(result);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteBarn(int id)
+    {
+        var result = await _barnService.DeleteBarnAsync(id);
+        if (!result) return BadRequest("Failed to delete barn.");
+
+        return Ok(result);
+    }
+}

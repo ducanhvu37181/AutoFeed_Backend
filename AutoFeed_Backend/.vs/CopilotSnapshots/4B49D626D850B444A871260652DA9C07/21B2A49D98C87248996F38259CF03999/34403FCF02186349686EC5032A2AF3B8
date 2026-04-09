@@ -78,24 +78,19 @@ public class BarnController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateBarn([FromBody] BarnRequest request)
     {
-        if (request == null)
-            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
-
         var barn = new Barn
         {
             Temperature = 0m,
             Humidity = 0m,
             Type = request.Type,
             Area = request.Area,
-            CreateDate = DateTime.Now
+            CreateDate = request.CreateDate
         };
 
         var result = await _barnService.CreateBarnAsync(barn);
-        if (!result) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Create failed" });
+        if (!result) return BadRequest("Failed to create barn.");
 
-        var dto = new { BarnId = barn.BarnId, Type = barn.Type, Area = barn.Area, Temperature = barn.Temperature, Humidity = barn.Humidity };
-        var response = new ApiResponse<object> { Status = true, HttpCode = 201, Data = dto, Description = "Created" };
-        return CreatedAtAction(nameof(GetBarnById), new { id = barn.BarnId }, response);
+        return Ok(result);
     }
 
     [HttpPut]

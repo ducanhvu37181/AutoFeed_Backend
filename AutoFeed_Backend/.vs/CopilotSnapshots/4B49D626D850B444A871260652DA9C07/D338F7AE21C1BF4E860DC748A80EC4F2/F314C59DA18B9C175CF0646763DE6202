@@ -1,6 +1,5 @@
 ﻿using AutoFeed_Backend_DAO.Models;
 using AutoFeed_Backend_Services.Interfaces;
-using AutoFeed_Backend.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,18 +21,12 @@ public class BarnController : ControllerBase
     // Class to define exactly what fields show up in Swagger POST/PUT
     public class BarnRequest
     {
-        // When creating a barn only Type and Area are required.
+        public int BarnId { get; set; }
+        public decimal Temperature { get; set; }
+        public decimal Humidity { get; set; }
         public string Type { get; set; }
         public decimal Area { get; set; }
         public System.DateTime? CreateDate { get; set; }
-    }
-
-    // Request used for updating only Type and Area of a barn
-    public class UpdateBarnInfoRequest
-    {
-        public int BarnId { get; set; }
-        public string Type { get; set; }
-        public decimal Area { get; set; }
     }
 
     public class UpdateBarnMetricsRequest
@@ -78,45 +71,38 @@ public class BarnController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateBarn([FromBody] BarnRequest request)
     {
-        if (request == null)
-            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
-
         var barn = new Barn
         {
-            Temperature = 0m,
-            Humidity = 0m,
+            Temperature = request.Temperature,
+            Humidity = request.Humidity,
             Type = request.Type,
             Area = request.Area,
-            CreateDate = DateTime.Now
+            CreateDate = request.CreateDate
         };
 
         var result = await _barnService.CreateBarnAsync(barn);
-        if (!result) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Create failed" });
+        if (!result) return BadRequest("Failed to create barn.");
 
-        var dto = new { BarnId = barn.BarnId, Type = barn.Type, Area = barn.Area, Temperature = barn.Temperature, Humidity = barn.Humidity };
-        var response = new ApiResponse<object> { Status = true, HttpCode = 201, Data = dto, Description = "Created" };
-        return CreatedAtAction(nameof(GetBarnById), new { id = barn.BarnId }, response);
+        return Ok(result);
     }
 
     [HttpPut]
-    public async Task<IActionResult> UpdateBarn([FromBody] UpdateBarnInfoRequest request)
+    public async Task<IActionResult> UpdateBarn([FromBody] BarnRequest request)
     {
-        if (request == null)
-            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
+        var barn = new Barn
+        {
+            BarnId = request.BarnId,
+            Temperature = request.Temperature,
+            Humidity = request.Humidity,
+            Type = request.Type,
+            Area = request.Area,
+            CreateDate = request.CreateDate
+        };
 
-        var existing = await _barnService.GetByIdAsync(request.BarnId);
-        if (existing == null)
-            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Barn not found" });
+        var result = await _barnService.UpdateBarnAsync(barn);
+        if (!result) return BadRequest("Failed to update barn.");
 
-        // Only update Type and Area
-        existing.Type = request.Type;
-        existing.Area = request.Area;
-
-        var ok = await _barnService.UpdateBarnAsync(existing);
-        if (!ok) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Update failed" });
-
-        var dto = new { BarnId = existing.BarnId, Type = existing.Type, Area = existing.Area };
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Update success" });
+        return Ok(result);
     }
 
     [HttpDelete("{id}")]
