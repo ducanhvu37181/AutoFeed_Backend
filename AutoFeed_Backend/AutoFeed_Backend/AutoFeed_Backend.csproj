@@ -19,4 +19,10 @@
     <ProjectReference Include="..\AutoFeed_Backend_Services\AutoFeed_Backend_Services.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Models\Requests\Food\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\Requests\Food\" />
+  </ItemGroup>
 </Project>

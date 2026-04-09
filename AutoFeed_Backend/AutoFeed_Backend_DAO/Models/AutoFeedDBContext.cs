@@ -280,7 +280,7 @@ public partial class AutoFeedDBContext : DbContext
                 .HasColumnName("weight");
         });
 
-        modelBuilder.Entity<Food>(entity =>
+       modelBuilder.Entity<Food>(entity =>
         {
             entity.HasKey(e => e.FoodId).HasName("PK__Food__77EAEA1951652A21");
 
@@ -292,10 +292,6 @@ public partial class AutoFeedDBContext : DbContext
                 .HasMaxLength(100)
                 .HasColumnName("name");
             entity.Property(e => e.Note).HasColumnName("note");
-            entity.Property(e => e.Price)
-                .HasColumnType("decimal(18, 2)")
-                .HasColumnName("price");
-            entity.Property(e => e.Quantity).HasColumnName("quantity");
             entity.Property(e => e.Type)
                 .IsRequired()
                 .HasMaxLength(50)

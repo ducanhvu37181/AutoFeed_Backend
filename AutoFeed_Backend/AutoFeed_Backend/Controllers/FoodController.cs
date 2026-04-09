@@ -1,25 +1,92 @@
 ﻿using AutoFeed_Backend_DAO.Models;
 using AutoFeed_Backend_Services.Interfaces;
+using AutoFeed_Backend_Services.Models.Responses;
+using AutoFeed_Backend.Models.Requests.Food;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AutoFeed_Backend.Controllers;
-
-[Route("api/[controller]")]
-[ApiController]
-public class FoodController : ControllerBase
+namespace AutoFeed_Backend.Controllers
 {
-    private readonly IFoodService _foodService;
-    public FoodController(IFoodService foodService) => _foodService = foodService;
-
-    [HttpGet]
-    public async Task<IActionResult> GetInventory(string? search, string? type)
-        => Ok(await _foodService.GetInventoryAsync(search, type));
-
-    [HttpPost("add")]
-    public async Task<IActionResult> AddItem(Food item)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class FoodController : ControllerBase
     {
-        var result = await _foodService.AddFoodItemAsync(item);
-        if (result) return Ok(new { message = "Thành công!" });
-        return BadRequest(new { message = "Lỗi!" });
+        private readonly IFoodService _foodService;
+
+        public FoodController(IFoodService foodService)
+        {
+            _foodService = foodService;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var foods = await _foodService.GetAllFoodsAsync();
+            var response = foods.Select(f => new FoodResponse
+            {
+                FoodId = f.FoodId.ToString(),
+                Name = f.Name,
+                Type = f.Type,
+                Note = f.Note
+            }).ToList();
+            return Ok(response);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] FoodCreateRequest request)
+        {
+            var food = new Food
+            {
+                Name = request.Name,
+                Type = request.Type,
+                Note = request.Note
+            };
+
+            // Gọi service lưu
+            await _foodService.AddFoodItemAsync(food);
+
+            // Mẹo: Nếu DB đã ghi được, food.FoodId sẽ khác 0 (vì nó tự tăng)
+            // Mình check trực tiếp vào con số này cho chắc ăn Kiên nhé!
+            if (food.FoodId > 0)
+            {
+                return Ok(new
+                {
+                    message = "Food item created successfully!",
+                    data = food
+                });
+            }
+
+            return BadRequest(new { message = "Thực sự không lưu được vào DB!" });
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] FoodUpdateRequest request)
+        {
+            if (id != request.FoodId)
+                return BadRequest(new { message = "ID mismatch!" });
+
+            var food = new Food
+            {
+                FoodId = request.FoodId,
+                Name = request.Name,
+                Type = request.Type,
+                Note = request.Note
+            };
+
+            var result = await _foodService.UpdateFoodAsync(food);
+            if (result)
+                return Ok(new { message = "Food item updated successfully!" });
+
+            return NotFound(new { message = "Food item not found!" });
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _foodService.DeleteFoodAsync(id);
+            if (result)
+                return Ok(new { message = "Food item deleted successfully!" });
+
+            return NotFound(new { message = "Food item not found!" });
+        }
     }
 }
