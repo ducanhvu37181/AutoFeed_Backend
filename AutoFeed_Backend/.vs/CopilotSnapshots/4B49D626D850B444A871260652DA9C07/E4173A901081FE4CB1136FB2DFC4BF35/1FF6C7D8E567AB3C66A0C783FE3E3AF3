@@ -169,7 +169,7 @@ public class ReportController : ControllerBase
 
     [HttpPost]
     [Consumes("multipart/form-data")]
-    public async Task<IActionResult> CreateReport([FromForm] CreateReportRequest model, [FromServices] IConfiguration config)
+    public async Task<IActionResult> CreateReport([FromForm] CreateReportRequest model, IFormFile file, [FromServices] IConfiguration config)
     {
         // If caller sent application/json instead of multipart/form-data, try to deserialize JSON body as fallback
         if (model == null)
@@ -192,13 +192,12 @@ public class ReportController : ControllerBase
         if (model == null || string.IsNullOrWhiteSpace(model.Type))
             return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
 
-        string? url = null;
+        string? url;
 
-        var uploadFile = model?.File;
-        if (uploadFile != null && uploadFile.Length > 0)
+        if (file != null && file.Length > 0)
         {
             var allowedExt = new[] { ".jpg", ".jpeg", ".png", ".gif", ".pdf", ".doc", ".docx", ".xlsx", ".mp4", ".mp3" };
-                var ext = Path.GetExtension(uploadFile.FileName).ToLowerInvariant();
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
             if (!allowedExt.Contains(ext))
                 return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = $"Invalid file type. Allowed: {string.Join(", ", allowedExt)}" });
 
@@ -211,7 +210,7 @@ public class ReportController : ControllerBase
                     return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Firebase not configured" });
 
                 url = await AutoFeed_Backend.Helpers.FirebaseStorageHelper
-                    .UploadFileAndGetSignedUrlAsync(uploadFile, bucket, saPath, TimeSpan.FromDays(30));
+                    .UploadFileAndGetSignedUrlAsync(file, bucket, saPath, TimeSpan.FromDays(30));
             }
             catch (Exception ex)
             {

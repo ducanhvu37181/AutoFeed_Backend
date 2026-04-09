@@ -90,7 +90,6 @@ public class RequestController : ControllerBase
     }
 
     [HttpPost]
-    [Consumes("multipart/form-data")]
     // Accept multipart/form-data so callers can upload a file. The file will be uploaded to
     // Firebase Storage and the returned URL saved in the request's Url field.
     public async Task<IActionResult> Create([FromForm] CreateRequestRequest model, IFormFile file, [FromServices] IConfiguration config)
