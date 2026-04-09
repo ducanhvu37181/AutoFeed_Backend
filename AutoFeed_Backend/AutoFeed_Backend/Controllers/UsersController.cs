@@ -178,7 +178,23 @@ public class UserController : ControllerBase
 
         entity.Password = null;
         return CreatedAtAction(nameof(Get), new { id = entity.UserId },
-            new ApiResponse<object> { Status = true, HttpCode = 201, Data = entity, Description = "Created" });
+            new ApiResponse<object>
+            {
+                Status = true,
+                HttpCode = 201,
+                Data = new UserResponse
+                {
+                    UserId = entity.UserId,
+                    RoleId = entity.RoleId,
+                    Email = entity.Email,
+                    FullName = entity.FullName,
+                    Phone = entity.Phone,
+                    Username = entity.Username,
+                    AvatarUrl = entity.AvatarUrl,
+                    Status = entity.Status
+                },
+                Description = "Created"
+            });
     }
 
     [HttpPut("{id:int}")]
