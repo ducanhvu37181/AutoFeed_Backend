@@ -16,20 +16,14 @@ builder.Services.AddDbContext<AutoFeedDBContext>(options =>
 // ---------------------------------------------------------
 
 builder.Services.AddControllers();
-// register all services via service provider helper
 builder.Services.AddServiceProvider();
 
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IEmailService, EmailService>();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(c => {
-    c.MapType<IFormFile>(() => new Microsoft.OpenApi.Models.OpenApiSchema
-    {
-        Type = "string",
-        Format = "binary"
-    });
+    c.MapType<IFormFile>(() => new Microsoft.OpenApi.Models.OpenApiSchema { Type = "string", Format = "binary" });
     c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -42,10 +36,7 @@ builder.Services.AddSwaggerGen(c => {
     c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement {
         {
             new Microsoft.OpenApi.Models.OpenApiSecurityScheme {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference { Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme, Id = "Bearer" }
             }, new string[] { }
         }
     });
@@ -63,6 +54,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 var app = builder.Build();
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+    await userService.MigratePasswordsAsync();
+}
 
 if (app.Environment.IsDevelopment())
 {
