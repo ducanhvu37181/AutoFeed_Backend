@@ -29,6 +29,9 @@ public class AuthService : IAuthService
 
         // Kiểm tra mật khẩu mã hóa BCrypt
         if (!BCrypt.Net.BCrypt.Verify(password, user.Password)) return null;
+        user.LastLogin = DateTime.UtcNow;
+        _context.Users.Update(user);
+        await _context.SaveChangesAsync();
 
         return user;
     }
