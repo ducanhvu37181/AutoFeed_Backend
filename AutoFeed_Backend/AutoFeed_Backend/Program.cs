@@ -2,11 +2,18 @@ using AutoFeed_Backend_DAO.Settings;
 using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Services.ServiceProvider;
 using AutoFeed_Backend_Services.Services;
+using AutoFeed_Backend_DAO.Models; // Thêm dòng này để nhận diện DbContext
+using Microsoft.EntityFrameworkCore; // Thêm dòng này để dùng UseSqlServer
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// --- DÒNG QUAN TRỌNG NHẤT ĐỂ SỬA LỖI aggregateexception ---
+builder.Services.AddDbContext<AutoFeedDBContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// ---------------------------------------------------------
 
 builder.Services.AddControllers();
 // register all services via service provider helper

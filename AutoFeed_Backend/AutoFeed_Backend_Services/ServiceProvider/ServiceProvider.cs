@@ -94,6 +94,13 @@ public static class ServiceProvider
         return services;
     }
 
+    public static IServiceCollection AddFeedingRuleServices(this IServiceCollection services)
+    {
+        // Đăng ký trực tiếp Service để dùng DbContext như file bạn vừa gửi
+        services.AddScoped<IFeedingRuleService, FeedingRuleService>();
+        return services;
+    }
+
     public static IServiceCollection AddServiceProvider(this IServiceCollection services)
     {
         services.AddTaskServices();
@@ -108,6 +115,7 @@ public static class ServiceProvider
         services.AddFlockServices();
         services.AddReportServices();
         services.AddDashboardTechServices();
+        services.AddFeedingRuleServices(); // Thêm dòng này ở cuối
 
         return services;
     }
