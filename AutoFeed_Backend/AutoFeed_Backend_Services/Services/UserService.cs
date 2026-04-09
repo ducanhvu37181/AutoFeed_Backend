@@ -52,7 +52,7 @@ public class UserService : IUserService
         }
     }
 
-    public async System.Threading.Tasks.Task<List<User>> GetAllAsync()
+    public async Task<List<User>> GetAllAsync()
     {
         return await _unitOfWork.Users.GetAllAsync();
     }

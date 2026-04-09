@@ -22,7 +22,9 @@ public class BarnController : ControllerBase
     // Class to define exactly what fields show up in Swagger POST/PUT
     public class BarnRequest
     {
-        // When creating a barn only Type and Area are required.
+        public int BarnId { get; set; }
+        public decimal Temperature { get; set; }
+        public decimal Humidity { get; set; }
         public string Type { get; set; }
         public decimal Area { get; set; }
         public System.DateTime? CreateDate { get; set; }
@@ -78,24 +80,19 @@ public class BarnController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateBarn([FromBody] BarnRequest request)
     {
-        if (request == null)
-            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
-
         var barn = new Barn
         {
-            Temperature = 0m,
-            Humidity = 0m,
+            Temperature = request.Temperature,
+            Humidity = request.Humidity,
             Type = request.Type,
             Area = request.Area,
-            CreateDate = DateTime.Now
+            CreateDate = request.CreateDate
         };
 
         var result = await _barnService.CreateBarnAsync(barn);
-        if (!result) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Create failed" });
+        if (!result) return BadRequest("Failed to create barn.");
 
-        var dto = new { BarnId = barn.BarnId, Type = barn.Type, Area = barn.Area, Temperature = barn.Temperature, Humidity = barn.Humidity };
-        var response = new ApiResponse<object> { Status = true, HttpCode = 201, Data = dto, Description = "Created" };
-        return CreatedAtAction(nameof(GetBarnById), new { id = barn.BarnId }, response);
+        return Ok(result);
     }
 
     [HttpPut]

@@ -7,7 +7,7 @@ namespace AutoFeed_Backend.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize]
+//[Authorize]
 public class DeviceController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;

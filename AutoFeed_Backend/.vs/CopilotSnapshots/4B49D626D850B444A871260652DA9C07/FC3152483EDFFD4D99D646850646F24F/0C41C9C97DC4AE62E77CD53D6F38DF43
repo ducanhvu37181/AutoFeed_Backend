@@ -11,6 +11,4 @@ public interface IBarnService
     Task<bool> CreateBarnAsync(Barn barn);
     Task<bool> UpdateBarnAsync(Barn barn);
     Task<bool> DeleteBarnAsync(int id);
-    // Update only temperature and humidity for a barn
-    Task<bool> UpdateBarnMetricsAsync(int barnId, decimal temperature, decimal humidity);
 }

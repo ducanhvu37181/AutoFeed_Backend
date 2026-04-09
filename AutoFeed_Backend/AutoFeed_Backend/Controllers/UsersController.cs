@@ -62,7 +62,7 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var items = await _service.GetAllAsync();
-        var dto = items.Select(u => new AutoFeed_Backend.Models.Responses.UserResponse {
+        var dto = items.Select(u => new UserResponse {
             UserId = u.UserId,
             RoleId = u.RoleId,
             Email = u.Email,

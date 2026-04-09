@@ -39,16 +39,4 @@ public class BarnService : IBarnService
         _unitOfWork.Barns.PrepareRemove(barn);
         return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
     }
-
-    public async Task<bool> UpdateBarnMetricsAsync(int barnId, decimal temperature, decimal humidity)
-    {
-        var barn = await _unitOfWork.Barns.GetByIdAsync(barnId);
-        if (barn == null) return false;
-
-        barn.Temperature = temperature;
-        barn.Humidity = humidity;
-
-        _unitOfWork.Barns.PrepareUpdate(barn);
-        return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
-    }
 }
