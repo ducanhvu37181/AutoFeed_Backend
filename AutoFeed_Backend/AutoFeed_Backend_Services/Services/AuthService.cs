@@ -2,24 +2,35 @@
 using AutoFeed_Backend_Repositories.UnitOfWork;
 using AutoFeed_Backend_Services.Interfaces;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore; 
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using BCrypt.Net;
 
 namespace AutoFeed_Backend_Services.Services;
 
 public class AuthService : IAuthService
 {
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly AutoFeedDBContext _context; 
 
-    public AuthService(IUnitOfWork unitOfWork)
+    public AuthService(AutoFeedDBContext context)
     {
-        _unitOfWork = unitOfWork;
+        _context = context;
     }
 
     public async System.Threading.Tasks.Task<User?> LoginAsync(string usernameOrEmail, string password)
     {
-        return await _unitOfWork.Users.LoginAsync(usernameOrEmail, password);
+        // Kiểm tra cả Username và Email
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => (u.Username == usernameOrEmail || u.Email == usernameOrEmail) && u.Status == true);
+
+        if (user == null) return null;
+
+        // Kiểm tra mật khẩu mã hóa BCrypt
+        if (!BCrypt.Net.BCrypt.Verify(password, user.Password)) return null;
+
+        return user;
     }
 
     public string GenerateJwtToken(User user)

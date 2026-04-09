@@ -24,7 +24,6 @@ public static class ServiceProvider
 
     public static IServiceCollection AddUserServices(this IServiceCollection services)
     {
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
         return services;
@@ -115,7 +114,7 @@ public static class ServiceProvider
         services.AddFlockServices();
         services.AddReportServices();
         services.AddDashboardTechServices();
-        services.AddFeedingRuleServices(); // Thêm dòng này ở cuối
+        services.AddFeedingRuleServices(); 
 
         return services;
     }

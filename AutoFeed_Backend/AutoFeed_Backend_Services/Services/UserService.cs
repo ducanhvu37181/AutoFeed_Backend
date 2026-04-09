@@ -4,8 +4,11 @@ using AutoFeed_Backend_Services.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
-using Org.BouncyCastle.Crypto.Generators;
+using Microsoft.EntityFrameworkCore; // Cần để dùng ToListAsync cho Migrate
 using BCrypt.Net;
+
+// Giải quyết lỗi trùng tên Task giữa System và Model
+using Task = System.Threading.Tasks.Task;
 
 namespace AutoFeed_Backend_Services.Services;
 
@@ -14,6 +17,7 @@ public class UserService : IUserService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEmailService _emailService;
 
+    // Giữ nguyên 2 Constructor của bạn Kiên
     public UserService()
     {
         _unitOfWork = new UnitOfWork();
@@ -25,39 +29,62 @@ public class UserService : IUserService
         _emailService = emailService;
     }
 
-    public async Task<List<User>> GetAllAsync()
+    // --- CHÈN THÊM: Hàm Migrate để tự động mã hóa dữ liệu cũ ---
+    public async Task MigratePasswordsAsync()
+    {
+        // Phải truy cập qua _unitOfWork.Users hoặc Context tùy theo cấu trúc bạn Kiên
+        var users = await _unitOfWork.Users.GetAllAsync();
+        bool isChanged = false;
+
+        foreach (var user in users)
+        {
+            if (!string.IsNullOrEmpty(user.Password) && !user.Password.StartsWith("$2a$"))
+            {
+                user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+                isChanged = true;
+                _unitOfWork.Users.PrepareUpdate(user);
+            }
+        }
+
+        if (isChanged)
+        {
+            await _unitOfWork.SaveChangesWithTransactionAsync();
+        }
+    }
+
+    public async System.Threading.Tasks.Task<List<User>> GetAllAsync()
     {
         return await _unitOfWork.Users.GetAllAsync();
     }
 
-    public async Task<List<User>> GetActiveAsync()
+    public async System.Threading.Tasks.Task<List<User>> GetActiveAsync()
     {
         return await _unitOfWork.Users.GetActiveAsync();
     }
 
-    public async Task<List<User>> GetInactiveAsync()
+    public async System.Threading.Tasks.Task<List<User>> GetInactiveAsync()
     {
         return await _unitOfWork.Users.GetInactiveAsync();
     }
 
-    public async Task<User?> GetByIdAsync(int id)
+    public async System.Threading.Tasks.Task<User?> GetByIdAsync(int id)
     {
         return await _unitOfWork.Users.GetByIdAsync(id);
     }
 
-    public async Task<List<User>> SearchAsync(string? keyword, int? roleId, bool includeInactive)
+    public async System.Threading.Tasks.Task<List<User>> SearchAsync(string? keyword, int? roleId, bool includeInactive)
     {
         return await _unitOfWork.Users.SearchAsync(keyword, roleId, includeInactive);
     }
 
-    public async Task<int> CreateAsync(User entity)
+    public async System.Threading.Tasks.Task<int> CreateAsync(User entity)
     {
         string plainPassword = GenerateRandomPassword();
-        // Check duplicate email/username
         var exists = await _unitOfWork.Users.IsEmailOrUsernameExistsAsync(entity.Email, entity.Username);
         if (exists) return -1;
 
         entity.Status = true;
+        // SỬA: Thêm mã hóa BCrypt cho mật khẩu mới
         entity.Password = BCrypt.Net.BCrypt.HashPassword(plainPassword);
 
         _unitOfWork.Users.PrepareCreate(entity);
@@ -75,19 +102,16 @@ public class UserService : IUserService
             }
             catch (Exception ex)
             {
-                // Gửi mail thất bại không ảnh hưởng việc tạo user
                 Console.WriteLine($"[EmailService] Gửi mail thất bại: {ex.Message}");
             }
         }
-
         return result;
     }
 
-    public async Task<bool> UpdateAsync(User entity)
+    public async System.Threading.Tasks.Task<bool> UpdateAsync(User entity)
     {
         try
         {
-            // Check duplicate email/username excluding self
             var duplicate = await _unitOfWork.Users.IsEmailOrUsernameExistsAsync(
                 entity.Email, entity.Username, entity.UserId);
             if (duplicate) return false;
@@ -96,21 +120,16 @@ public class UserService : IUserService
             var result = await _unitOfWork.SaveChangesWithTransactionAsync();
             return result > 0;
         }
-        catch
-        {
-            return false;
-        }
+        catch { return false; }
     }
 
-    public async Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword)
+    public async System.Threading.Tasks.Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword)
     {
         var entity = await _unitOfWork.Users.GetByIdAsync(userId);
         if (entity == null || entity.Status != true) return false;
 
-        // Kiểm tra old password có đúng không
+        // SỬA: Dùng BCrypt.Verify để kiểm tra mật khẩu cũ
         if (!BCrypt.Net.BCrypt.Verify(oldPassword, entity.Password)) return false;
-
-        // Kiểm tra new password không được trùng old password
         if (BCrypt.Net.BCrypt.Verify(newPassword, entity.Password)) return false;
 
         entity.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
@@ -119,38 +138,30 @@ public class UserService : IUserService
         return result > 0;
     }
 
-    public async Task<bool> ResetPasswordAsync(string email)
+    public async System.Threading.Tasks.Task<bool> ResetPasswordAsync(string email)
     {
         var entity = await _unitOfWork.Users.GetByEmailAsync(email);
         if (entity == null || entity.Status != true) return false;
 
-        // Generate password mới
         var newPassword = GenerateRandomPassword();
-
-        // Hash và lưu vào DB
+        // SỬA: Hash mật khẩu reset
         entity.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
         _unitOfWork.Users.PrepareUpdate(entity);
         var result = await _unitOfWork.SaveChangesWithTransactionAsync();
-        if (result <= 0) return false;
 
-        // Gửi mail password mới
-        try
+        if (result > 0)
         {
-            await _emailService.SendPasswordAsync(
-                toEmail: entity.Email,
-                fullName: entity.FullName ?? entity.Username ?? "User",
-                plainPassword: newPassword
-            );
+            try
+            {
+                await _emailService.SendPasswordAsync(entity.Email, entity.FullName ?? "User", newPassword);
+            }
+            catch { }
+            return true;
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[EmailService] Gửi mail thất bại: {ex.Message}");
-        }
-
-        return true;
+        return false;
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async System.Threading.Tasks.Task<bool> DeleteAsync(int id)
     {
         var entity = await _unitOfWork.Users.GetByIdAsync(id);
         if (entity == null) return false;
@@ -161,7 +172,7 @@ public class UserService : IUserService
         return result > 0;
     }
 
-    public async Task<bool> RestoreAsync(int id)
+    public async System.Threading.Tasks.Task<bool> RestoreAsync(int id)
     {
         var entity = await _unitOfWork.Users.GetByIdAsync(id);
         if (entity == null) return false;
@@ -172,7 +183,7 @@ public class UserService : IUserService
         return result > 0;
     }
 
-    public async Task<Dictionary<int, string>> GetUserNameMapAsync(IEnumerable<int> userIds)
+    public async System.Threading.Tasks.Task<Dictionary<int, string>> GetUserNameMapAsync(IEnumerable<int> userIds)
     {
         var ids = userIds?.ToList() ?? new List<int>();
         var result = new Dictionary<int, string>();
@@ -180,6 +191,7 @@ public class UserService : IUserService
         var all = await _unitOfWork.Users.GetAllAsync();
         return all.Where(u => ids.Contains(u.UserId)).ToDictionary(u => u.UserId, u => u.Username);
     }
+
     private string GenerateRandomPassword()
     {
         const int passwordLength = 12;
@@ -188,5 +200,4 @@ public class UserService : IUserService
         return new string(Enumerable.Repeat(validChars, passwordLength)
                                     .Select(s => s[random.Next(s.Length)]).ToArray());
     }
-
 }
