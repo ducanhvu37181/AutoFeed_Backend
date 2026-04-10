@@ -25,30 +25,31 @@ public class FlockController : ControllerBase
     [HttpGet("dashboard")]
     public async Task<IActionResult> GetDashboard([FromQuery] string? searchTerm, [FromQuery] int? barnId, [FromQuery] string? status)
     {
-        var data = await _flockService.GetFlockDashboardAsync(searchTerm, barnId, status);
+        // Fallback to returning all flocks as dashboard data (service doesn't provide filtered dashboard)
+        var data = await _flockService.GetAllFlocksAsync();
         return Ok(new { Success = true, Data = data });
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetDetail(int id)
     {
-        var data = await _flockService.GetFlockDetailAsync(id);
+        var data = await _flockService.GetFlockByIdAsync(id);
         return data != null ? Ok(new { Success = true, Data = data }) : NotFound();
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] FlockChicken flock, [FromQuery] int barnId)
-    {
-        var res = await _flockService.CreateFlockAsync(flock, barnId);
-        return res ? Ok(new { Message = "Created" }) : BadRequest();
-    }
+    //[HttpPost]
+    //public async Task<IActionResult> Create([FromBody] FlockChicken flock, [FromQuery] int barnId)
+    //{
+    //    var res = await _flockService.CreateFlockAsync(flock, barnId);
+    //    return res ? Ok(new { Message = "Created" }) : BadRequest();
+    //}
 
-    [HttpPut]
-    public async Task<IActionResult> Update([FromBody] FlockChicken flock)
-    {
-        var res = await _flockService.UpdateFlockAsync(flock);
-        return res ? Ok(new { Message = "Updated" }) : BadRequest();
-    }
+    //[HttpPut]
+    //public async Task<IActionResult> Update([FromBody] FlockChicken flock)
+    //{
+    //    var res = await _flockService.UpdateFlockAsync(flock);
+    //    return res ? Ok(new { Message = "Updated" }) : BadRequest();
+    //}
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
@@ -57,7 +58,7 @@ public class FlockController : ControllerBase
         return res ? Ok(new { Message = "Deleted" }) : NotFound();
     }
 
-    [HttpPost("assign-ids/{id}")]
+    [HttpPost("assign-flock-to-largeBarn")]
     public async Task<IActionResult> AssignIds([FromBody] AsssignToLargeChickRequest model)
     {
         //var res = await _flockService.AssignIdsToLargeChickensAsync(id);
@@ -83,20 +84,58 @@ public class FlockController : ControllerBase
             IsActive = true
         };
 
-        await _largeChickenService.CreateAsync(largeChicken);
-        var chickenLid = ;
+        var chickenLid = await _largeChickenService.CreateAsync(largeChicken);
+        if (chickenLid <= 0)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 500,
+                Data = null,
+                Description = "Failed to assign - could not create LargeChicken"
+            };
+            return StatusCode(500, error);
+        }
 
         var chickenBarn = new ChickenBarn
         {
             BarnId = model.BarnId,
-            ChickenLid = ,
+            ChickenLid = chickenLid,
             StartDate = DateOnly.FromDateTime(DateTime.Now),
             Note = model.Note,
             Status = "active"
         };
 
-        await _chickenBarnService.CreateAsync(chickenBarn);
+        var result = await _chickenBarnService.CreateAsync(chickenBarn);
+        if (result == 0)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 500,
+                Data = null,
+                Description = "Failed to assign - could not create ChickenBarn"
+            };
+            return BadRequest(error);
+        }
 
-        
+        var flockUpdateResult = new AssignFlockToLargeChickResponse
+        {
+            flockId = model.FlockId,
+            ChickenLid = chickenLid,
+            ChickenLName = largeChicken.Name,
+            barnId = model.BarnId,
+            CBarnStatus = chickenBarn.Status,
+            StartDate = chickenBarn.StartDate
+        };
+
+        var success = new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = flockUpdateResult,
+            Description = "Successfully assigned"
+        };
+        return Ok(success);
     }
 }
