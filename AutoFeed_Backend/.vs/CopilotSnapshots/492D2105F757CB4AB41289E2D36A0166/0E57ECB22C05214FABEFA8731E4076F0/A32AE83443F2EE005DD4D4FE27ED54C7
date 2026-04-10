@@ -49,9 +49,7 @@ public class LargeChickenService : ILargeChickenService
     {
         entity.IsActive = true;
         _unitOfWork.LargeChickens.PrepareCreate(entity);
-        var result = await _unitOfWork.SaveChangesWithTransactionAsync();
-        // If save succeeded, EF will populate entity.ChickenLid — return it so callers get the new id
-        return result > 0 ? entity.ChickenLid : 0;
+        return await _unitOfWork.SaveChangesWithTransactionAsync();
     }
 
     public async Task<bool> UpdateAsync(LargeChicken entity)
