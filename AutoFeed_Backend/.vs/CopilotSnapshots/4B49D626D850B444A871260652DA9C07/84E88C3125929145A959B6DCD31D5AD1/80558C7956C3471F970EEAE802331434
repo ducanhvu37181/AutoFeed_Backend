@@ -59,7 +59,7 @@ namespace AutoFeed_Backend.Controllers
                 Status = true,
                 HttpCode = 200,
                 Data = response,
-                Description = "Add sucessfully!!"
+                Description = "Thêm thành công!"
             });
         }
 
@@ -107,21 +107,9 @@ namespace AutoFeed_Backend.Controllers
         {
             var result = await _foodService.DeleteFoodAsync(id);
             if (result)
-                return Ok(new ApiResponse<object>
-                {
-                    Status = true,
-                    HttpCode = 200,
-                    Data = null,
-                    Description = "Food item deleted successfully!"
-                });
+                return Ok(new { message = "Food item deleted successfully!" });
 
-            return NotFound(new ApiResponse<object>
-            {
-                Status = false,
-                HttpCode = 404,
-                Data = null,
-                Description = "Food item not found!"
-            });
+            return NotFound(new { message = "Food item not found!" });
         }
     }
 }
