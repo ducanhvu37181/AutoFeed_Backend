@@ -169,7 +169,7 @@ public class ReportController : ControllerBase
 
     [HttpPost]
     [Consumes("multipart/form-data")]
-    public async Task<IActionResult> CreateReport([FromForm] CreateReportRequest model, IFormFile? file, [FromServices] IConfiguration config)
+    public async Task<IActionResult> CreateReport([FromForm] CreateReportRequest model, [FromServices] IConfiguration config)
     {
         // If caller sent application/json instead of multipart/form-data, try to deserialize JSON body as fallback
         if (model == null)
@@ -194,7 +194,7 @@ public class ReportController : ControllerBase
 
         string? url = null;
 
-        var uploadFile = file ?? model?.File;
+        var uploadFile = model?.File;
         if (uploadFile != null && uploadFile.Length > 0)
         {
             var allowedExt = new[] { ".jpg", ".jpeg", ".png", ".gif", ".pdf", ".doc", ".docx", ".xlsx", ".mp4", ".mp3" };
