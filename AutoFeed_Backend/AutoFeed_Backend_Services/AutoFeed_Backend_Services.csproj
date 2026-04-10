@@ -21,7 +21,4 @@
   <ItemGroup>
     <None Remove="Models\Requests\" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\Requests\" />
-  </ItemGroup>
 </Project>

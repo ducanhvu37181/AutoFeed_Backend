@@ -20,6 +20,7 @@ public class UnitOfWork : IUnitOfWork
     private FlockRepository _flockRepository;
     private InventoryRepository _inventoryRepository;
     private ReportRepository _reportRepository;
+    private DataIoTRepository _dataIoTRepository;
 
     public UnitOfWork() => _context ??= new AutoFeedDBContext();
 
@@ -79,6 +80,10 @@ public class UnitOfWork : IUnitOfWork
     public ReportRepository Reports
     {
         get { return _reportRepository ??= new ReportRepository(_context); }
+    }
+    public DataIoTRepository DataIoTs
+    {
+        get { return _dataIoTRepository ??= new DataIoTRepository(_context); }
     }
     public int SaveChangesWithTransaction()
     {
