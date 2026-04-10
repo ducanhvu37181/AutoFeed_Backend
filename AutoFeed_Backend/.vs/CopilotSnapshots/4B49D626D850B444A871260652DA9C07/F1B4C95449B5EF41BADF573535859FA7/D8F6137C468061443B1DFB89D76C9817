@@ -93,7 +93,7 @@ public class RequestController : ControllerBase
     [Consumes("multipart/form-data")]
     // Accept multipart/form-data so callers can upload a file. The file will be uploaded to
     // Firebase Storage and the returned URL saved in the request's Url field.
-    public async Task<IActionResult> Create([FromForm] CreateRequestRequest model, IFormFile? file, [FromServices] IConfiguration config)
+    public async Task<IActionResult> Create([FromForm] CreateRequestRequest model, IFormFile file, [FromServices] IConfiguration config)
     {
         // If caller sent application/json instead of multipart/form-data, the model will be null here.
         // Try to read and deserialize JSON body as a fallback so file upload remains optional.
@@ -125,8 +125,7 @@ public class RequestController : ControllerBase
         };
 
         // if a file was uploaded, upload it to Firebase and set entity.Url
-        var fileToUse = file ?? model?.File;
-        if (fileToUse != null && fileToUse.Length > 0)
+        if (file != null && file.Length > 0)
         {
             var bucket = config.GetValue<string>("Firebase:Bucket");
             var saPath = config.GetValue<string>("Firebase:ServiceAccountPath");
@@ -135,7 +134,7 @@ public class RequestController : ControllerBase
 
             try
             {
-                var url = await FirebaseStorageHelper.UploadFileAndGetSignedUrlAsync(fileToUse, bucket, saPath, TimeSpan.FromDays(30));
+                var url = await FirebaseStorageHelper.UploadFileAndGetSignedUrlAsync(file, bucket, saPath, TimeSpan.FromDays(30));
                 entity.Url = url;
             }
             catch (Exception ex)

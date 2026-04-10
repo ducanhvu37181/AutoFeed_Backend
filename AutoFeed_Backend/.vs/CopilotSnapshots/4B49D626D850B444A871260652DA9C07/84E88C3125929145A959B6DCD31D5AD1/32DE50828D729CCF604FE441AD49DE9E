@@ -5,7 +5,5 @@
         public int UserId { get; set; }
         public string Type { get; set; }
         public string? Description { get; set; }
-        // Optional file upload (multipart/form-data). Null when caller sends JSON or no file.
-        public Microsoft.AspNetCore.Http.IFormFile? File { get; set; }
     }
 }
