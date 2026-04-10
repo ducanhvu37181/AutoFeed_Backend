@@ -99,6 +99,13 @@ public static class ServiceProvider
         return services;
     }
 
+    public static IServiceCollection AddDataIoTServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IDataIoTService, DataIoTService>();
+        return services;
+    }
+
     public static IServiceCollection AddServiceProvider(this IServiceCollection services)
     {
         services.AddTaskServices();
@@ -114,6 +121,7 @@ public static class ServiceProvider
         services.AddReportServices();
         services.AddDashboardTechServices();
         services.AddFeedingRuleServices(); 
+        services.AddDataIoTServices();
 
         return services;
     }

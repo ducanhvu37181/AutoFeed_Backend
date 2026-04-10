@@ -1,0 +1,49 @@
+using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Repositories.BasicRepo;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace AutoFeed_Backend_Repositories.Repositories;
+
+public class DataIoTRepository : GenericRepository<DataIoT>
+{
+    public DataIoTRepository() : base() { }
+    public DataIoTRepository(AutoFeedDBContext context) : base(context) { }
+
+    public async Task<int> CreateAsync(DataIoT entity)
+    {
+        _context.DataIoTs.Add(entity);
+        return await _context.SaveChangesAsync();
+    }
+
+    public async Task<int> GetNextSequenceNumberAsync(int deviceId, DateTime? date, string? description)
+    {
+        var d = date?.Date ?? DateTime.Now.Date;
+        var desc = description ?? string.Empty;
+        var next = await _context.DataIoTs
+            .Where(x => x.DeviceId == deviceId
+                        && x.RecordDate.HasValue && x.RecordDate.Value.Date == d
+                        && ((x.Description ?? string.Empty) == desc))
+            .MaxAsync(x => (int?)x.SequenceNumber);
+        return (next ?? 0) + 1;
+    }
+
+    public async Task<List<DataIoT>> GetAllAsync()
+    {
+        return await _context.DataIoTs
+            .Include(d => d.Device)
+            .ToListAsync();
+    }
+
+    public async Task<int> RemoveByDateAsync(DateTime date)
+    {
+        var d = date.Date;
+        var items = _context.DataIoTs.Where(x => x.RecordDate.HasValue && x.RecordDate.Value.Date == d);
+        var count = await items.CountAsync();
+        if (count == 0) return 0;
+        _context.DataIoTs.RemoveRange(items);
+        return await _context.SaveChangesAsync();
+    }
+}

@@ -1,0 +1,63 @@
+using AutoFeed_Backend_Services.Interfaces;
+using AutoFeed_Backend_Repositories.UnitOfWork;
+using AutoFeed_Backend_DAO.Models;
+using System;
+using System.Threading.Tasks;
+
+namespace AutoFeed_Backend_Services.Services;
+
+public class DataIoTService : IDataIoTService
+{
+    private readonly IUnitOfWork _unitOfWork;
+
+    public DataIoTService()
+    {
+        _unitOfWork = new UnitOfWork();
+    }
+
+    public DataIoTService(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<(int BarnId, string DeviceName, decimal Value, string? Description, DateTime RecordDate, int SequenceNumber)?> AddDataAsync(int barnId, int deviceId, decimal value, string? description)
+    {
+        var device = await _unitOfWork.IoTDevices.GetByIdAsync(deviceId);
+        if (device == null) return null;
+
+        var recordDate = DateTime.Now;
+        var seq = await _unitOfWork.DataIoTs.GetNextSequenceNumberAsync(deviceId, recordDate, description);
+
+        var entity = new DataIoT
+        {
+            BarnId = barnId,
+            DeviceId = deviceId,
+            Value = value,
+            Description = description,
+            RecordDate = recordDate,
+            SequenceNumber = seq
+        };
+
+        var r = await _unitOfWork.DataIoTs.CreateAsync(entity);
+        if (r <= 0) return null;
+
+        return (entity.BarnId, device.Name, entity.Value, entity.Description, entity.RecordDate ?? DateTime.Now, entity.SequenceNumber);
+    }
+
+    public async Task<System.Collections.Generic.List<(int BarnId, string DeviceName, decimal Value, string? Description, DateTime RecordDate, int SequenceNumber)>> GetAllAsync()
+    {
+        var list = await _unitOfWork.DataIoTs.GetAllAsync();
+        var result = new System.Collections.Generic.List<(int, string, decimal, string?, DateTime, int)>();
+        foreach (var d in list)
+        {
+            var name = d.Device?.Name ?? string.Empty;
+            result.Add((d.BarnId, name, d.Value, d.Description, d.RecordDate ?? DateTime.Now, d.SequenceNumber));
+        }
+        return result;
+    }
+
+    public async Task<int> RemoveByDateAsync(DateTime date)
+    {
+        return await _unitOfWork.DataIoTs.RemoveByDateAsync(date);
+    }
+}
