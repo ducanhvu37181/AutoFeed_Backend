@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|c:\\users\\admin\\documents\\github\\autofeed_backend\\autofeed_backend\\autofeed_backend\\controllers\\devicecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|solutionrelative:autofeed_backend\\controllers\\devicecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{728A6B3D-5500-4959-853D-70F8A182D313}|AutoFeed_Backend_Repositories\\AutoFeed_Backend_Repositories.csproj|c:\\users\\admin\\documents\\github\\autofeed_backend\\autofeed_backend\\autofeed_backend_repositories\\repositories\\foodrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{728A6B3D-5500-4959-853D-70F8A182D313}|AutoFeed_Backend_Repositories\\AutoFeed_Backend_Repositories.csproj|solutionrelative:autofeed_backend_repositories\\repositories\\foodrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{75F34F6C-E112-48BB-BECC-EF377125B027}|AutoFeed_Backend_Services\\AutoFeed_Backend_Services.csproj|c:\\users\\admin\\documents\\github\\autofeed_backend\\autofeed_backend\\autofeed_backend_services\\services\\flockservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{75F34F6C-E112-48BB-BECC-EF377125B027}|AutoFeed_Backend_Services\\AutoFeed_Backend_Services.csproj|solutionrelative:autofeed_backend_services\\services\\flockservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -15,20 +23,20 @@
       "RelativeMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|solutionrelative:autofeed_backend\\controllers\\reportcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{75F34F6C-E112-48BB-BECC-EF377125B027}|AutoFeed_Backend_Services\\AutoFeed_Backend_Services.csproj|c:\\users\\admin\\documents\\github\\autofeed_backend\\autofeed_backend\\autofeed_backend_services\\interfaces\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75F34F6C-E112-48BB-BECC-EF377125B027}|AutoFeed_Backend_Services\\AutoFeed_Backend_Services.csproj|solutionrelative:autofeed_backend_services\\interfaces\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{75F34F6C-E112-48BB-BECC-EF377125B027}|AutoFeed_Backend_Services\\AutoFeed_Backend_Services.csproj|c:\\users\\admin\\documents\\github\\autofeed_backend\\autofeed_backend\\autofeed_backend_services\\services\\foodservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75F34F6C-E112-48BB-BECC-EF377125B027}|AutoFeed_Backend_Services\\AutoFeed_Backend_Services.csproj|solutionrelative:autofeed_backend_services\\services\\foodservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|c:\\users\\admin\\documents\\github\\autofeed_backend\\autofeed_backend\\autofeed_backend\\controllers\\schedulecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|solutionrelative:autofeed_backend\\controllers\\schedulecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|c:\\users\\admin\\documents\\github\\autofeed_backend\\autofeed_backend\\autofeed_backend\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|solutionrelative:autofeed_backend\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{75F34F6C-E112-48BB-BECC-EF377125B027}|AutoFeed_Backend_Services\\AutoFeed_Backend_Services.csproj|c:\\users\\admin\\documents\\github\\autofeed_backend\\autofeed_backend\\autofeed_backend_services\\interfaces\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75F34F6C-E112-48BB-BECC-EF377125B027}|AutoFeed_Backend_Services\\AutoFeed_Backend_Services.csproj|solutionrelative:autofeed_backend_services\\interfaces\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|c:\\users\\admin\\documents\\github\\autofeed_backend\\autofeed_backend\\autofeed_backend\\controllers\\devicecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|solutionrelative:autofeed_backend\\controllers\\devicecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|c:\\users\\admin\\documents\\github\\autofeed_backend\\autofeed_backend\\autofeed_backend\\models\\responses\\apiresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -51,20 +59,12 @@
       "RelativeMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|solutionrelative:autofeed_backend\\models\\responses\\scheduleresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|c:\\users\\admin\\documents\\github\\autofeed_backend\\autofeed_backend\\autofeed_backend\\controllers\\foodcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|solutionrelative:autofeed_backend\\controllers\\foodcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|c:\\users\\admin\\documents\\github\\autofeed_backend\\autofeed_backend\\autofeed_backend\\controllers\\barncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|solutionrelative:autofeed_backend\\controllers\\barncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{55048197-0AF7-4F8A-8F76-5FF9256D7261}|AutoFeed_Backend_DAO\\AutoFeed_Backend_DAO.csproj|c:\\users\\admin\\documents\\github\\autofeed_backend\\autofeed_backend\\autofeed_backend_dao\\models\\iotdevice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{55048197-0AF7-4F8A-8F76-5FF9256D7261}|AutoFeed_Backend_DAO\\AutoFeed_Backend_DAO.csproj|solutionrelative:autofeed_backend_dao\\models\\iotdevice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{75F34F6C-E112-48BB-BECC-EF377125B027}|AutoFeed_Backend_Services\\AutoFeed_Backend_Services.csproj|c:\\users\\admin\\documents\\github\\autofeed_backend\\autofeed_backend\\autofeed_backend_services\\services\\foodservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75F34F6C-E112-48BB-BECC-EF377125B027}|AutoFeed_Backend_Services\\AutoFeed_Backend_Services.csproj|solutionrelative:autofeed_backend_services\\services\\foodservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|c:\\users\\admin\\documents\\github\\autofeed_backend\\autofeed_backend\\autofeed_backend\\controllers\\feedingrulecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -309,32 +309,71 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "ScheduleController.cs",
-              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\ScheduleController.cs",
-              "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\ScheduleController.cs",
-              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\ScheduleController.cs",
-              "RelativeToolTip": "AutoFeed_Backend\\Controllers\\ScheduleController.cs",
-              "ViewState": "AgIAAGoAAAAAAAAAAAAAADsAAAAUAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "FoodRepository.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Repositories\\Repositories\\FoodRepository.cs",
+              "RelativeDocumentMoniker": "AutoFeed_Backend_Repositories\\Repositories\\FoodRepository.cs",
+              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Repositories\\Repositories\\FoodRepository.cs",
+              "RelativeToolTip": "AutoFeed_Backend_Repositories\\Repositories\\FoodRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-16T12:47:56.541Z",
+              "WhenOpened": "2026-04-10T02:47:56.673Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "UsersController.cs",
-              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\UsersController.cs",
-              "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\UsersController.cs",
-              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\UsersController.cs",
-              "RelativeToolTip": "AutoFeed_Backend\\Controllers\\UsersController.cs",
-              "ViewState": "AgIAADkAAAAAAAAAAAAYwEgAAAAdAAAAAAAAAA==",
+              "Title": "ReportController.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\ReportController.cs",
+              "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\ReportController.cs",
+              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\ReportController.cs",
+              "RelativeToolTip": "AutoFeed_Backend\\Controllers\\ReportController.cs",
+              "ViewState": "AgIAAGMAAAAAAAAAAAAuwG0AAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-17T08:02:11.428Z",
+              "WhenOpened": "2026-04-09T04:23:16.948Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "FlockController.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\FlockController.cs",
+              "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\FlockController.cs",
+              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\FlockController.cs",
+              "RelativeToolTip": "AutoFeed_Backend\\Controllers\\FlockController.cs",
+              "ViewState": "AgIAABAAAAAAAAAAAAAQwBUAAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-09T14:28:01.386Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "FlockService.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\FlockService.cs",
+              "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\FlockService.cs",
+              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\FlockService.cs",
+              "RelativeToolTip": "AutoFeed_Backend_Services\\Services\\FlockService.cs",
+              "ViewState": "AgIAABgAAAAAAAAAAAAvwC0AAABpAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-07T16:35:23.995Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "DeviceController.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\DeviceController.cs",
+              "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\DeviceController.cs",
+              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\DeviceController.cs",
+              "RelativeToolTip": "AutoFeed_Backend\\Controllers\\DeviceController.cs",
+              "ViewState": "AgIAADsAAAAAAAAAAAAgwBUAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-01T07:12:27.04Z",
               "EditorCaption": ""
             },
             {
@@ -352,59 +391,44 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "ReportController.cs",
-              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\ReportController.cs",
-              "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\ReportController.cs",
-              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\ReportController.cs",
-              "RelativeToolTip": "AutoFeed_Backend\\Controllers\\ReportController.cs",
-              "ViewState": "AgIAAGMAAAAAAAAAAAAuwG0AAAAhAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-09T04:23:16.948Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "FlockController.cs",
-              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\FlockController.cs",
-              "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\FlockController.cs",
-              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\FlockController.cs",
-              "RelativeToolTip": "AutoFeed_Backend\\Controllers\\FlockController.cs",
-              "ViewState": "AgIAABAAAAAAAAAAAAAQwBUAAAA9AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-09T14:28:01.386Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "FlockService.cs",
-              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\FlockService.cs",
-              "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\FlockService.cs",
-              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\FlockService.cs*",
-              "RelativeToolTip": "AutoFeed_Backend_Services\\Services\\FlockService.cs*",
-              "ViewState": "AgIAABgAAAAAAAAAAAAvwC0AAABpAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-07T16:35:23.995Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 6,
-              "Title": "DeviceController.cs",
-              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\DeviceController.cs",
-              "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\DeviceController.cs",
-              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\DeviceController.cs",
-              "RelativeToolTip": "AutoFeed_Backend\\Controllers\\DeviceController.cs",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAUwBsAAAAaAAAAAAAAAA==",
+              "Title": "FoodService.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\FoodService.cs",
+              "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\FoodService.cs",
+              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\FoodService.cs",
+              "RelativeToolTip": "AutoFeed_Backend_Services\\Services\\FoodService.cs",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAvwBEAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-01T07:12:27.04Z",
+              "WhenOpened": "2026-04-09T15:21:57.527Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "UsersController.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\UsersController.cs",
+              "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\UsersController.cs",
+              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\UsersController.cs",
+              "RelativeToolTip": "AutoFeed_Backend\\Controllers\\UsersController.cs",
+              "ViewState": "AgIAADkAAAAAAAAAAAAYwEgAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-17T08:02:11.428Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 7,
+              "Title": "ScheduleController.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\ScheduleController.cs",
+              "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\ScheduleController.cs",
+              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\ScheduleController.cs",
+              "RelativeToolTip": "AutoFeed_Backend\\Controllers\\ScheduleController.cs",
+              "ViewState": "AgIAAGoAAAAAAAAAAAAAADsAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-16T12:47:56.541Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
               "Title": "ApiResponse.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Models\\Responses\\ApiResponse.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Models\\Responses\\ApiResponse.cs",
@@ -412,12 +436,11 @@
               "RelativeToolTip": "AutoFeed_Backend\\Models\\Responses\\ApiResponse.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAuwAIAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-09T16:25:57.048Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-09T16:25:57.048Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 10,
               "Title": "UserService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\UserService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\UserService.cs",
@@ -425,12 +448,11 @@
               "RelativeToolTip": "AutoFeed_Backend_Services\\Services\\UserService.cs",
               "ViewState": "AgIAADIAAAAAAAAAAAAgwAQAAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-23T09:17:33.597Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-23T09:17:33.597Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 11,
               "Title": "ScheduleService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\ScheduleService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\ScheduleService.cs",
@@ -438,12 +460,11 @@
               "RelativeToolTip": "AutoFeed_Backend_Services\\Services\\ScheduleService.cs",
               "ViewState": "AgIAANsAAAAAAAAAAIAwwNoAAAA1AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-16T12:57:08.182Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-16T12:57:08.182Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 12,
               "Title": "IScheduleService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Interfaces\\IScheduleService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Interfaces\\IScheduleService.cs",
@@ -451,25 +472,11 @@
               "RelativeToolTip": "AutoFeed_Backend_Services\\Interfaces\\IScheduleService.cs",
               "ViewState": "AgIAABEAAAAAAAAAAAA2wCAAAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-16T12:48:22.844Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-16T12:48:22.844Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "FoodController.cs",
-              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\FoodController.cs",
-              "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\FoodController.cs",
-              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\FoodController.cs",
-              "RelativeToolTip": "AutoFeed_Backend\\Controllers\\FoodController.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAwwBIAAAAxAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-15T16:38:24.73Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 14,
               "Title": "BarnController.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\BarnController.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\BarnController.cs",
@@ -477,12 +484,11 @@
               "RelativeToolTip": "AutoFeed_Backend\\Controllers\\BarnController.cs",
               "ViewState": "AgIAAHcAAAAAAAAAAAAAwFkAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-03T14:12:48.75Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-03T14:12:48.75Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 13,
               "Title": "ScheduleResponse.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Models\\Responses\\ScheduleResponse.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Models\\Responses\\ScheduleResponse.cs",
@@ -490,12 +496,11 @@
               "RelativeToolTip": "AutoFeed_Backend\\Models\\Responses\\ScheduleResponse.cs",
               "ViewState": "AgIAAAQAAAAAAAAAAAAwwBQAAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-23T14:30:25.098Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-23T14:30:25.098Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 15,
               "Title": "IoTDevice.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_DAO\\Models\\IoTDevice.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_DAO\\Models\\IoTDevice.cs",
@@ -503,21 +508,7 @@
               "RelativeToolTip": "AutoFeed_Backend_DAO\\Models\\IoTDevice.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-09T15:27:29.749Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
-              "Title": "FoodService.cs",
-              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\FoodService.cs",
-              "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\FoodService.cs",
-              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\FoodService.cs",
-              "RelativeToolTip": "AutoFeed_Backend_Services\\Services\\FoodService.cs",
-              "ViewState": "AgIAAA0AAAAAAAAAAAAQwBoAAAA3AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-09T15:21:57.527Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-09T15:27:29.749Z"
             },
             {
               "$type": "Document",
@@ -529,8 +520,7 @@
               "RelativeToolTip": "AutoFeed_Backend\\Controllers\\FeedingRuleController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-09T15:16:20.905Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-09T15:16:20.905Z"
             },
             {
               "$type": "Document",
@@ -542,8 +532,7 @@
               "RelativeToolTip": "AutoFeed_Backend_DAO\\Models\\BarnIoTDevice.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-09T15:17:21.784Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-09T15:17:21.784Z"
             },
             {
               "$type": "Document",
@@ -555,8 +544,7 @@
               "RelativeToolTip": "AutoFeed_Backend_Services\\Services\\IoTDeviceService.cs",
               "ViewState": "AgIAAAMAAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-24T04:00:17.742Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-24T04:00:17.742Z"
             },
             {
               "$type": "Document",
@@ -568,8 +556,7 @@
               "RelativeToolTip": "AutoFeed_Backend\\Controllers\\AuthController.cs",
               "ViewState": "AgIAAAMAAAAAAAAAAAAAABIAAAAxAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-09T03:06:35.849Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-09T03:06:35.849Z"
             },
             {
               "$type": "Document",
@@ -581,8 +568,7 @@
               "RelativeToolTip": "AutoFeed_Backend\\Models\\Responses\\UserResponse.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-23T14:30:29.517Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-23T14:30:29.517Z"
             },
             {
               "$type": "Document",
@@ -594,8 +580,7 @@
               "RelativeToolTip": "AutoFeed_Backend_Services\\Services\\AuthService.cs",
               "ViewState": "AgIAABwAAAAAAAAAAADgvy8AAAAxAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-23T09:17:50.791Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-23T09:17:50.791Z"
             },
             {
               "$type": "Document",
@@ -607,8 +592,7 @@
               "RelativeToolTip": "AutoFeed_Backend\\Controllers\\LargeChickensController.cs",
               "ViewState": "AgIAADoAAAAAAAAAAAA5wAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-09T14:27:43.381Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-09T14:27:43.381Z"
             },
             {
               "$type": "Document",
@@ -620,8 +604,7 @@
               "RelativeToolTip": "AutoFeed_Backend_Services\\Services\\DashboardTechService.cs",
               "ViewState": "AgIAAA0AAAAAAAAAAAAzwCEAAAAjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-09T14:23:25.453Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-09T14:23:25.453Z"
             },
             {
               "$type": "Document",
@@ -633,8 +616,7 @@
               "RelativeToolTip": "AutoFeed_Backend\\Controllers\\DashboardTechController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAqAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-09T14:23:08.779Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-09T14:23:08.779Z"
             },
             {
               "$type": "Document",
@@ -646,8 +628,7 @@
               "RelativeToolTip": "AutoFeed_Backend_Services\\Interfaces\\IBarnService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-09T13:57:28.977Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-09T13:57:28.977Z"
             },
             {
               "$type": "Document",
@@ -659,8 +640,7 @@
               "RelativeToolTip": "AutoFeed_Backend_Services\\Services\\BarnService..cs",
               "ViewState": "AgIAACAAAAAAAAAAAAArwBMAAABLAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-23T08:38:14.061Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-23T08:38:14.061Z"
             },
             {
               "$type": "Document",
@@ -672,8 +652,7 @@
               "RelativeToolTip": "AutoFeed_Backend_Repositories\\UnitOfWork\\UnitOfWork.cs",
               "ViewState": "AgIAAGYAAAAAAAAAAIAwwHYAAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-16T12:45:40.357Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-16T12:45:40.357Z"
             },
             {
               "$type": "Document",

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AutoFeed_Backend.Models.Requests.Device;
 using AutoFeed_Backend_Services.Interfaces;
+using AutoFeed_Backend.Models.Responses;
 
 namespace AutoFeed_Backend.Controllers
 {
@@ -19,7 +20,13 @@ namespace AutoFeed_Backend.Controllers
         public async Task<IActionResult> GetAll(string? search, string? type, string? status)
         {
             var result = await _deviceService.GetAllDevicesAsync(search ?? "", type ?? "", status ?? "");
-            return Ok(result);
+            return Ok(new ApiResponse<object>
+            {
+                Status = true,
+                HttpCode = 200,
+                Data = result,
+                Description = "Devices retrieved successfully."
+            });
         }
 
         [HttpPost]
@@ -27,22 +34,52 @@ namespace AutoFeed_Backend.Controllers
         {
             var success = await _deviceService.RegisterDeviceAsync(request.Name, request.Description);
             if (success)
-                return Ok(new { message = "Device registered successfully!" });
+                return Ok(new ApiResponse<object>
+                {
+                    Status = true,
+                    HttpCode = 200,
+                    Data = null,
+                    Description = "Device registered successfully!"
+                });
 
-            return BadRequest(new { message = "Failed to register device." });
+            return BadRequest(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Failed to register device."
+            });
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] DeviceUpdateRequest request)
         {
             if (id != request.DeviceID)
-                return BadRequest(new { message = "ID mismatch!" });
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "ID mismatch!"
+                });
 
             var success = await _deviceService.UpdateDeviceAsync(id, request.Name, request.Description, request.Status);
             if (success)
-                return Ok(new { message = "Device updated successfully!" });
+                return Ok(new ApiResponse<object>
+                {
+                    Status = true,
+                    HttpCode = 200,
+                    Data = null,
+                    Description = "Device updated successfully!"
+                });
 
-            return NotFound(new { message = "Device not found." });
+            return NotFound(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 404,
+                Data = null,
+                Description = "Device not found."
+            });
         }
 
         [HttpPut("{id}/assign-barn")]
@@ -50,9 +87,21 @@ namespace AutoFeed_Backend.Controllers
         {
             var success = await _deviceService.ReassignDeviceAsync(id, request.BarnID);
             if (success)
-                return Ok(new { message = $"Device {id} assigned to barn {request.BarnID} successfully!" });
+                return Ok(new ApiResponse<object>
+                {
+                    Status = true,
+                    HttpCode = 200,
+                    Data = null,
+                    Description = $"Device {id} assigned to barn {request.BarnID} successfully!"
+                });
 
-            return BadRequest(new { message = "Assignment failed." });
+            return BadRequest(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Assignment failed."
+            });
         }
 
         [HttpDelete("{id}")]
@@ -60,9 +109,21 @@ namespace AutoFeed_Backend.Controllers
         {
             var success = await _deviceService.DeleteDeviceAsync(id);
             if (success)
-                return Ok(new { message = "Device deleted successfully!" });
+                return Ok(new ApiResponse<object>
+                {
+                    Status = true,
+                    HttpCode = 200,
+                    Data = null,
+                    Description = "Device deleted successfully!"
+                });
 
-            return NotFound(new { message = "Device not found for deletion." });
+            return NotFound(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 404,
+                Data = null,
+                Description = "Device not found for deletion."
+            });
         }
     }
 }
