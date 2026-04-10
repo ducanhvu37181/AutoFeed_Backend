@@ -1,4 +1,6 @@
-﻿using AutoFeed_Backend_DAO.Models;
+﻿using AutoFeed_Backend.Models.Requests.Flock;
+using AutoFeed_Backend.Models.Responses;
+using AutoFeed_Backend_DAO.Models;
 using AutoFeed_Backend_Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -10,10 +12,14 @@ namespace AutoFeed_Backend.Controllers;
 public class FlockController : ControllerBase
 {
     private readonly IFlockService _flockService;
+    private readonly ILargeChickenService _largeChickenService;
+    private readonly IChickenBarnService _chickenBarnService;
 
-    public FlockController(IFlockService flockService)
+    public FlockController(IFlockService flockService, ILargeChickenService largeChickenService, IChickenBarnService chickenBarnService)
     {
         _flockService = flockService;
+        _largeChickenService = largeChickenService;
+        _chickenBarnService = chickenBarnService;
     }
 
     [HttpGet("dashboard")]
@@ -52,9 +58,45 @@ public class FlockController : ControllerBase
     }
 
     [HttpPost("assign-ids/{id}")]
-    public async Task<IActionResult> AssignIds(int id)
+    public async Task<IActionResult> AssignIds([FromBody] AsssignToLargeChickRequest model)
     {
-        var res = await _flockService.AssignIdsToLargeChickensAsync(id);
-        return res ? Ok(new { Message = "Assigned" }) : BadRequest();
+        //var res = await _flockService.AssignIdsToLargeChickensAsync(id);
+        if (model == null)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Invalid request"
+            };
+            return BadRequest(error);
+        }
+
+        var largeChicken = new LargeChicken
+        {
+            FlockId = model.FlockId,
+            Name = "LChikenFromFlock" + model.FlockId.ToString(),
+            Weight = 0,
+            HealthStatus = "Healthy",
+            Note = model.Note,
+            IsActive = true
+        };
+
+        await _largeChickenService.CreateAsync(largeChicken);
+        var chickenLid = ;
+
+        var chickenBarn = new ChickenBarn
+        {
+            BarnId = model.BarnId,
+            ChickenLid = ,
+            StartDate = DateOnly.FromDateTime(DateTime.Now),
+            Note = model.Note,
+            Status = "active"
+        };
+
+        await _chickenBarnService.CreateAsync(chickenBarn);
+
+        
     }
 }
