@@ -1,139 +1,162 @@
 ﻿using AutoFeed_Backend_DAO.Models;
 using AutoFeed_Backend_Repositories.UnitOfWork;
 using AutoFeed_Backend_Services.Interfaces;
-using System;
+using AutoFeed_Backend.Models.Requests.Flock;
+using AutoFeed_Backend.Models.Responses;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System;
 
-namespace AutoFeed_Backend_Services.Services;
-
-public class FlockService : IFlockService
+namespace AutoFeed_Backend_Services.Services
 {
-    private readonly IUnitOfWork _unitOfWork;
-
-    public FlockService(IUnitOfWork unitOfWork)
+    public class FlockService : IFlockService
     {
-        _unitOfWork = unitOfWork;
-    }
+        private readonly IUnitOfWork _unitOfWork;
 
-    public async Task<IEnumerable<object>> GetFlockDashboardAsync(string? searchTerm, int? barnId, string? status)
-    {
-        var flocks = await _unitOfWork.Flocks.GetAllWithBarnAsync();
-        var query = flocks.AsQueryable();
-
-        if (!string.IsNullOrEmpty(searchTerm))
+        public FlockService(IUnitOfWork unitOfWork)
         {
-            query = query.Where(f => f.FlockId.ToString().Contains(searchTerm) || (f.Name != null && f.Name.Contains(searchTerm)));
+            _unitOfWork = unitOfWork;
         }
 
-        if (barnId.HasValue)
+        // 1. Get all flocks
+        public async Task<IEnumerable<FlockResponse>> GetAllFlocksAsync()
         {
-            query = query.Where(f => f.ChickenBarn != null && f.ChickenBarn.BarnId == barnId);
-        }
+            var flocks = await _unitOfWork.Flocks.GetAllAsync();
+            if (flocks == null) return Enumerable.Empty<FlockResponse>();
 
-        if (!string.IsNullOrEmpty(status) && status != "All Status")
-        {
-            query = query.Where(f => f.HealthStatus == status);
-        }
-
-        return query.Select(f => new {
-            f.FlockId,
-            f.Name,
-            HatchDate = f.DoB.ToString("yyyy-MM-dd"),
-            Age = CalculateAge(f.DoB),
-            f.Quantity,
-            NurseryBarn = (f.ChickenBarn != null && f.ChickenBarn.Barn != null) ? f.ChickenBarn.Barn.Type : "N/A",
-            Status = f.HealthStatus ?? "Healthy",
-            f.Note
-        }).ToList();
-    }
-
-    public async Task<object?> GetFlockDetailAsync(int id)
-    {
-        var flocks = await _unitOfWork.Flocks.GetAllWithBarnAsync();
-        var f = flocks.FirstOrDefault(x => x.FlockId == id);
-        if (f == null) return null;
-
-        var schedules = _unitOfWork.Schedules.GetAll()
-            .Where(s => s.CbarnId == f.ChickenBarn?.CbarnId)
-            .Select(s => new {
-                Action = (s.Description != null) ? s.Description : "Daily Action",
-                Date = s.StartDate.ToString(),
-                // ĐÃ SỬA: s.Status là string nên so sánh với chuỗi "True" hoặc "Completed"
-                Status = (s.Status == "True" || s.Status == "Completed") ? "Completed" : "Scheduled"
-            }).ToList();
-
-        int startedWith = 50;
-        decimal survivalRate = startedWith > 0 ? ((decimal)f.Quantity / startedWith) * 100 : 0;
-
-        return new
-        {
-            Header = new { f.FlockId, f.Name, Status = f.HealthStatus ?? "Healthy" },
-            MainStats = new
+            return flocks.Select(f => new FlockResponse
             {
-                CurrentBirds = f.Quantity,
-                StartedWith = startedWith,
-                Age = CalculateAge(f.DoB),
-                RaisingDate = f.DoB.ToString("yyyy-MM-dd"),
-                AvgWeight = f.Weight.ToString() + " kg",
-                GrowthStatus = "Normal growth"
-            },
-            HealthStatistics = new
-            {
-                Mortality = startedWith - f.Quantity,
-                HealthIssues = 2,
-                HealthyBirds = f.Quantity - 2,
-                SurvivalRate = survivalRate.ToString() + "%"
-            },
-            PlannedActions = schedules
-        };
-    }
-
-    public async Task<bool> CreateFlockAsync(FlockChicken flock, int barnId)
-    {
-        _unitOfWork.Flocks.PrepareCreate(flock);
-        bool res = await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
-        if (res)
-        {
-            var cb = new ChickenBarn { FlockId = flock.FlockId, BarnId = barnId, StartDate = flock.DoB, Status = "active" };
-            _unitOfWork.ChickenBarns.PrepareCreate(cb);
-            await _unitOfWork.SaveChangesWithTransactionAsync();
+                FlockId = f.FlockId,
+                Name = f.Name,
+                Quantity = f.Quantity,
+                Weight = f.Weight,
+                DoB = f.DoB,
+                HealthStatus = f.HealthStatus,
+                Note = f.Note
+            });
         }
-        return res;
-    }
 
-    public async Task<bool> UpdateFlockAsync(FlockChicken flock)
-    {
-        _unitOfWork.Flocks.PrepareUpdate(flock);
-        return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
-    }
+        // 2. Get flock by ID
+        public async Task<FlockResponse?> GetFlockByIdAsync(int id)
+        {
+            var f = await _unitOfWork.Flocks.GetByIdAsync(id);
+            if (f == null) return null;
 
-    public async Task<bool> DeleteFlockAsync(int id)
-    {
-        var flock = await _unitOfWork.Flocks.GetByIdAsync(id);
-        if (flock == null) return false;
+            return new FlockResponse
+            {
+                FlockId = f.FlockId,
+                Name = f.Name,
+                Quantity = f.Quantity,
+                Weight = f.Weight,
+                DoB = f.DoB,
+                HealthStatus = f.HealthStatus,
+                Note = f.Note
+            };
+        }
 
-        var allCB = await _unitOfWork.ChickenBarns.GetAllAsync();
-        var related = allCB.Where(x => x.FlockId == id).ToList();
-        foreach (var item in related) _unitOfWork.ChickenBarns.PrepareRemove(item);
+        // 3. Create new flock
+        public async Task<bool> CreateFlockAsync(FlockCreateRequest req)
+        {
+            try
+            {
+                var flock = new FlockChicken
+                {
+                    Name = req.Name,
+                    Quantity = req.Quantity,
+                    Weight = req.Weight,
+                    DoB = req.DoB,
+                    TransferDate = req.TransferDate,
+                    HealthStatus = req.HealthStatus ?? "Healthy",
+                    Note = req.Note
+                };
+                await _unitOfWork.Flocks.CreateAsync(flock);
+                return await _unitOfWork.SaveChangesWithTransactionAsync();
+            }
+            catch (Exception) { return false; }
+        }
 
-        _unitOfWork.Flocks.PrepareRemove(flock);
-        return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
-    }
+        // 4. Update flock information
+        public async Task<bool> UpdateFlockAsync(FlockUpdateRequest req)
+        {
+            var f = await _unitOfWork.Flocks.GetByIdAsync(req.FlockID);
+            if (f == null) return false;
 
-    public async Task<bool> AssignIdsToLargeChickensAsync(int id)
-    {
-        var flock = await _unitOfWork.Flocks.GetByIdAsync(id);
-        if (flock == null) return false;
-        flock.IsActive = false;
-        _unitOfWork.Flocks.PrepareUpdate(flock);
-        return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
-    }
+            f.Name = req.Name;
+            f.Quantity = req.Quantity;
+            f.Weight = req.Weight;
+            f.HealthStatus = req.HealthStatus;
+            f.Note = req.Note;
 
-    private string CalculateAge(DateOnly dob)
-    {
-        var days = (DateTime.Now.Date - dob.ToDateTime(TimeOnly.MinValue)).Days;
-        return days >= 7 ? (days / 7).ToString() + " weeks" : days.ToString() + " days";
+            await _unitOfWork.Flocks.UpdateAsync(f);
+            return await _unitOfWork.SaveChangesWithTransactionAsync();
+        }
+
+        // 5. Delete flock
+        public async Task<bool> DeleteFlockAsync(int id)
+        {
+            var f = await _unitOfWork.Flocks.GetByIdAsync(id);
+            if (f == null) return false;
+
+            await _unitOfWork.Flocks.RemoveAsync(f);
+            return await _unitOfWork.SaveChangesWithTransactionAsync();
+        }
+
+        // 6. UPGRADE LOGIC: Move a chicken from Flock to Large Chicken Barn
+        public async Task<bool> UpgradeToLargeChickenAsync(FlockUpgradeRequest req)
+        {
+            // Check if flock exists and has available chickens
+            var flock = await _unitOfWork.Flocks.GetByIdAsync(req.FlockID);
+            if (flock == null || flock.Quantity <= 0) return false;
+
+            // Check if target barn exists
+            var barn = await _unitOfWork.Barns.GetByIdAsync(req.BarnID);
+            if (barn == null) return false;
+
+            try
+            {
+                // 1. Create a record in LargeChicken table
+                var lc = new LargeChicken
+                {
+                    FlockId = req.FlockID,
+                    Name = req.ChickenName,
+                    Weight = req.Weight,
+                    HealthStatus = "Healthy",
+                    Note = req.Note
+                };
+                await _unitOfWork.LargeChickens.CreateAsync(lc);
+                await _unitOfWork.SaveChangesWithTransactionAsync(); // Save to get generated ChickenLid
+
+                // 2. Assign the new large chicken to a specific barn
+                var cb = new ChickenBarn
+                {
+                    BarnId = req.BarnID,
+                    ChickenLid = lc.ChickenLid,
+                    FlockId = req.FlockID,
+                    StartDate = DateTime.Now,
+                    Status = "Active",
+                    Note = $"Upgraded from flock: {flock.Name}"
+                };
+                await _unitOfWork.ChickenBarns.CreateAsync(cb);
+
+                // 3. Update the source flock: Decrease quantity by 1
+                flock.Quantity -= 1;
+
+                // If no chickens left, remove the flock record, otherwise update it
+                if (flock.Quantity <= 0)
+                    await _unitOfWork.Flocks.RemoveAsync(flock);
+                else
+                    await _unitOfWork.Flocks.UpdateAsync(flock);
+
+                // Commit all changes
+                return await _unitOfWork.SaveChangesWithTransactionAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log the error for debugging
+                Console.WriteLine("Error during chicken upgrade: " + ex.Message);
+                return false;
+            }
+        }
     }
 }

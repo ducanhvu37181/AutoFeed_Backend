@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AutoFeed_Backend_DAO\AutoFeed_Backend_DAO.csproj" />
     <ProjectReference Include="..\AutoFeed_Backend_Repositories\AutoFeed_Backend_Repositories.csproj" />
   </ItemGroup>
 
@@ -16,5 +17,11 @@
     <PackageReference Include="MailKit" Version="4.15.1" />
     <PackageReference Include="MimeKit" Version="4.15.1" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Models\Requests\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\Requests\" />
   </ItemGroup>
 </Project>
