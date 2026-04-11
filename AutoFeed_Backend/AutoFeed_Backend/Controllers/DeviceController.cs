@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using AutoFeed_Backend.Models.Requests.Device;
 using AutoFeed_Backend_Services.Interfaces;
-using AutoFeed_Backend.Models.Responses;
+using AutoFeed_Backend_Services.Models.Requests;  // Dùng Model từ Project Service
+using AutoFeed_Backend_Services.Models.Responses; // Dùng Model từ Project Service
+using AutoFeed_Backend.Models.Responses;          // Dùng ApiResponse chung của Web
 
 namespace AutoFeed_Backend.Controllers
 {
@@ -11,11 +12,13 @@ namespace AutoFeed_Backend.Controllers
     {
         private readonly IIoTDeviceService _deviceService;
 
+        // Chỉ tiêm Service vào đây, không dùng UnitOfWork ở Controller nữa
         public IoTDeviceController(IIoTDeviceService deviceService)
         {
             _deviceService = deviceService;
         }
 
+        // 1. Lấy danh sách tất cả thiết bị
         [HttpGet]
         public async Task<IActionResult> GetAll(string? search, string? type, string? status)
         {
@@ -29,6 +32,32 @@ namespace AutoFeed_Backend.Controllers
             });
         }
 
+        // 2. Lấy chi tiết thiết bị theo ID (Hàm mới Kiên yêu cầu)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var result = await _deviceService.GetDeviceByIdAsync(id);
+            if (result == null)
+            {
+                return NotFound(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 404,
+                    Data = null,
+                    Description = $"Device with ID {id} not found."
+                });
+            }
+
+            return Ok(new ApiResponse<DeviceDetailResponse>
+            {
+                Status = true,
+                HttpCode = 200,
+                Data = result,
+                Description = "Device details retrieved successfully."
+            });
+        }
+
+        // 3. Đăng ký thiết bị mới
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] DeviceCreateRequest request)
         {
@@ -51,6 +80,7 @@ namespace AutoFeed_Backend.Controllers
             });
         }
 
+        // 4. Cập nhật thông tin thiết bị
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] DeviceUpdateRequest request)
         {
@@ -82,6 +112,7 @@ namespace AutoFeed_Backend.Controllers
             });
         }
 
+        // 5. Gán thiết bị vào chuồng
         [HttpPut("{id}/assign-barn")]
         public async Task<IActionResult> AssignToBarn(int id, [FromBody] DeviceAssignRequest request)
         {
@@ -92,7 +123,7 @@ namespace AutoFeed_Backend.Controllers
                     Status = true,
                     HttpCode = 200,
                     Data = null,
-                    Description = $"Device {id} assigned to barn {request.BarnID} successfully!"
+                    Description = $"Device {id} assigned successfully!"
                 });
 
             return BadRequest(new ApiResponse<object>
@@ -104,6 +135,7 @@ namespace AutoFeed_Backend.Controllers
             });
         }
 
+        // 6. Xóa thiết bị
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

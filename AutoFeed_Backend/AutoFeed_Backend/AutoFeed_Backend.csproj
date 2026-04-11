@@ -22,9 +22,11 @@
   <ItemGroup>
     <None Remove="Models\Requests\Flock\" />
     <None Remove="Models\Requests\FeedingRuleRequest\" />
+    <None Remove="Models\Requests\IotDevice\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\Requests\Flock\" />
     <Folder Include="Models\Requests\FeedingRuleRequest\" />
+    <Folder Include="Models\Requests\IotDevice\" />
   </ItemGroup>
 </Project>

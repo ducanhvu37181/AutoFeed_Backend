@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-
+﻿using AutoFeed_Backend_Services.Models.Responses;
 namespace AutoFeed_Backend_Services.Interfaces
 {
     public interface IIoTDeviceService
@@ -10,5 +8,6 @@ namespace AutoFeed_Backend_Services.Interfaces
         Task<bool> UpdateDeviceAsync(int id, string name, string description, bool status);
         Task<bool> DeleteDeviceAsync(int id);
         Task<bool> ReassignDeviceAsync(int deviceId, int barnId);
+        Task<DeviceDetailResponse?> GetDeviceByIdAsync(int deviceId);
     }
 }

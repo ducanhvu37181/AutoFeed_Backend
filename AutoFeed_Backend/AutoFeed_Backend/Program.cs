@@ -17,7 +17,8 @@ builder.Services.AddDbContext<AutoFeedDBContext>(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddServiceProvider();
-
+builder.Services.AddScoped<AutoFeed_Backend_Repositories.UnitOfWork.IUnitOfWork, AutoFeed_Backend_Repositories.UnitOfWork.UnitOfWork>();
+builder.Services.AddScoped<IIoTDeviceService, IoTDeviceService>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddEndpointsApiExplorer();

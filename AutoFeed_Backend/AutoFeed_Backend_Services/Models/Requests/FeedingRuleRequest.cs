@@ -12,7 +12,7 @@ namespace AutoFeed_Backend_Services.Models.Requests.FeedingRuleRequest
         public string? Note { get; set; }
     }
 
-    // DTO để Cập nhật Rule gốc (Cái đang bị thiếu làm Kiên lỗi Build)
+    // DTO để Cập nhật Rule gốc 
     public class FeedingRuleUpdateDto
     {
         public int? ChickenLid { get; set; }
