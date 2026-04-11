@@ -20,4 +20,14 @@ namespace AutoFeed_Backend_Services.Models.Requests.FeedingRuleRequest
         public int FeedMinute { get; set; }
         public string Description { get; set; } = null!;
     }
+    public class RuleDetailCreateDto
+    {
+        public int RuleID { get; set; } 
+        public int FoodID { get; set; }
+        public DateOnly StartDate { get; set; }
+        public DateOnly EndDate { get; set; }
+        public int FeedHour { get; set; }
+        public int FeedMinute { get; set; }
+        public string Description { get; set; } = null!;
+    }
 }

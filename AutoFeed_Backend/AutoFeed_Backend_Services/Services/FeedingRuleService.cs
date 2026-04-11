@@ -15,19 +15,34 @@ namespace AutoFeed_Backend_Services.Services
         private readonly AutoFeedDBContext _context;
         public FeedingRuleService(AutoFeedDBContext context) => _context = context;
 
-        // 1. Lấy danh sách tất cả Rules (Rút gọn)
+        // 1. Thêm mới chi tiết giờ ăn (Hàm Kiên vừa yêu cầu)
+        public async Task<bool> AddDetailAsync(RuleDetailCreateDto dto)
+        {
+            var detail = new FeedingRuleDetail
+            {
+                RuleId = dto.RuleID,
+                FoodId = dto.FoodID,
+                StartDate = dto.StartDate,
+                EndDate = dto.EndDate,
+                FeedHour = dto.FeedHour,
+                FeedMinute = dto.FeedMinute,
+                Description = dto.Description,
+                Status = true
+            };
+
+            _context.FeedingRuleDetails.Add(detail);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        // 2. Lấy danh sách tất cả Rules
         public async Task<IEnumerable<object>> GetAllRulesAsync()
         {
             return await _context.FeedingRules
-                .Select(r => new {
-                    r.RuleId,
-                    r.Description,
-                    r.Times
-                })
+                .Select(r => new { r.RuleId, r.Description, r.Times })
                 .ToListAsync();
         }
 
-        // 2. Lấy chi tiết Rule kèm danh sách giờ ăn (Trả về DateOnly)
+        // 3. Lấy chi tiết Rule và các giờ ăn
         public async Task<FeedingRuleFullResponse?> GetRuleByIdAsync(int id)
         {
             var rule = await _context.FeedingRules
@@ -50,14 +65,13 @@ namespace AutoFeed_Backend_Services.Services
                     FeedHour = d.FeedHour,
                     FeedMinute = d.FeedMinute,
                     Status = d.Status ?? false,
-                    // Trả về kiểu DateOnly để chỉ hiện Ngày/Tháng/Năm
                     StartDate = d.StartDate,
                     EndDate = d.EndDate
                 }).ToList()
             };
         }
 
-        // 3. Tạo Rule mới
+        // 4. Tạo Rule gốc
         public async Task<bool> CreateRuleAsync(FeedingRuleCreateDto dto)
         {
             var rule = new FeedingRule
@@ -72,41 +86,32 @@ namespace AutoFeed_Backend_Services.Services
             return await _context.SaveChangesAsync() > 0;
         }
 
-        // 4. Vô hiệu hóa chi tiết giờ ăn (Status = false)
+        // 5. Vô hiệu hóa (Status = false)
         public async Task<bool> DisableDetailAsync(int detailId)
         {
-            var detail = await _context.FeedingRuleDetails
-                .FirstOrDefaultAsync(x => x.FeedRuleDetailId == detailId);
-
+            var detail = await _context.FeedingRuleDetails.FindAsync(detailId);
             if (detail == null) return false;
-
             detail.Status = false;
-            _context.Entry(detail).State = EntityState.Modified;
             return await _context.SaveChangesAsync() > 0;
         }
 
-        // 5. Cập nhật chi tiết giờ ăn (Dùng DateOnly trực tiếp)
+        // 6. Cập nhật chi tiết
         public async Task<bool> UpdateDetailAsync(int detailId, RuleDetailUpdateDto dto)
         {
-            var detail = await _context.FeedingRuleDetails
-                .FirstOrDefaultAsync(x => x.FeedRuleDetailId == detailId);
-
+            var detail = await _context.FeedingRuleDetails.FindAsync(detailId);
             if (detail == null) return false;
 
             detail.FoodId = dto.FoodID;
-            // Gán trực tiếp vì DTO bây giờ đã là DateOnly
             detail.StartDate = dto.StartDate;
             detail.EndDate = dto.EndDate;
-
             detail.FeedHour = dto.FeedHour;
             detail.FeedMinute = dto.FeedMinute;
             detail.Description = dto.Description;
 
-            _context.Entry(detail).State = EntityState.Modified;
             return await _context.SaveChangesAsync() > 0;
         }
 
-        // 6. Xóa Rule
+        // 7. Xóa Rule
         public async Task<bool> DeleteRuleAsync(int id)
         {
             var rule = await _context.FeedingRules.FindAsync(id);

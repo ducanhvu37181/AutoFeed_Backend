@@ -23,6 +23,13 @@ namespace AutoFeed_Backend.Controllers
             return result == null ? NotFound("Rule not found") : Ok(result);
         }
 
+        [HttpPost("detail")]
+        public async Task<IActionResult> AddDetail(RuleDetailCreateDto dto)
+        {
+            var success = await _feedingRuleService.AddDetailAsync(dto);
+            return success ? Ok("Successfully") : BadRequest("Failed");
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create(FeedingRuleCreateDto dto)
         {
