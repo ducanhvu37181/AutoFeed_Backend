@@ -17,6 +17,10 @@ public partial class FeedingRuleDetail
 
     public DateOnly EndDate { get; set; }
 
+    public int FeedHour { get; set; }
+
+    public int FeedMinute { get; set; }
+
     public string Description { get; set; }
 
     public bool? Status { get; set; }
