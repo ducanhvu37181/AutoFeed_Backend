@@ -15,26 +15,7 @@ namespace AutoFeed_Backend_Services.Services
         private readonly AutoFeedDBContext _context;
         public FeedingRuleService(AutoFeedDBContext context) => _context = context;
 
-        // 1. Thêm mới chi tiết giờ ăn (Hàm Kiên vừa yêu cầu)
-        public async Task<bool> AddDetailAsync(RuleDetailCreateDto dto)
-        {
-            var detail = new FeedingRuleDetail
-            {
-                RuleId = dto.RuleID,
-                FoodId = dto.FoodID,
-                StartDate = dto.StartDate,
-                EndDate = dto.EndDate,
-                FeedHour = dto.FeedHour,
-                FeedMinute = dto.FeedMinute,
-                Description = dto.Description,
-                Status = true
-            };
-
-            _context.FeedingRuleDetails.Add(detail);
-            return await _context.SaveChangesAsync() > 0;
-        }
-
-        // 2. Lấy danh sách tất cả Rules
+        // 1. Lấy danh sách tất cả Rules (Dùng cho trang chủ)
         public async Task<IEnumerable<object>> GetAllRulesAsync()
         {
             return await _context.FeedingRules
@@ -42,7 +23,7 @@ namespace AutoFeed_Backend_Services.Services
                 .ToListAsync();
         }
 
-        // 3. Lấy chi tiết Rule và các giờ ăn
+        // 2. Lấy chi tiết Rule và các bữa ăn (Dùng để lấy ID bữa ăn đi test Disable/Update)
         public async Task<FeedingRuleFullResponse?> GetRuleByIdAsync(int id)
         {
             var rule = await _context.FeedingRules
@@ -71,7 +52,7 @@ namespace AutoFeed_Backend_Services.Services
             };
         }
 
-        // 4. Tạo Rule gốc
+        // 3. Tạo mới Rule gốc (Bảng cha)
         public async Task<bool> CreateRuleAsync(FeedingRuleCreateDto dto)
         {
             var rule = new FeedingRule
@@ -86,19 +67,47 @@ namespace AutoFeed_Backend_Services.Services
             return await _context.SaveChangesAsync() > 0;
         }
 
-        // 5. Vô hiệu hóa (Status = false)
-        public async Task<bool> DisableDetailAsync(int detailId)
+        // 4. Cập nhật Rule gốc (Hàm Kiên vừa yêu cầu thêm)
+        public async Task<bool> UpdateRuleAsync(int id, FeedingRuleUpdateDto dto)
         {
-            var detail = await _context.FeedingRuleDetails.FindAsync(detailId);
-            if (detail == null) return false;
-            detail.Status = false;
+            var rule = await _context.FeedingRules.FirstOrDefaultAsync(r => r.RuleId == id);
+            if (rule == null) return false;
+
+            rule.ChickenLid = dto.ChickenLid;
+            rule.FlockId = dto.FlockId;
+            rule.Times = dto.Times;
+            rule.Description = dto.Description;
+            rule.Note = dto.Note;
+
+            _context.FeedingRules.Update(rule);
             return await _context.SaveChangesAsync() > 0;
         }
 
-        // 6. Cập nhật chi tiết
+        // 5. Thêm một bữa ăn mới vào Rule (Bảng con)
+        public async Task<bool> AddDetailAsync(RuleDetailCreateDto dto)
+        {
+            var detail = new FeedingRuleDetail
+            {
+                RuleId = dto.RuleID,
+                FoodId = dto.FoodID,
+                StartDate = dto.StartDate,
+                EndDate = dto.EndDate,
+                FeedHour = dto.FeedHour,
+                FeedMinute = dto.FeedMinute,
+                Description = dto.Description,
+                Status = true
+            };
+
+            _context.FeedingRuleDetails.Add(detail);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        // 6. Cập nhật thông tin một bữa ăn (Sửa giờ, thức ăn...)
         public async Task<bool> UpdateDetailAsync(int detailId, RuleDetailUpdateDto dto)
         {
-            var detail = await _context.FeedingRuleDetails.FindAsync(detailId);
+            var detail = await _context.FeedingRuleDetails
+                .FirstOrDefaultAsync(x => x.FeedRuleDetailId == detailId);
+
             if (detail == null) return false;
 
             detail.FoodId = dto.FoodID;
@@ -108,10 +117,24 @@ namespace AutoFeed_Backend_Services.Services
             detail.FeedMinute = dto.FeedMinute;
             detail.Description = dto.Description;
 
+            _context.FeedingRuleDetails.Update(detail);
             return await _context.SaveChangesAsync() > 0;
         }
 
-        // 7. Xóa Rule
+        // 7. Vô hiệu hóa bữa ăn (Hàm Kiên đang test lỗi - Đã sửa logic tìm ID)
+        public async Task<bool> DisableDetailAsync(int detailId)
+        {
+            var detail = await _context.FeedingRuleDetails
+                .FirstOrDefaultAsync(x => x.FeedRuleDetailId == detailId);
+
+            if (detail == null) return false;
+
+            detail.Status = false;
+            _context.FeedingRuleDetails.Update(detail);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        // 8. Xóa Rule (Xóa cả cha lẫn con)
         public async Task<bool> DeleteRuleAsync(int id)
         {
             var rule = await _context.FeedingRules.FindAsync(id);
