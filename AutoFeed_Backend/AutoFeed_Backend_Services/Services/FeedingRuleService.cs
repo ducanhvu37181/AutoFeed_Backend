@@ -38,6 +38,8 @@ namespace AutoFeed_Backend_Services.Services
                 RuleId = rule.RuleId,
                 Description = rule.Description,
                 Times = rule.Times,
+                StartDate = rule.StartDate,
+                EndDate = rule.EndDate,
                 Details = rule.FeedingRuleDetails.Select(d => new RuleDetailResponse
                 {
                     FeedRuleDetailID = d.FeedRuleDetailId,
@@ -45,9 +47,8 @@ namespace AutoFeed_Backend_Services.Services
                     FoodName = d.Food?.Name ?? "Unknown",
                     FeedHour = d.FeedHour,
                     FeedMinute = d.FeedMinute,
-                    Status = d.Status ?? false,
-                    StartDate = d.StartDate,
-                    EndDate = d.EndDate
+                    Amount = d.Amount,
+                    Status = d.Status ?? false,                    
                 }).ToList()
             };
         }
@@ -60,6 +61,8 @@ namespace AutoFeed_Backend_Services.Services
                 ChickenLid = dto.ChickenLid,
                 FlockId = dto.FlockId,
                 Times = dto.Times,
+                StartDate = dto.StartDate,
+                EndDate = dto.EndDate,
                 Description = dto.Description,
                 Note = dto.Note
             };
@@ -76,6 +79,8 @@ namespace AutoFeed_Backend_Services.Services
             rule.ChickenLid = dto.ChickenLid;
             rule.FlockId = dto.FlockId;
             rule.Times = dto.Times;
+            rule.StartDate = dto.StartDate;
+            rule.EndDate = dto.EndDate;
             rule.Description = dto.Description;
             rule.Note = dto.Note;
 
@@ -89,11 +94,10 @@ namespace AutoFeed_Backend_Services.Services
             var detail = new FeedingRuleDetail
             {
                 RuleId = dto.RuleID,
-                FoodId = dto.FoodID,
-                StartDate = dto.StartDate,
-                EndDate = dto.EndDate,
+                FoodId = dto.FoodID,                
                 FeedHour = dto.FeedHour,
                 FeedMinute = dto.FeedMinute,
+                Amount = dto.Amount,
                 Description = dto.Description,
                 Status = true
             };
@@ -110,10 +114,9 @@ namespace AutoFeed_Backend_Services.Services
 
             if (detail == null) return false;
 
-            detail.FoodId = dto.FoodID;
-            detail.StartDate = dto.StartDate;
-            detail.EndDate = dto.EndDate;
+            detail.FoodId = dto.FoodID;            
             detail.FeedHour = dto.FeedHour;
+            detail.Amount = dto.Amount;
             detail.FeedMinute = dto.FeedMinute;
             detail.Description = dto.Description;
 
