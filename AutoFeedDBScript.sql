@@ -185,15 +185,14 @@ CREATE UNIQUE NONCLUSTERED INDEX UIX_FRule_Chicken ON FeedingRule(chickenLID) WH
 -- 5. OPERATION & LOGGING TABLES (Level 3)
 -- ======================================================
 
--- UPDATED: Added feedHour and feedMinute
 CREATE TABLE [dbo].[FeedingRuleDetail] (
     [feedRuleDetailID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [ruleID] INT NOT NULL,
     [foodID] INT NOT NULL,
     [startDate] DATE NOT NULL,
     [endDate] DATE NOT NULL,
-    [feedHour] INT NOT NULL,   -- 0-23
-    [feedMinute] INT NOT NULL, -- 0-59
+    [feedHour] INT NOT NULL,
+    [feedMinute] INT NOT NULL,
     [description] NVARCHAR(MAX) NOT NULL,
     [status] BIT DEFAULT 1,
     CONSTRAINT [FK_Detail_Food] FOREIGN KEY([foodID]) REFERENCES [dbo].[Food] ([foodID]),
@@ -202,6 +201,7 @@ CREATE TABLE [dbo].[FeedingRuleDetail] (
     CONSTRAINT [CK_FeedTime_Minute] CHECK ([feedMinute] BETWEEN 0 AND 59)
 );
 
+-- UPDATED: Status changed from 'approved' to 'reviewed'
 CREATE TABLE [dbo].[Report] (
     [reportID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [userID] INT NOT NULL,
@@ -211,7 +211,7 @@ CREATE TABLE [dbo].[Report] (
     [url] NVARCHAR(MAX) NULL,                   
     [createDate] DATETIME DEFAULT GETDATE(),
     CONSTRAINT [FK_Report_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID]),
-    CONSTRAINT [CK_Report_Status] CHECK ([status] IN ('pending', 'approved', 'rejected'))
+    CONSTRAINT [CK_Report_Status] CHECK ([status] IN ('pending', 'reviewed', 'rejected'))
 );
 
 CREATE TABLE [dbo].[Request] (
@@ -339,23 +339,23 @@ INSERT INTO [Schedule] (userID, taskID, CBarnID, description, note, priority, st
 (15, 13, 13, 'D', 'N', 'medium', 'pending', '2026-04-07', '2026-04-10'), (3, 14, 14, 'D', 'N', 'low', 'pending', '2026-04-07', '2026-04-10'),
 (4, 15, 15, 'D', 'N', 'low', 'pending', '2026-04-07', '2026-04-10');
 
--- FeedingRule (Lowered to 3)
+-- FeedingRule (3)
 INSERT INTO [FeedingRule] (flockID, chickenLID, times, description) VALUES 
 (1,NULL,3,'Morning Heavy'), (2,NULL,2,'Noon Lite'), (NULL,1,3,'High Protein Individual');
 
--- FeedingRuleDetail (Lowered to 3 with Hour/Minute)
+-- FeedingRuleDetail (3)
 INSERT INTO [FeedingRuleDetail] (ruleID, foodID, startDate, endDate, feedHour, feedMinute, description) VALUES 
 (1,1,'2026-03-01','2026-04-01', 7, 30, 'Breakfast cycle'),
 (2,2,'2026-03-01','2026-04-01', 12, 0, 'Lunch cycle'),
 (3,3,'2026-03-01','2026-04-01', 18, 15, 'Dinner cycle');
 
--- Reports (15)
+-- Reports (15) - Status: pending, reviewed, rejected
 INSERT INTO [Report] (userID, type, description, status, url) VALUES 
-(1, 'A', 'D1', 'pending', 'h1'), (2, 'A', 'D2', 'approved', 'h2'), (3, 'A', 'D3', 'rejected', 'h3'),
-(4, 'A', 'D4', 'pending', 'h4'), (5, 'A', 'D5', 'approved', 'h5'), (6, 'A', 'D6', 'rejected', 'h6'),
-(7, 'A', 'D7', 'pending', 'h7'), (8, 'A', 'D8', 'approved', 'h8'), (9, 'A', 'D9', 'rejected', 'h9'),
-(10, 'A', 'D10', 'pending', 'h10'), (11, 'A', 'D11', 'approved', 'h11'), (12, 'A', 'D12', 'rejected', 'h12'),
-(13, 'A', 'D13', 'pending', 'h13'), (14, 'A', 'D14', 'approved', 'h14'), (15, 'A', 'D15', 'rejected', 'h15');
+(1, 'A', 'D1', 'pending', 'h1'), (2, 'A', 'D2', 'reviewed', 'h2'), (3, 'A', 'D3', 'rejected', 'h3'),
+(4, 'A', 'D4', 'pending', 'h4'), (5, 'A', 'D5', 'reviewed', 'h5'), (6, 'A', 'D6', 'rejected', 'h6'),
+(7, 'A', 'D7', 'pending', 'h7'), (8, 'A', 'D8', 'reviewed', 'h8'), (9, 'A', 'D9', 'rejected', 'h9'),
+(10, 'A', 'D10', 'pending', 'h10'), (11, 'A', 'D11', 'reviewed', 'h11'), (12, 'A', 'D12', 'rejected', 'h12'),
+(13, 'A', 'D13', 'pending', 'h13'), (14, 'A', 'D14', 'reviewed', 'h14'), (15, 'A', 'D15', 'rejected', 'h15');
 
 -- Requests (15)
 INSERT INTO [Request] (userID, type, description, url) VALUES 
