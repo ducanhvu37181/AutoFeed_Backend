@@ -70,14 +70,27 @@ namespace AutoFeed_Backend_Services.Services
         // 4. Cập nhật Rule gốc (Hàm Kiên vừa yêu cầu thêm)
         public async Task<bool> UpdateRuleAsync(int id, FeedingRuleUpdateDto dto)
         {
-            var rule = await _context.FeedingRules.FirstOrDefaultAsync(r => r.RuleId == id);
+            // 1. Tìm Rule kèm theo tất cả Details hiện tại của nó
+            var rule = await _context.FeedingRules
+                .Include(r => r.FeedingRuleDetails)
+                .FirstOrDefaultAsync(r => r.RuleId == id);
+
             if (rule == null) return false;
 
+            // 2. Cập nhật thông tin bảng cha
             rule.ChickenLid = dto.ChickenLid;
             rule.FlockId = dto.FlockId;
             rule.Times = dto.Times;
             rule.Description = dto.Description;
             rule.Note = dto.Note;
+
+            // 3. LOGIC QUAN TRỌNG: Nếu Kiên muốn gửi kèm danh sách Detail để update luôn
+            // (Giả sử trong FeedingRuleUpdateDto của Kiên có danh sách List<RuleDetailUpdateDto> Details)
+            /* if (dto.Details != null) {
+                // Xóa bớt logic phức tạp, cách đơn giản nhất cho Kiên là:
+                // Cập nhật từng cái Detail có sẵn hoặc thêm mới vào rule.FeedingRuleDetails
+            }
+            */
 
             _context.FeedingRules.Update(rule);
             return await _context.SaveChangesAsync() > 0;
