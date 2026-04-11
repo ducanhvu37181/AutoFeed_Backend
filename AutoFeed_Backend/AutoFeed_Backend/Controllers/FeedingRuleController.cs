@@ -1,60 +1,54 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AutoFeed_Backend_Services.Interfaces;
-using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Services.Models.Requests.FeedingRuleRequest;
+using AutoFeed_Backend_Services.Models.Responses;
+using System.Threading.Tasks;
 
-namespace AutoFeed_Backend_API.Controllers;
-
-[Route("api/[controller]")]
-[ApiController]
-public class FeedingRuleController : ControllerBase
+namespace AutoFeed_Backend.Controllers
 {
-    private readonly IFeedingRuleService _feedingRuleService;
-
-    public FeedingRuleController(IFeedingRuleService feedingRuleService)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class FeedingRuleController : ControllerBase
     {
-        _feedingRuleService = feedingRuleService;
-    }
+        private readonly IFeedingRuleService _feedingRuleService;
+        public FeedingRuleController(IFeedingRuleService feedingRuleService) => _feedingRuleService = feedingRuleService;
 
-    // 1. GET: api/FeedingRule (Lấy danh sách các quy tắc ăn uống)
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var rules = await _feedingRuleService.GetAllRulesAsync();
-        return Ok(rules);
-    }
+        [HttpGet]
+        public async Task<IActionResult> GetAll() => Ok(await _feedingRuleService.GetAllRulesAsync());
 
-    // 2. GET: api/FeedingRule/{id} (Chi tiết 1 quy tắc)
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
-    {
-        var rule = await _feedingRuleService.GetRuleByIdAsync(id);
-        if (rule == null) return NotFound("Không tìm thấy quy tắc yêu cầu.");
-        return Ok(rule);
-    }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var result = await _feedingRuleService.GetRuleByIdAsync(id);
+            return result == null ? NotFound("Rule not found") : Ok(result);
+        }
 
-    // 3. POST: api/FeedingRule (Tạo quy tắc mới - Chicks, Fighting, hoặc Sick)
-    [HttpPost]
-    public async Task<IActionResult> Create(FeedingRuleCreateDto dto)
-    {
-        var result = await _feedingRuleService.CreateRuleAsync(dto);
-        return CreatedAtAction(nameof(GetById), new { id = result.RuleId }, result);
-    }
+        [HttpPost]
+        public async Task<IActionResult> Create(FeedingRuleCreateDto dto)
+        {
+            var success = await _feedingRuleService.CreateRuleAsync(dto);
+            return success ? Ok("Created") : BadRequest("Failed");
+        }
 
-    // 4. PUT: api/FeedingRule/{id} (Cập nhật quy tắc)
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, FeedingRule rule)
-    {
-        var isUpdated = await _feedingRuleService.UpdateRuleAsync(id, rule);
-        if (!isUpdated) return BadRequest("Cập nhật thất bại. Vui lòng kiểm tra lại ID.");
-        return Ok("Cập nhật quy tắc thành công.");
-    }
+        [HttpPut("detail/{detailId}/disable")]
+        public async Task<IActionResult> DisableDetail(int detailId)
+        {
+            var success = await _feedingRuleService.DisableDetailAsync(detailId);
+            return success ? Ok("Disabled") : NotFound();
+        }
 
-    // 5. DELETE: api/FeedingRule/{id} (Xóa quy tắc)
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var isDeleted = await _feedingRuleService.DeleteRuleAsync(id);
-        if (!isDeleted) return NotFound("Không tìm thấy quy tắc để xóa.");
-        return Ok("Đã xóa quy tắc thành công.");
+        [HttpPut("detail/{detailId}")]
+        public async Task<IActionResult> UpdateDetail(int detailId, RuleDetailUpdateDto dto)
+        {
+            var success = await _feedingRuleService.UpdateDetailAsync(detailId, dto);
+            return success ? Ok("Updated") : BadRequest();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _feedingRuleService.DeleteRuleAsync(id);
+            return success ? Ok("Deleted") : NotFound();
+        }
     }
 }
