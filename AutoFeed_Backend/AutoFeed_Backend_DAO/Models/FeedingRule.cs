@@ -13,6 +13,10 @@ public partial class FeedingRule
 
     public int? FlockId { get; set; }
 
+    public DateOnly StartDate { get; set; }
+
+    public DateOnly EndDate { get; set; }
+
     public int Times { get; set; }
 
     public string Description { get; set; }

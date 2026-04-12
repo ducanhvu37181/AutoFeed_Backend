@@ -1,6 +1,8 @@
 ﻿using AutoFeed_Backend_DAO.Models;
 using AutoFeed_Backend_Repositories.UnitOfWork;
 using AutoFeed_Backend_Services.Interfaces;
+using AutoFeed_Backend_Services.Models.Requests;  
+using AutoFeed_Backend_Services.Models.Responses; 
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,20 +18,36 @@ namespace AutoFeed_Backend_Services.Services
             _unitOfWork = unitOfWork;
         }
 
+        // --- HÀM MỚI THÊM ---
+        public async Task<DeviceDetailResponse?> GetDeviceByIdAsync(int deviceId)
+        {
+            var devices = await _unitOfWork.IoTDevices.GetDevicesWithBarnAsync("", "", "");
+            var d = devices.FirstOrDefault(x => x.DeviceId == deviceId);
+
+            if (d == null) return null;
+
+            return new DeviceDetailResponse
+            {
+                DeviceID = d.DeviceId,
+                DeviceName = d.Name,
+                Description = d.Description ?? "",
+                AssignedTo = d.BarnIoTDevices.OrderByDescending(b => b.InstallationDate)
+                                .FirstOrDefault()?.Barn?.Type ?? "Unassigned",
+                Status = d.Status == true ? "Online" : "Offline"
+            };
+        }
+
         public async Task<IEnumerable<object>> GetAllDevicesAsync(string search, string type, string status)
         {
-            // Gọi Repository lấy dữ liệu kèm bảng liên kết Barn
             var devices = await _unitOfWork.IoTDevices.GetDevicesWithBarnAsync(search, type, status);
 
             return devices.Select(d => new {
-                DeviceID = d.DeviceId, // ID số nguyên chuẩn Database
+                DeviceID = d.DeviceId,
                 DeviceName = d.Name,
                 Description = d.Description,
-                // Lấy thông tin loại chuồng (Type) từ bảng Barn thông qua bảng trung gian BarnIoTDevices
                 AssignedTo = d.BarnIoTDevices.OrderByDescending(b => b.InstallationDate)
                              .FirstOrDefault()?.Barn?.Type ?? "Unassigned",
                 Status = d.Status == true ? "Online" : "Offline"
-                // Đã loại bỏ hoàn toàn Battery và LastUpdate (Data fake)
             });
         }
 
@@ -39,7 +57,7 @@ namespace AutoFeed_Backend_Services.Services
             {
                 Name = name,
                 Description = description,
-                Status = true // Mặc định thiết bị mới sẽ ở trạng thái Online (1)
+                Status = true // Mặc định Online
             };
 
             await _unitOfWork.IoTDevices.CreateAsync(device);
@@ -73,8 +91,6 @@ namespace AutoFeed_Backend_Services.Services
 
         public async Task<bool> ReassignDeviceAsync(int deviceId, int barnId)
         {
-            // Logic gán thiết bị dựa trên DeviceID và BarnID (Sử dụng ID số nguyên)
-            // Hàm này sẽ tạo bản ghi mới trong bảng trung gian BarnIoT_Device trong Database
             await _unitOfWork.IoTDevices.ReassignDeviceAsync(deviceId, barnId);
             await _unitOfWork.SaveChangesWithTransactionAsync();
             return true;
