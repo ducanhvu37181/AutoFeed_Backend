@@ -23,6 +23,8 @@ public partial class FeedingRule
 
     public string Note { get; set; }
 
+    public string Status { get; set; }
+
     public virtual LargeChicken ChickenL { get; set; }
 
     public virtual ICollection<FeedingRuleDetail> FeedingRuleDetails { get; set; } = new List<FeedingRuleDetail>();

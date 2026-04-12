@@ -167,7 +167,7 @@ CREATE TABLE [dbo].[ChickenBarn] (
 CREATE UNIQUE NONCLUSTERED INDEX UIX_CBarn_Flock ON ChickenBarn(flockID) WHERE flockID IS NOT NULL;
 CREATE UNIQUE NONCLUSTERED INDEX UIX_CBarn_Chicken ON ChickenBarn(chickenLID) WHERE chickenLID IS NOT NULL;
 
--- UPDATED: Added startDate and endDate to FeedingRule
+-- UPDATED: Added Status to FeedingRule
 CREATE TABLE [dbo].[FeedingRule] (
     [ruleID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [chickenLID] INT NULL,
@@ -177,8 +177,10 @@ CREATE TABLE [dbo].[FeedingRule] (
     [times] INT NOT NULL,
     [description] NVARCHAR(MAX) NOT NULL,
     [note] NVARCHAR(MAX) NULL,
+    [status] NVARCHAR(20) DEFAULT 'active', -- active, disabled
     CONSTRAINT [FK_Rule_Flock] FOREIGN KEY([flockID]) REFERENCES [dbo].[FlockChicken] ([flockID]),
-    CONSTRAINT [FK_Rule_LargeChicken] FOREIGN KEY([chickenLID]) REFERENCES [dbo].[LargeChicken] ([chickenLID])
+    CONSTRAINT [FK_Rule_LargeChicken] FOREIGN KEY([chickenLID]) REFERENCES [dbo].[LargeChicken] ([chickenLID]),
+    CONSTRAINT [CK_FeedingRule_Status] CHECK ([status] IN ('active', 'disabled')) --
 );
 
 CREATE UNIQUE NONCLUSTERED INDEX UIX_FRule_Flock ON FeedingRule(flockID) WHERE flockID IS NOT NULL;
@@ -188,7 +190,6 @@ CREATE UNIQUE NONCLUSTERED INDEX UIX_FRule_Chicken ON FeedingRule(chickenLID) WH
 -- 5. OPERATION & LOGGING TABLES (Level 3)
 -- ======================================================
 
--- UPDATED: Removed startDate and endDate from detail
 CREATE TABLE [dbo].[FeedingRuleDetail] (
     [feedRuleDetailID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [ruleID] INT NOT NULL,
@@ -341,13 +342,13 @@ INSERT INTO [Schedule] (userID, taskID, CBarnID, description, note, priority, st
 (15, 13, 13, 'D', 'N', 'medium', 'pending', '2026-04-07', '2026-04-10'), (3, 14, 14, 'D', 'N', 'low', 'pending', '2026-04-07', '2026-04-10'),
 (4, 15, 15, 'D', 'N', 'low', 'pending', '2026-04-07', '2026-04-10');
 
--- FeedingRule (3) - Dates moved here
-INSERT INTO [FeedingRule] (flockID, chickenLID, startDate, endDate, times, description) VALUES 
-(1, NULL, '2026-03-01', '2026-04-01', 3, 'Morning Heavy'), 
-(2, NULL, '2026-03-01', '2026-04-01', 2, 'Noon Lite'), 
-(NULL, 1, '2026-03-01', '2026-04-01', 3, 'High Protein Individual');
+-- FeedingRule (3) - Updated with Status
+INSERT INTO [FeedingRule] (flockID, chickenLID, startDate, endDate, times, description, status) VALUES 
+(1, NULL, '2026-03-01', '2026-04-01', 3, 'Morning Heavy', 'active'), 
+(2, NULL, '2026-03-01', '2026-04-01', 2, 'Noon Lite', 'active'), 
+(NULL, 1, '2026-03-01', '2026-04-01', 3, 'Old Strategy', 'disabled');
 
--- FeedingRuleDetail (3) - Dates removed from here
+-- FeedingRuleDetail (3)
 INSERT INTO [FeedingRuleDetail] (ruleID, foodID, feedHour, feedMinute, amount, description) VALUES 
 (1, 1, 7, 30, 25.50, 'Breakfast cycle'),
 (2, 2, 12, 0, 15.00, 'Lunch cycle'),
