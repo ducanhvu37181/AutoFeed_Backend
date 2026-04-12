@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|c:\\users\\admin\\documents\\github\\autofeed_backend\\autofeed_backend\\autofeed_backend\\controllers\\largechickenscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|solutionrelative:autofeed_backend\\controllers\\largechickenscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{728A6B3D-5500-4959-853D-70F8A182D313}|AutoFeed_Backend_Repositories\\AutoFeed_Backend_Repositories.csproj|c:\\users\\admin\\documents\\github\\autofeed_backend\\autofeed_backend\\autofeed_backend_repositories\\repositories\\barnrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{728A6B3D-5500-4959-853D-70F8A182D313}|AutoFeed_Backend_Repositories\\AutoFeed_Backend_Repositories.csproj|solutionrelative:autofeed_backend_repositories\\repositories\\barnrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -243,10 +247,6 @@
       "RelativeMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|solutionrelative:autofeed_backend\\models\\responses\\userresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|c:\\users\\admin\\documents\\github\\autofeed_backend\\autofeed_backend\\autofeed_backend\\controllers\\largechickenscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{595447D5-E8B3-4CEA-A806-FBE53645CD98}|AutoFeed_Backend\\AutoFeed_Backend.csproj|solutionrelative:autofeed_backend\\controllers\\largechickenscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{75F34F6C-E112-48BB-BECC-EF377125B027}|AutoFeed_Backend_Services\\AutoFeed_Backend_Services.csproj|c:\\users\\admin\\documents\\github\\autofeed_backend\\autofeed_backend\\autofeed_backend_services\\services\\dashboardtechservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{75F34F6C-E112-48BB-BECC-EF377125B027}|AutoFeed_Backend_Services\\AutoFeed_Backend_Services.csproj|solutionrelative:autofeed_backend_services\\services\\dashboardtechservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -389,50 +389,24 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "BarnRepository.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Repositories\\Repositories\\BarnRepository.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Repositories\\Repositories\\BarnRepository.cs",
               "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Repositories\\Repositories\\BarnRepository.cs",
               "RelativeToolTip": "AutoFeed_Backend_Repositories\\Repositories\\BarnRepository.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABEAAAAuAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-04-12T08:29:01.867Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "UnitOfWork.cs",
-              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Repositories\\UnitOfWork\\UnitOfWork.cs",
-              "RelativeDocumentMoniker": "AutoFeed_Backend_Repositories\\UnitOfWork\\UnitOfWork.cs",
-              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Repositories\\UnitOfWork\\UnitOfWork.cs",
-              "RelativeToolTip": "AutoFeed_Backend_Repositories\\UnitOfWork\\UnitOfWork.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAHQAAAAMAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-16T12:45:40.357Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "BarnService..cs",
-              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\BarnService..cs",
-              "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\BarnService..cs",
-              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\BarnService..cs",
-              "RelativeToolTip": "AutoFeed_Backend_Services\\Services\\BarnService..cs",
-              "ViewState": "AgIAAAoAAAAAAAAAAAAjwBoAAAAIAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-23T08:38:14.061Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "ChickenBarnController.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\ChickenBarnController.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\ChickenBarnController.cs",
@@ -440,12 +414,11 @@
               "RelativeToolTip": "AutoFeed_Backend\\Controllers\\ChickenBarnController.cs",
               "ViewState": "AgIAABcAAAAAAAAAAAArwLwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-23T08:46:45.326Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-23T08:46:45.326Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "IBarnService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Interfaces\\IBarnService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Interfaces\\IBarnService.cs",
@@ -453,25 +426,23 @@
               "RelativeToolTip": "AutoFeed_Backend_Services\\Interfaces\\IBarnService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-09T13:57:28.977Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-09T13:57:28.977Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "BarnController.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\BarnController.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\BarnController.cs",
               "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\BarnController.cs",
               "RelativeToolTip": "AutoFeed_Backend\\Controllers\\BarnController.cs",
-              "ViewState": "AgIAACYAAAAAAAAAAIA3wH4AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAGYAAAAAAAAAAIAwwH4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-03T14:12:48.75Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-03T14:12:48.75Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "AutoFeedDBContext.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_DAO\\Models\\AutoFeedDBContext.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_DAO\\Models\\AutoFeedDBContext.cs",
@@ -479,12 +450,48 @@
               "RelativeToolTip": "AutoFeed_Backend_DAO\\Models\\AutoFeedDBContext.cs",
               "ViewState": "AgIAADYAAAAAAAAAAIA/wEQAAAALAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-11T12:11:40.995Z",
+              "WhenOpened": "2026-04-11T12:11:40.995Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "LargeChickensController.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\LargeChickensController.cs",
+              "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\LargeChickensController.cs",
+              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\LargeChickensController.cs",
+              "RelativeToolTip": "AutoFeed_Backend\\Controllers\\LargeChickensController.cs",
+              "ViewState": "AgIAABsAAAAAAAAAAAAuwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-09T14:27:43.381Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 3,
+              "Title": "BarnService..cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\BarnService..cs",
+              "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\BarnService..cs",
+              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\BarnService..cs",
+              "RelativeToolTip": "AutoFeed_Backend_Services\\Services\\BarnService..cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAjwBoAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-23T08:38:14.061Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "UnitOfWork.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Repositories\\UnitOfWork\\UnitOfWork.cs",
+              "RelativeDocumentMoniker": "AutoFeed_Backend_Repositories\\UnitOfWork\\UnitOfWork.cs",
+              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Repositories\\UnitOfWork\\UnitOfWork.cs",
+              "RelativeToolTip": "AutoFeed_Backend_Repositories\\UnitOfWork\\UnitOfWork.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAHQAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-16T12:45:40.357Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
               "Title": "ChickenBarnResponse.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Models\\Responses\\ChickenBarnResponse.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Models\\Responses\\ChickenBarnResponse.cs",
@@ -496,7 +503,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "RequestController.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\RequestController.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\RequestController.cs",
@@ -504,12 +511,11 @@
               "RelativeToolTip": "AutoFeed_Backend\\Controllers\\RequestController.cs",
               "ViewState": "AgIAANUAAAAAAAAAAAAAAIIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-24T05:12:38.476Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-24T05:12:38.476Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "RequestService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\RequestService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\RequestService.cs",
@@ -521,7 +527,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "IRequestService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Interfaces\\IRequestService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Interfaces\\IRequestService.cs",
@@ -545,7 +551,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "RequestRepository.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Repositories\\Repositories\\RequestRepository.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Repositories\\Repositories\\RequestRepository.cs",
@@ -557,7 +563,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 13,
               "Title": "launchSettings.json",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Properties\\launchSettings.json",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Properties\\launchSettings.json",
@@ -569,7 +575,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 14,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Program.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Program.cs",
@@ -581,7 +587,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 16,
               "Title": "FeedingRuleService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\FeedingRuleService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\FeedingRuleService.cs",
@@ -589,12 +595,11 @@
               "RelativeToolTip": "AutoFeed_Backend_Services\\Services\\FeedingRuleService.cs",
               "ViewState": "AgIAAHwAAAAAAAAAAAAwwFIAAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-11T03:11:20.863Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-11T03:11:20.863Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 15,
               "Title": "FeedingRuleController.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\FeedingRuleController.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\FeedingRuleController.cs",
@@ -606,7 +611,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 17,
               "Title": "FeedingRuleResponse.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Models\\Responses\\FeedingRuleResponse.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Models\\Responses\\FeedingRuleResponse.cs",
@@ -618,7 +623,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 18,
               "Title": "FeedingRuleRequest.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Models\\Requests\\FeedingRuleRequest.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Models\\Requests\\FeedingRuleRequest.cs",
@@ -630,7 +635,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 19,
               "Title": "FeedingRuleDetail.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_DAO\\Models\\FeedingRuleDetail.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_DAO\\Models\\FeedingRuleDetail.cs",
@@ -642,7 +647,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 20,
               "Title": "FeedingRule.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_DAO\\Models\\FeedingRule.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_DAO\\Models\\FeedingRule.cs",
@@ -654,7 +659,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 21,
               "Title": "IFeedingRuleService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Interfaces\\IFeedingRuleService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Interfaces\\IFeedingRuleService.cs",
@@ -666,7 +671,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 22,
               "Title": "TaskService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\TaskService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\TaskService.cs",
@@ -678,7 +683,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 23,
               "Title": "TaskController.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\TaskController.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\TaskController.cs",
@@ -690,7 +695,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 24,
               "Title": "ServiceProvider.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\ServiceProvider\\ServiceProvider.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\ServiceProvider\\ServiceProvider.cs",
@@ -702,7 +707,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 29,
               "Title": "DataIoTRepository.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Repositories\\Repositories\\DataIoTRepository.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Repositories\\Repositories\\DataIoTRepository.cs",
@@ -714,7 +719,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 25,
               "Title": "DeviceController.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\DeviceController.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\DeviceController.cs",
@@ -726,7 +731,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 28,
               "Title": "IDataIoTService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Interfaces\\IDataIoTService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Interfaces\\IDataIoTService.cs",
@@ -738,7 +743,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 27,
               "Title": "DataIoTService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\DataIoTService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\DataIoTService.cs",
@@ -750,7 +755,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 26,
               "Title": "DataIoTController.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\DataIoTController.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\DataIoTController.cs",
@@ -762,7 +767,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 30,
               "Title": "IUnitOfWork.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Repositories\\UnitOfWork\\IUnitOfWork.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Repositories\\UnitOfWork\\IUnitOfWork.cs",
@@ -774,7 +779,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 31,
               "Title": "AddDataIoTResponse.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Models\\Responses\\AddDataIoTResponse.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Models\\Responses\\AddDataIoTResponse.cs",
@@ -786,7 +791,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 31,
+              "DocumentIndex": 32,
               "Title": "AddDataIoTRequest.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Models\\Requests\\AddDataIoTRequest.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Models\\Requests\\AddDataIoTRequest.cs",
@@ -798,7 +803,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 35,
+              "DocumentIndex": 36,
               "Title": "AddDataIoTResponse.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Models\\Responses\\AddDataIoTResponse.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Models\\Responses\\AddDataIoTResponse.cs",
@@ -810,7 +815,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 35,
               "Title": "AddDataIoTRequest.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Models\\Requests\\AddDataIoTRequest.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Models\\Requests\\AddDataIoTRequest.cs",
@@ -822,7 +827,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
+              "DocumentIndex": 34,
               "Title": "InventoryService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\InventoryService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\InventoryService.cs",
@@ -834,7 +839,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 32,
+              "DocumentIndex": 33,
               "Title": "IoTDeviceService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\IoTDeviceService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\IoTDeviceService.cs",
@@ -846,7 +851,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 36,
+              "DocumentIndex": 37,
               "Title": "FlockController.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\FlockController.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\FlockController.cs",
@@ -858,7 +863,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 40,
+              "DocumentIndex": 41,
               "Title": "AssignFlockToLargeChickResponse.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Models\\Responses\\AssignFlockToLargeChickResponse.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Models\\Responses\\AssignFlockToLargeChickResponse.cs",
@@ -870,7 +875,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 37,
+              "DocumentIndex": 38,
               "Title": "AsssignToLargeChickRequest.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Models\\Requests\\Flock\\AsssignToLargeChickRequest.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Models\\Requests\\Flock\\AsssignToLargeChickRequest.cs",
@@ -882,7 +887,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 38,
+              "DocumentIndex": 39,
               "Title": "ApiResponse.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Models\\Responses\\ApiResponse.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Models\\Responses\\ApiResponse.cs",
@@ -894,7 +899,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 39,
+              "DocumentIndex": 40,
               "Title": "AssignFlockToLargeChickResponse.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Models\\Responses\\AssignFlockToLargeChickResponse.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Models\\Responses\\AssignFlockToLargeChickResponse.cs",
@@ -906,7 +911,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 41,
+              "DocumentIndex": 42,
               "Title": "LargeChickenService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\LargeChickenService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\LargeChickenService.cs",
@@ -918,7 +923,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 43,
+              "DocumentIndex": 44,
               "Title": "AsssignToLargeChickRequest.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Models\\Requests\\Flock\\AsssignToLargeChickRequest.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Models\\Requests\\Flock\\AsssignToLargeChickRequest.cs",
@@ -930,7 +935,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 44,
+              "DocumentIndex": 45,
               "Title": "CreateRequestRequest.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Models\\Requests\\Request\\CreateRequestRequest.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Models\\Requests\\Request\\CreateRequestRequest.cs",
@@ -942,7 +947,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 42,
+              "DocumentIndex": 43,
               "Title": "FlockService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\FlockService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\FlockService.cs",
@@ -954,7 +959,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 49,
+              "DocumentIndex": 50,
               "Title": "FoodService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\FoodService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\FoodService.cs",
@@ -966,7 +971,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 48,
+              "DocumentIndex": 49,
               "Title": "IUserService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Interfaces\\IUserService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Interfaces\\IUserService.cs",
@@ -978,7 +983,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 45,
+              "DocumentIndex": 46,
               "Title": "FoodController.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\FoodController.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\FoodController.cs",
@@ -990,7 +995,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 47,
+              "DocumentIndex": 48,
               "Title": "ReportController.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\ReportController.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\ReportController.cs",
@@ -998,12 +1003,11 @@
               "RelativeToolTip": "AutoFeed_Backend\\Controllers\\ReportController.cs",
               "ViewState": "AgIAAKoAAAAAAAAAAIBQwG0AAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-09T04:23:16.948Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-09T04:23:16.948Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 46,
+              "DocumentIndex": 47,
               "Title": "FoodRepository.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Repositories\\Repositories\\FoodRepository.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Repositories\\Repositories\\FoodRepository.cs",
@@ -1015,7 +1019,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 51,
+              "DocumentIndex": 52,
               "Title": "UsersController.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\UsersController.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\UsersController.cs",
@@ -1027,7 +1031,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 50,
+              "DocumentIndex": 51,
               "Title": "ScheduleController.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\ScheduleController.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\ScheduleController.cs",
@@ -1039,7 +1043,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 52,
+              "DocumentIndex": 53,
               "Title": "ApiResponse.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Models\\Responses\\ApiResponse.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Models\\Responses\\ApiResponse.cs",
@@ -1051,7 +1055,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 53,
+              "DocumentIndex": 54,
               "Title": "UserService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\UserService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\UserService.cs",
@@ -1063,7 +1067,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 54,
+              "DocumentIndex": 55,
               "Title": "ScheduleService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\ScheduleService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\ScheduleService.cs",
@@ -1075,7 +1079,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 55,
+              "DocumentIndex": 56,
               "Title": "IScheduleService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Interfaces\\IScheduleService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Interfaces\\IScheduleService.cs",
@@ -1087,7 +1091,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 56,
+              "DocumentIndex": 57,
               "Title": "ScheduleResponse.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Models\\Responses\\ScheduleResponse.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Models\\Responses\\ScheduleResponse.cs",
@@ -1099,7 +1103,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 58,
+              "DocumentIndex": 59,
               "Title": "AuthController.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\AuthController.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\AuthController.cs",
@@ -1111,7 +1115,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 59,
+              "DocumentIndex": 60,
               "Title": "UserResponse.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Models\\Responses\\UserResponse.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend\\Models\\Responses\\UserResponse.cs",
@@ -1123,7 +1127,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 57,
+              "DocumentIndex": 58,
               "Title": "AuthService.cs",
               "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend_Services\\Services\\AuthService.cs",
               "RelativeDocumentMoniker": "AutoFeed_Backend_Services\\Services\\AuthService.cs",
@@ -1132,18 +1136,6 @@
               "ViewState": "AgIAABwAAAAAAAAAAADgvy8AAAAxAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-23T09:17:50.791Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 60,
-              "Title": "LargeChickensController.cs",
-              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\LargeChickensController.cs",
-              "RelativeDocumentMoniker": "AutoFeed_Backend\\Controllers\\LargeChickensController.cs",
-              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\AutoFeed_Backend\\AutoFeed_Backend\\AutoFeed_Backend\\Controllers\\LargeChickensController.cs",
-              "RelativeToolTip": "AutoFeed_Backend\\Controllers\\LargeChickensController.cs",
-              "ViewState": "AgIAADoAAAAAAAAAAAA5wAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-09T14:27:43.381Z"
             },
             {
               "$type": "Document",
