@@ -13,4 +13,6 @@ public class ChickenBarnResponse
     public string Note { get; set; }
     // Status values: "active", "exported", or "inactive"
     public string Status { get; set; }
+    // Avatar image URL of the chicken currently assigned to this barn (if any)
+    public string? AvatarUrl { get; set; }
 }

@@ -40,19 +40,17 @@ public class RequestService : IRequestService
     {
         return await _unitOfWork.Requests.GetAllAsync();
     }
-
-    public async Task<List<Request>> GetActiveRequestsAsync()
-    {
-        return await _unitOfWork.Requests.GetActiveAsync();
-    }
-
-    public async Task<List<Request>> GetInactiveRequestsAsync()
-    {
-        return await _unitOfWork.Requests.GetInactiveAsync();
-    }
     public async Task<List<Request>> GetByUserIdAsync(int userId)   
     {
         return await _unitOfWork.Requests.GetByUserIdAsync(userId);
+    }
+
+    public async Task<List<Request>> GetByStatusAsync(string status)
+    {
+        if (string.IsNullOrWhiteSpace(status)) return new List<Request>();
+        var normalized = status.Trim().ToLower();
+        if (!AllowedStatuses.Contains(normalized)) return new List<Request>();
+        return await _unitOfWork.Requests.GetByStatusAsync(normalized);
     }
 
     // Update

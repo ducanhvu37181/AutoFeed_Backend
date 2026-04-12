@@ -32,7 +32,8 @@ public class ChickenBarnController : ControllerBase
             StartDate = i.StartDate,
             ExportDate = i.ExportDate,
             Note = i.Note,
-            Status = (i.Status != null) ? i.Status : (i.ExportDate.HasValue ? "exported" : "inactive")
+            Status = (i.Status != null) ? i.Status : (i.ExportDate.HasValue ? "exported" : "inactive"),
+            AvatarUrl = i.ChickenL != null ? i.ChickenL.Url : null
         }).ToList();
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
@@ -50,7 +51,8 @@ public class ChickenBarnController : ControllerBase
             StartDate = i.StartDate,
             ExportDate = i.ExportDate,
             Note = i.Note,
-            Status = "active"
+            Status = "active",
+            AvatarUrl = i.ChickenL != null ? i.ChickenL.Url : null
         }).ToList();
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
@@ -68,7 +70,8 @@ public class ChickenBarnController : ControllerBase
             StartDate = i.StartDate,
             ExportDate = i.ExportDate,
             Note = i.Note,
-            Status = "exported"
+            Status = "exported",
+            AvatarUrl = i.ChickenL != null ? i.ChickenL.Url : null
         }).ToList();
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
@@ -87,7 +90,8 @@ public class ChickenBarnController : ControllerBase
             StartDate = item.StartDate,
             ExportDate = item.ExportDate,
             Note = item.Note,
-            Status = item.Status
+            Status = item.Status,
+            AvatarUrl = item.ChickenL != null ? item.ChickenL.Url : null
         };
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
@@ -119,7 +123,8 @@ public class ChickenBarnController : ControllerBase
             StartDate = entity.StartDate,
             ExportDate = entity.ExportDate,
             Note = entity.Note,
-            Status = entity.Status
+            Status = entity.Status,
+            AvatarUrl = entity.ChickenL != null ? entity.ChickenL.Url : null
         };
         return CreatedAtAction(nameof(Get), new { id = entity.CbarnId }, new ApiResponse<object> { Status = true, HttpCode = 201, Data = dto, Description = "Created" });
     }
@@ -148,7 +153,8 @@ public class ChickenBarnController : ControllerBase
             StartDate = existing.StartDate,
             ExportDate = existing.ExportDate,
             Note = existing.Note,
-            Status = existing.Status
+            Status = existing.Status,
+            AvatarUrl = existing.ChickenL != null ? existing.ChickenL.Url : null
         };
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Update success" });
     }
@@ -174,7 +180,8 @@ public class ChickenBarnController : ControllerBase
             StartDate = i.StartDate,
             ExportDate = i.ExportDate,
             Note = i.Note,
-            Status = i.Status
+            Status = i.Status,
+            AvatarUrl = i.ChickenL != null ? i.ChickenL.Url : null
         }).ToList();
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }

@@ -12,9 +12,9 @@ public interface IRequestService
     // Read
     Task<Request?> GetRequestByIdAsync(int id);
     Task<List<Request>> GetAllRequestsAsync();
-    Task<List<Request>> GetActiveRequestsAsync();
-    Task<List<Request>> GetInactiveRequestsAsync();
+
     Task<List<Request>> GetByUserIdAsync(int userId);
+    Task<List<Request>> GetByStatusAsync(string status);
 
     // Update
     Task<bool> UpdateRequestAsync(Request request);

@@ -46,21 +46,7 @@ public class RequestController : ControllerBase
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
 
-    [HttpGet("active")]
-    public async Task<IActionResult> GetActive()
-    {
-        var items = await _service.GetActiveRequestsAsync();
-        var dto = items.Select(ToDto).ToList();
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
-    }
 
-    [HttpGet("inactive")]
-    public async Task<IActionResult> GetInactive()
-    {
-        var items = await _service.GetInactiveRequestsAsync();
-        var dto = items.Select(ToDto).ToList();
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
-    }
 
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string q)
@@ -85,6 +71,21 @@ public class RequestController : ControllerBase
     public async Task<IActionResult> GetByUserId(int userId)
     {
         var items = await _service.GetByUserIdAsync(userId);
+        var dto = items.Select(ToDto).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
+    }
+
+    [HttpGet("status/{status}")]
+    public async Task<IActionResult> GetByStatus(string status)
+    {
+        if (string.IsNullOrWhiteSpace(status))
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid status" });
+
+        var normalized = status.Trim().ToLower();
+        if (normalized != "pending" && normalized != "approved" && normalized != "rejected")
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Allowed statuses: pending, approved, rejected" });
+
+        var items = await _service.GetByStatusAsync(normalized);
         var dto = items.Select(ToDto).ToList();
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
