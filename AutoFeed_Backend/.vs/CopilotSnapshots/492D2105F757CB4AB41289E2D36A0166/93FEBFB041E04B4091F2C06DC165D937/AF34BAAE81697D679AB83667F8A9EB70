@@ -4,11 +4,7 @@ using AutoFeed_Backend.Models.Requests;
 using AutoFeed_Backend.Models.Requests.LargeChicken;
 using AutoFeed_Backend.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
-using System;
-using AutoFeed_Backend.Helpers;
 
 namespace AutoFeed_Backend.Controllers;
 
@@ -21,37 +17,6 @@ public class LargeChickenController : ControllerBase
     public LargeChickenController(ILargeChickenService service)
     {
         _service = service;
-    }
-
-    [HttpPost("{id:int}/avatar")]
-    [Consumes("multipart/form-data")]
-    public async Task<IActionResult> UpdateAvatar(int id, IFormFile file, [FromServices] IConfiguration config)
-    {
-        if (file == null || file.Length == 0)
-            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid file" });
-
-        var existing = await _service.GetByIdAsync(id);
-        if (existing == null)
-            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
-
-        var bucket = config.GetValue<string>("Firebase:Bucket");
-        var saPath = config.GetValue<string>("Firebase:ServiceAccountPath");
-        if (string.IsNullOrWhiteSpace(bucket) || string.IsNullOrWhiteSpace(saPath))
-            return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Firebase not configured" });
-
-        try
-        {
-            var url = await FirebaseStorageHelper.UploadFileAndGetSignedUrlAsync(file, bucket, saPath, TimeSpan.FromDays(365));
-            existing.Url = url;
-            var ok = await _service.UpdateAsync(existing);
-            if (!ok) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Update failed" });
-
-            return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = new { Url = url }, Description = "Avatar updated" });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = ex.Message });
-        }
     }
 
     [HttpGet]
