@@ -12,6 +12,7 @@ public interface IUnitOfWork
     FoodRepository Foods { get; }
     ScheduleRepository Schedules { get; }
     ChickenBarnRepository ChickenBarns { get; }
+    FeedingRuleRepository FeedingRules { get; }
     IoTDeviceRepository IoTDevices { get; }
     RequestRepository Requests { get; }
     BarnRepository Barns { get; }
