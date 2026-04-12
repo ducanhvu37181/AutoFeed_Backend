@@ -1,12 +1,18 @@
 ﻿<Properties StartupConfiguration="{595447D5-E8B3-4CEA-A806-FBE53645CD98}|https">
-  <MonoDevelop.Ide.Workbench ActiveDocument="AutoFeed_Backend/appsettings.json">
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.ItemProperties.AutoFeed__Backend PreferredExecutionTarget="/Applications/Google Chrome.app" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.Workbench ActiveDocument="AutoFeed_Backend/Program.cs">
     <Files>
-      <File FileName="AutoFeed_Backend/appsettings.json" Line="24" Column="2" />
+      <File FileName="AutoFeed_Backend/appsettings.json" Line="22" Column="10" />
       <File FileName="AutoFeed_Backend/Controllers/AuthController.cs" />
       <File FileName="AutoFeed_Backend/Controllers/FoodController.cs" />
       <File FileName="AutoFeed_Backend_Services/Interfaces/IUserService.cs" />
       <File FileName="AutoFeed_Backend_Services/Services/UserService.cs" />
-      <File FileName="AutoFeed_Backend/Program.cs" />
+      <File FileName="AutoFeed_Backend/Program.cs" Line="1" Column="1" />
       <File FileName="AutoFeed_Backend_Services/Interfaces/IAuthService.cs" />
       <File FileName="AutoFeed_Backend_Services/Interfaces/IFoodService.cs" />
       <File FileName="AutoFeed_Backend_Services/Interfaces/IIoTDeviceService.cs" />
@@ -22,7 +28,7 @@
       <File FileName="AutoFeed_Backend_DAO/Models/BarnIoTDevice.cs" />
       <File FileName="AutoFeed_Backend_DAO/Models/IoTDevice.cs" />
       <File FileName="AutoFeed_Backend_Services/Interfaces/IFeedingRuleService.cs" />
-      <File FileName="AutoFeed_Backend_Services/Services/FeedingRuleService.cs" Line="151" Column="2" />
+      <File FileName="AutoFeed_Backend_Services/Services/FeedingRuleService.cs" />
       <File FileName="AutoFeed_Backend_Services/Services/DashboardTechService.cs" />
       <File FileName="AutoFeed_Backend/Controllers/FeedingRuleController.cs" />
       <File FileName="AutoFeed_Backend_Services/Services/EmailService.cs" />
@@ -52,7 +58,7 @@
         <State name="__root__">
           <Node name="AutoFeed_Backend">
             <Node name="AutoFeed_Backend" expanded="True">
-              <Node name="appsettings.json" selected="True" />
+              <Node name="Program.cs" selected="True" />
             </Node>
             <Node name="AutoFeed_Backend_DAO" expanded="True">
               <Node name="Models" expanded="True" />
@@ -68,11 +74,5 @@
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
-  <MultiItemStartupConfigurations />
-  <MonoDevelop.Ide.ItemProperties.AutoFeed__Backend PreferredExecutionTarget="/Applications/Google Chrome.app" />
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
-  </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
 </Properties>

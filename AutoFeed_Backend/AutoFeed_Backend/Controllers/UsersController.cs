@@ -1,10 +1,10 @@
 ﻿using AutoFeed_Backend_DAO.Models;
 using AutoFeed_Backend_Services.Interfaces;
-using AutoFeed_Backend.Models.Requests;
 using AutoFeed_Backend.Models.Requests.User;
 using AutoFeed_Backend.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace AutoFeed_Backend.Controllers;
 
@@ -19,8 +19,6 @@ public class UserController : ControllerBase
         _service = service;
     }
 
-    // POST /api/user/{id}/avatar
-    // Content-Type: multipart/form-data
     [HttpPost("{id:int}/avatar")]
     public async Task<IActionResult> UploadAvatar(int id, IFormFile file, [FromServices] IConfiguration config)
     {
@@ -38,7 +36,6 @@ public class UserController : ControllerBase
 
         try
         {
-            // allow common image types only
             var allowed = new[] { ".jpg", ".jpeg", ".png", ".gif" };
             var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
             if (!allowed.Contains(ext))
@@ -63,9 +60,14 @@ public class UserController : ControllerBase
     {
         var roleFilter = string.IsNullOrWhiteSpace(role) ? null : role.Trim();
         var items = await _service.GetAllAsync(roleFilter);
-        var dto = items.Select(u => new UserResponse {
+
+        // Nếu muốn loại bỏ user có role manager:
+        var filtered = items.Where(u => !(u.Role?.Description?.ToLower().Contains("manager") ?? false)).ToList();
+
+        var dto = filtered.Select(u => new UserResponse {
             UserId = u.UserId,
             RoleId = u.RoleId,
+            RoleName = u.Role?.Description ?? "",
             Email = u.Email,
             FullName = u.FullName,
             Phone = u.Phone,
@@ -80,9 +82,10 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetActive()
     {
         var items = await _service.GetActiveAsync();
-        var dto = items.Select(u => new AutoFeed_Backend.Models.Responses.UserResponse {
+        var dto = items.Select(u => new UserResponse {
             UserId = u.UserId,
             RoleId = u.RoleId,
+            RoleName = u.Role?.Description ?? "",
             Email = u.Email,
             FullName = u.FullName,
             Phone = u.Phone,
@@ -97,9 +100,10 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetInactive()
     {
         var items = await _service.GetInactiveAsync();
-        var dto = items.Select(u => new AutoFeed_Backend.Models.Responses.UserResponse {
+        var dto = items.Select(u => new UserResponse {
             UserId = u.UserId,
             RoleId = u.RoleId,
+            RoleName = u.Role?.Description ?? "",
             Email = u.Email,
             FullName = u.FullName,
             Phone = u.Phone,
@@ -117,11 +121,11 @@ public class UserController : ControllerBase
         if (item == null)
             return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
 
-        // map to response DTO and hide password
-        var dto = new AutoFeed_Backend.Models.Responses.UserResponse
+        var dto = new UserResponse
         {
             UserId = item.UserId,
             RoleId = item.RoleId,
+            RoleName = item.Role?.Description ?? "",
             Email = item.Email,
             FullName = item.FullName,
             Phone = item.Phone,
@@ -133,7 +137,6 @@ public class UserController : ControllerBase
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
 
-    // GET api/user/search?keyword=john&roleId=2&includeInactive=false
     [HttpGet("search")]
     public async Task<IActionResult> Search(
         [FromQuery] string? keyword,
@@ -141,9 +144,10 @@ public class UserController : ControllerBase
         [FromQuery] bool includeInactive = false)
     {
         var items = await _service.SearchAsync(keyword, roleId, includeInactive);
-        var dto = items.Select(u => new AutoFeed_Backend.Models.Responses.UserResponse {
+        var dto = items.Select(u => new UserResponse {
             UserId = u.UserId,
             RoleId = u.RoleId,
+            RoleName = u.Role?.Description ?? "",
             Email = u.Email,
             FullName = u.FullName,
             Phone = u.Phone,
@@ -169,7 +173,6 @@ public class UserController : ControllerBase
             Username = model.Username
         };
 
-        //var result = await _service.CreateAsync(entity);
         var result = await _service.CreateAsync(entity);
         if (result == -1)
             return Conflict(new ApiResponse<object> { Status = false, HttpCode = 409, Data = null, Description = "Email or Username already exists" });
@@ -187,6 +190,7 @@ public class UserController : ControllerBase
                 {
                     UserId = entity.UserId,
                     RoleId = entity.RoleId,
+                    RoleName = entity.Role?.Description ?? "",
                     Email = entity.Email,
                     FullName = entity.FullName,
                     Phone = entity.Phone,
@@ -208,7 +212,7 @@ public class UserController : ControllerBase
         if (existing == null)
             return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
 
-        existing.RoleId = model.RoleId ?? existing.RoleId;
+        // Không cho sửa RoleId
         existing.Email = model.Email;
         existing.FullName = model.FullName;
         existing.Phone = model.Phone;
@@ -237,7 +241,6 @@ public class UserController : ControllerBase
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Password changed successfully" });
     }
 
-    // Soft delete
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
@@ -261,7 +264,6 @@ public class UserController : ControllerBase
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "New password sent to email" });
     }
 
-    // Restore
     [HttpPatch("{id:int}/restore")]
     public async Task<IActionResult> Restore(int id)
     {
