@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Services.Models.Requests.FeedingRuleRequest;
-using AutoFeed_Backend_Services.Models.Responses;
 using System.Threading.Tasks;
 
 namespace AutoFeed_Backend.Controllers
@@ -61,7 +60,6 @@ namespace AutoFeed_Backend.Controllers
                 return NotFound(new { success = false, message });
             return BadRequest(new { success = false, message });
         }
-        
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)

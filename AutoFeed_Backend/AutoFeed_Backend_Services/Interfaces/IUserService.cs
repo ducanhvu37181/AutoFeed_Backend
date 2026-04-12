@@ -1,13 +1,11 @@
 ﻿using AutoFeed_Backend_DAO.Models;
 using System.Collections.Generic;
-
 using Task = System.Threading.Tasks.Task;
 
 namespace AutoFeed_Backend_Services.Interfaces;
 
 public interface IUserService
 {
-    /// <param name="roleDescriptionContains">If set, only users whose Role.Description contains this text (case-insensitive), e.g. "manager".</param>
     Task<List<User>> GetAllAsync(string? roleDescriptionContains = null);
     Task<List<User>> GetActiveAsync();
     Task<List<User>> GetInactiveAsync();
