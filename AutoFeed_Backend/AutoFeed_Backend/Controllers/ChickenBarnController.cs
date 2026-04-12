@@ -159,6 +159,14 @@ public class ChickenBarnController : ControllerBase
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Update success" });
     }
 
+    [HttpPut("{id:int}/export")]
+    public async Task<IActionResult> Export(int id)
+    {
+        var ok = await _service.ExportAsync(id);
+        if (!ok) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Export failed" });
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Chicken Exported" });
+    }
+
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {

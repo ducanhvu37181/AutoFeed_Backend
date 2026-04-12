@@ -14,4 +14,5 @@ public interface IChickenBarnService
     Task<bool> UpdateAsync(ChickenBarnModel entity);
     Task<bool> DeleteAsync(int id); // soft delete
     Task<List<ChickenBarnModel>> SearchAsync(int? barnId, int? flockId, int? chickenLid, bool includeInactive = false);
+    Task<bool> ExportAsync(int id);
 }

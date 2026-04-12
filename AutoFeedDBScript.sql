@@ -167,7 +167,6 @@ CREATE TABLE [dbo].[ChickenBarn] (
 CREATE UNIQUE NONCLUSTERED INDEX UIX_CBarn_Flock ON ChickenBarn(flockID) WHERE flockID IS NOT NULL;
 CREATE UNIQUE NONCLUSTERED INDEX UIX_CBarn_Chicken ON ChickenBarn(chickenLID) WHERE chickenLID IS NOT NULL;
 
--- UPDATED: Added Status to FeedingRule
 CREATE TABLE [dbo].[FeedingRule] (
     [ruleID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [chickenLID] INT NULL,
@@ -180,7 +179,7 @@ CREATE TABLE [dbo].[FeedingRule] (
     [status] NVARCHAR(20) DEFAULT 'active', -- active, disabled
     CONSTRAINT [FK_Rule_Flock] FOREIGN KEY([flockID]) REFERENCES [dbo].[FlockChicken] ([flockID]),
     CONSTRAINT [FK_Rule_LargeChicken] FOREIGN KEY([chickenLID]) REFERENCES [dbo].[LargeChicken] ([chickenLID]),
-    CONSTRAINT [CK_FeedingRule_Status] CHECK ([status] IN ('active', 'disabled')) --
+    CONSTRAINT [CK_FeedingRule_Status] CHECK ([status] IN ('active', 'disabled'))
 );
 
 CREATE UNIQUE NONCLUSTERED INDEX UIX_FRule_Flock ON FeedingRule(flockID) WHERE flockID IS NOT NULL;
@@ -228,6 +227,7 @@ CREATE TABLE [dbo].[Request] (
     CONSTRAINT [FK_Request_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID])
 );
 
+-- UPDATED: Status now includes 'disabled'
 CREATE TABLE [dbo].[Schedule] (
     [schedID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [userID] INT NOT NULL,
@@ -243,7 +243,7 @@ CREATE TABLE [dbo].[Schedule] (
     CONSTRAINT [FK_Sched_CBarn] FOREIGN KEY([CBarnID]) REFERENCES [dbo].[ChickenBarn] ([CBarnID]),
     CONSTRAINT [FK_Sched_Task] FOREIGN KEY([taskID]) REFERENCES [dbo].[Task] ([taskID]),
     CONSTRAINT [FK_Sched_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID]),
-    CONSTRAINT [CK_Schedule_Status] CHECK ([status] IN ('pending', 'in progress', 'completed')),
+    CONSTRAINT [CK_Schedule_Status] CHECK ([status] IN ('pending', 'in progress', 'completed', 'disabled')), -- Added disabled
     CONSTRAINT [CK_Schedule_Priority] CHECK ([priority] IN ('low', 'medium', 'high'))
 );
 GO
@@ -257,21 +257,21 @@ INSERT INTO [Role] (description) VALUES ('Manager'), ('TechFarmer'), ('Farmer');
 
 -- Users (15)
 INSERT INTO [User] (roleID, email, password, fullName, phone, username, avatarURL) VALUES 
-(1, 'alice@farm.com', 'p1', 'Alice Johnson', '0123456781', 'alice_mgr', 'https://cdn.com/u1.png'),
-(2, 'bob@farm.com', 'p2', 'Bob Smith', '0123456782', 'bob_tech', 'https://cdn.com/u2.png'),
-(3, 'charlie@farm.com', 'p3', 'Charlie Brown', '0123456783', 'charlie_f', 'https://cdn.com/u3.png'),
-(3, 'david@farm.com', 'p4', 'David Miller', '0123456784', 'david_f', 'https://cdn.com/u4.png'),
-(3, 'eve@farm.com', 'p5', 'Eve Adams', '0123456785', 'eve_f', 'https://cdn.com/u5.png'),
-(3, 'frank@farm.com', 'p6', 'Frank White', '0123456786', 'frank_f', 'https://cdn.com/u6.png'),
-(3, 'grace@farm.com', 'p7', 'Grace Hopper', '0123456787', 'grace_f', 'https://cdn.com/u7.png'),
-(3, 'hank@farm.com', 'p8', 'Hank Hill', '0123456788', 'hank_f', 'https://cdn.com/u8.png'),
-(3, 'ivy@farm.com', 'p9', 'Ivy League', '0123456789', 'ivy_f', 'https://cdn.com/u9.png'),
-(3, 'jack@farm.com', 'p10', 'Jack Reacher', '0123456710', 'jack_f', 'https://cdn.com/u10.png'),
-(3, 'kelly@farm.com', 'p11', 'Kelly Green', '0123456711', 'kelly_f', 'https://cdn.com/u11.png'),
-(3, 'leo@farm.com', 'p12', 'Leo Messi', '0123456712', 'leo_f', 'https://cdn.com/u12.png'),
-(3, 'mia@farm.com', 'p13', 'Mia Wallace', '0123456713', 'mia_f', 'https://cdn.com/u13.png'),
-(3, 'noah@farm.com', 'p14', 'Noah Ark', '0123456714', 'noah_f', 'https://cdn.com/u14.png'),
-(3, 'olivia@farm.com', 'p15', 'Olivia Pope', '0123456715', 'olivia_f', 'https://cdn.com/u15.png');
+(1, 'alice@farm.com', 'p1', 'Alice Johnson', '0123456781', 'alice_mgr', 'https://tse1.mm.bing.net/th/id/OIP.p9bNjr0mX-spDgSi1S5hrgHaLH?rs=1&pid=ImgDetMain&o=7&rm=3'),
+(2, 'bob@farm.com', 'p2', 'Bob Smith', '0123456782', 'bob_tech', 'https://haycafe.vn/wp-content/uploads/2022/03/Hinh-anh-chan-dung-nam-dep.jpg'),
+(3, 'charlie@farm.com', 'p3', 'Charlie Brown', '0123456783', 'charlie_f', 'https://tse1.mm.bing.net/th/id/OIP.s_OjVf-2_ScyG9UniAlm6wHaLH?w=1024&h=1536&rs=1&pid=ImgDetMain&o=7&rm=3'),
+(3, 'david@farm.com', 'p4', 'David Miller', '0123456784', 'david_f', 'https://www.microsoft.com/en-us/research/wp-content/uploads/2023/03/Hoang-photo-1024x1024.jpg'),
+(3, 'eve@farm.com', 'p5', 'Eve Adams', '0123456785', 'eve_f', 'https://leasy.github.io/images/busi.png'),
+(3, 'frank@farm.com', 'p6', 'Frank White', '0123456786', 'frank_f', 'https://s7d1.scene7.com/is/image/dmqualcommprod/jiadi-zhu-800-800px?$QC_Responsive$&fmt=png-alpha'),
+(3, 'grace@farm.com', 'p7', 'Grace Hopper', '0123456787', 'grace_f', 'https://i1.rgstatic.net/ii/profile.image/11431281089589168-1665624682603_Q512/Cunjun-Li.jpg'),
+(3, 'hank@farm.com', 'p8', 'Hank Hill', '0123456788', 'hank_f', 'https://i1.rgstatic.net/ii/profile.image/539946005917696-1505744567688_Q512/Shuai-Han-13.jpg'),
+(3, 'ivy@farm.com', 'p9', 'Ivy League', '0123456789', 'ivy_f', 'https://tse1.mm.bing.net/th/id/OIP.oAel1TzRXgP0-G7OahplEAHaHa?rs=1&pid=ImgDetMain&o=7&rm=3'),
+(3, 'jack@farm.com', 'p10', 'Jack Reacher', '0123456710', 'jack_f', 'https://i1.rgstatic.net/ii/profile.image/1069199820607491-1631928510570_Q512/Hainan-Zhang-8.jpg'),
+(3, 'kelly@farm.com', 'p11', 'Kelly Green', '0123456711', 'kelly_f', 'https://tse1.mm.bing.net/th/id/OIP.qegvQOMGxNYOvF8qVrOO3QHaHa?w=1536&h=1536&rs=1&pid=ImgDetMain&o=7&rm=3'),
+(3, 'leo@farm.com', 'p12', 'Leo Messi', '0123456712', 'leo_f', 'https://tse4.mm.bing.net/th/id/OIP.8T8Oc2frNnW1dZwsWsN3qAHaH7?w=536&h=574&rs=1&pid=ImgDetMain&o=7&rm=3'),
+(3, 'mia@farm.com', 'p13', 'Mia Wallace', '0123456713', 'mia_f', 'https://www.newtimeshair.com/wp-content/uploads/2023/05/Robin-2-1.jpg'),
+(3, 'noah@farm.com', 'p14', 'Noah Ark', '0123456714', 'noah_f', 'https://i1.rgstatic.net/ii/profile.image/11431281264074724-1722426969202_Q512/Mingyang-Ren-4.jpg'),
+(3, 'olivia@farm.com', 'p15', 'Olivia Pope', '0123456715', 'olivia_f', 'https://i1.rgstatic.net/ii/profile.image/1060523051347968-1629859807394_Q512/Q-Sun-3.jpg');
 
 -- Food (15)
 INSERT INTO [Food] (name, type, note) VALUES 
@@ -302,14 +302,14 @@ INSERT INTO [FlockChicken] (name, quantity, weight, DoB, transferDate, healthSta
 
 -- LargeChicken (15)
 INSERT INTO [LargeChicken] (flockID, name, weight, healthStatus, url) VALUES 
-(11, 'L1', 3.5, 'healthy', 'https://cdn.com/c1.jpg'), (11, 'L2', 3.4, 'healthy', 'https://cdn.com/c2.jpg'),
-(12, 'L3', 3.6, 'healthy', 'https://cdn.com/c3.jpg'), (12, 'L4', 3.5, 'healthy', 'https://cdn.com/c4.jpg'),
-(13, 'L5', 3.7, 'healthy', 'https://cdn.com/c5.jpg'), (13, 'L6', 3.5, 'healthy', 'https://cdn.com/c6.jpg'),
-(14, 'L7', 3.8, 'healthy', 'https://cdn.com/c7.jpg'), (14, 'L8', 3.5, 'healthy', 'https://cdn.com/c8.jpg'),
-(15, 'L9', 3.9, 'healthy', 'https://cdn.com/c9.jpg'), (15, 'L10', 3.5, 'healthy', 'https://cdn.com/c10.jpg'),
-(1, 'L11', 2.0, 'sick', 'https://cdn.com/c11.jpg'), (2, 'L12', 2.0, 'sick', 'https://cdn.com/c12.jpg'),
-(3, 'L13', 2.0, 'sick', 'https://cdn.com/c13.jpg'), (4, 'L14', 2.0, 'sick', 'https://cdn.com/c14.jpg'),
-(5, 'L15', 2.0, 'sick', 'https://cdn.com/c15.jpg');
+(11, 'L1', 3.5, 'healthy', 'https://tse2.mm.bing.net/th/id/OIP.uMHvXzIat56m-af5peVqGgHaJq?rs=1&pid=ImgDetMain&o=7&rm=3'), (11, 'L2', 3.4, 'healthy', 'https://anhdephd.vn/wp-content/uploads/2022/05/hinh-nen-ga-choi-dep.jpg'),
+(12, 'L3', 3.6, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-duoc-chai-long-ti-mi.jpg'), (12, 'L4', 3.5, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-so-huu-bo-long-mau-do-nau.jpg'),
+(13, 'L5', 3.7, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-co-cua.jpg'), (13, 'L6', 3.5, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-xong-tran.jpg'),
+(14, 'L7', 3.8, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-chuyen-nghiep.jpg'), (14, 'L8', 3.5, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-dung-manh.jpg'),
+(15, 'L9', 3.9, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-hien-ngang.jpg'), (15, 'L10', 3.5, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-khi-dung-duoi-anh-nang-gat.jpg'),
+(1, 'L11', 2.0, 'sick', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-long-trang.jpg'), (2, 'L12', 2.0, 'sick', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-sieu-chien.jpg'),
+(3, 'L13', 2.0, 'sick', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-vung-hoang-da.jpg'), (4, 'L14', 2.0, 'sick', 'https://img1.kienthucvui.vn/uploads/2021/01/15/anh-ga-troi-tren-nen-co-xanh_011040616.jpg'),
+(5, 'L15', 2.0, 'sick', 'https://img1.kienthucvui.vn/uploads/2021/01/15/anh-giong-ga-choi-noi-tieng-tai-viet-nam_011040771.jpg');
 
 -- ChickenBarn (15)
 INSERT INTO [ChickenBarn] (barnID, flockID, chickenLID, startDate, status) VALUES 
@@ -331,18 +331,18 @@ INSERT INTO [Task] (title, description, startTime, endTime) VALUES
 ('T6','Clean','09:00','10:00'), ('T7','Check','11:00','12:00'), ('T8','Check','11:00','12:00'), ('T9','Check','11:00','12:00'), ('T10','Vet','13:00','14:00'),
 ('T11','Vet','13:00','14:00'), ('T12','Vet','13:00','14:00'), ('T13','Light','18:00','19:00'), ('T14','Light','18:00','19:00'), ('T15','Light','18:00','19:00');
 
--- Schedule (15)
+-- Schedule (15) - Includes 'disabled' status
 INSERT INTO [Schedule] (userID, taskID, CBarnID, description, note, priority, status, startDate, endDate) VALUES 
-(3, 1, 1, 'D', 'N', 'high', 'pending', '2026-04-07', '2026-04-10'), (4, 2, 2, 'D', 'N', 'high', 'pending', '2026-04-07', '2026-04-10'),
-(5, 3, 3, 'D', 'N', 'high', 'pending', '2026-04-07', '2026-04-10'), (6, 4, 4, 'D', 'N', 'medium', 'pending', '2026-04-07', '2026-04-10'),
-(7, 5, 5, 'D', 'N', 'medium', 'pending', '2026-04-07', '2026-04-10'), (8, 6, 6, 'D', 'N', 'medium', 'pending', '2026-04-07', '2026-04-10'),
-(9, 7, 7, 'D', 'N', 'low', 'pending', '2026-04-07', '2026-04-10'), (10, 8, 8, 'D', 'N', 'low', 'pending', '2026-04-07', '2026-04-10'),
-(11, 9, 9, 'D', 'N', 'low', 'pending', '2026-04-07', '2026-04-10'), (12, 10, 10, 'D', 'N', 'high', 'pending', '2026-04-07', '2026-04-10'),
-(13, 11, 11, 'D', 'N', 'high', 'pending', '2026-04-07', '2026-04-10'), (14, 12, 12, 'D', 'N', 'medium', 'pending', '2026-04-07', '2026-04-10'),
-(15, 13, 13, 'D', 'N', 'medium', 'pending', '2026-04-07', '2026-04-10'), (3, 14, 14, 'D', 'N', 'low', 'pending', '2026-04-07', '2026-04-10'),
-(4, 15, 15, 'D', 'N', 'low', 'pending', '2026-04-07', '2026-04-10');
+(3, 1, 1, 'D', 'N', 'high', 'pending', '2026-04-07', '2026-04-10'), (4, 2, 2, 'D', 'N', 'high', 'in progress', '2026-04-07', '2026-04-10'),
+(5, 3, 3, 'D', 'N', 'high', 'completed', '2026-04-07', '2026-04-10'), (6, 4, 4, 'D', 'N', 'medium', 'disabled', '2026-04-07', '2026-04-10'),
+(7, 5, 5, 'D', 'N', 'medium', 'pending', '2026-04-07', '2026-04-10'), (8, 6, 6, 'D', 'N', 'medium', 'in progress', '2026-04-07', '2026-04-10'),
+(9, 7, 7, 'D', 'N', 'low', 'completed', '2026-04-07', '2026-04-10'), (10, 8, 8, 'D', 'N', 'low', 'disabled', '2026-04-07', '2026-04-10'),
+(11, 9, 9, 'D', 'N', 'low', 'pending', '2026-04-07', '2026-04-10'), (12, 10, 10, 'D', 'N', 'high', 'in progress', '2026-04-07', '2026-04-10'),
+(13, 11, 11, 'D', 'N', 'high', 'completed', '2026-04-07', '2026-04-10'), (14, 12, 12, 'D', 'N', 'medium', 'disabled', '2026-04-07', '2026-04-10'),
+(15, 13, 13, 'D', 'N', 'medium', 'pending', '2026-04-07', '2026-04-10'), (3, 14, 14, 'D', 'N', 'low', 'in progress', '2026-04-07', '2026-04-10'),
+(4, 15, 15, 'D', 'N', 'low', 'completed', '2026-04-07', '2026-04-10');
 
--- FeedingRule (3) - Updated with Status
+-- FeedingRule (3)
 INSERT INTO [FeedingRule] (flockID, chickenLID, startDate, endDate, times, description, status) VALUES 
 (1, NULL, '2026-03-01', '2026-04-01', 3, 'Morning Heavy', 'active'), 
 (2, NULL, '2026-03-01', '2026-04-01', 2, 'Noon Lite', 'active'), 

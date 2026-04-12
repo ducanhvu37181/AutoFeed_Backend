@@ -69,6 +69,13 @@ public class ScheduleRepository : GenericRepository<Schedule>
             .ToListAsync();
     }
 
+    public async Task<List<Schedule>> GetByChickenBarnIdAsync(int cbarnId)
+    {
+        return await _context.Set<Schedule>()
+            .Where(s => s.CbarnId == cbarnId)
+            .ToListAsync();
+    }
+
     public async Task<List<Schedule>> GetByCbarnTaskAndDateAsync(int cbarnId, int taskId, DateOnly date)
     {
         return await _context.Set<Schedule>()

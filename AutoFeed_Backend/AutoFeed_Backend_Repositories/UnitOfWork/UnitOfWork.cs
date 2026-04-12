@@ -21,6 +21,7 @@ public class UnitOfWork : IUnitOfWork
     private InventoryRepository _inventoryRepository;
     private ReportRepository _reportRepository;
     private DataIoTRepository _dataIoTRepository;
+    private FeedingRuleRepository _feedingRuleRepository;
 
     public UnitOfWork() => _context ??= new AutoFeedDBContext();
 
@@ -84,6 +85,10 @@ public class UnitOfWork : IUnitOfWork
     public DataIoTRepository DataIoTs
     {
         get { return _dataIoTRepository ??= new DataIoTRepository(_context); }
+    }
+    public FeedingRuleRepository FeedingRules
+    {
+        get { return _feedingRuleRepository ??= new FeedingRuleRepository(_context); }
     }
     public int SaveChangesWithTransaction()
     {

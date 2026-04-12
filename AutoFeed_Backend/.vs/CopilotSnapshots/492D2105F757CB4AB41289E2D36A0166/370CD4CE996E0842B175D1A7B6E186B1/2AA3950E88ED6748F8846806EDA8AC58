@@ -1,0 +1,203 @@
+﻿using AutoFeed_Backend_Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using ChickenBarnModel = AutoFeed_Backend_DAO.Models.ChickenBarn;
+using AutoFeed_Backend.Models.Responses;
+using AutoFeed_Backend.Models.Requests.ChickenBarn;
+using System.Linq;
+
+namespace AutoFeed_Backend.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class ChickenBarnController : ControllerBase
+{
+    private readonly IChickenBarnService _service;
+
+    public ChickenBarnController(IChickenBarnService service)
+    {
+        _service = service;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var items = await _service.GetAllAsync();
+        var dto = items.Select(i => new AutoFeed_Backend.Models.Responses.ChickenBarnResponse
+        {
+            CbarnId = i.CbarnId,
+            BarnId = i.BarnId,
+            ChickenLid = i.ChickenLid,
+            FlockId = i.FlockId,
+            StartDate = i.StartDate,
+            ExportDate = i.ExportDate,
+            Note = i.Note,
+            Status = (i.Status != null) ? i.Status : (i.ExportDate.HasValue ? "exported" : "inactive"),
+            AvatarUrl = i.ChickenL != null ? i.ChickenL.Url : null
+        }).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
+    }
+
+    [HttpGet("active")]
+    public async Task<IActionResult> GetActive()
+    {
+        var items = await _service.GetActiveAsync();
+        var dto = items.Select(i => new AutoFeed_Backend.Models.Responses.ChickenBarnResponse
+        {
+            CbarnId = i.CbarnId,
+            BarnId = i.BarnId,
+            ChickenLid = i.ChickenLid,
+            FlockId = i.FlockId,
+            StartDate = i.StartDate,
+            ExportDate = i.ExportDate,
+            Note = i.Note,
+            Status = "active",
+            AvatarUrl = i.ChickenL != null ? i.ChickenL.Url : null
+        }).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
+    }
+
+    [HttpGet("exported")]
+    public async Task<IActionResult> GetExported()
+    {
+        var items = await _service.GetExportedAsync();
+        var dto = items.Select(i => new AutoFeed_Backend.Models.Responses.ChickenBarnResponse
+        {
+            CbarnId = i.CbarnId,
+            BarnId = i.BarnId,
+            ChickenLid = i.ChickenLid,
+            FlockId = i.FlockId,
+            StartDate = i.StartDate,
+            ExportDate = i.ExportDate,
+            Note = i.Note,
+            Status = "exported",
+            AvatarUrl = i.ChickenL != null ? i.ChickenL.Url : null
+        }).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> Get(int id)
+    {
+        var item = await _service.GetByIdAsync(id);
+        if (item == null) return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
+        var dto = new AutoFeed_Backend.Models.Responses.ChickenBarnResponse
+        {
+            CbarnId = item.CbarnId,
+            BarnId = item.BarnId,
+            ChickenLid = item.ChickenLid,
+            FlockId = item.FlockId,
+            StartDate = item.StartDate,
+            ExportDate = item.ExportDate,
+            Note = item.Note,
+            Status = item.Status,
+            AvatarUrl = item.ChickenL != null ? item.ChickenL.Url : null
+        };
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateChickenBarnRequest model)
+    {
+        if (model == null) return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
+
+        var entity = new ChickenBarnModel
+        {
+            BarnId = model.BarnId,
+            ChickenLid = model.ChickenLid,
+            FlockId = model.FlockId,
+            StartDate = model.StartDate,
+            Note = model.Note,
+            Status = "active" // created as active by default
+        };
+
+        var res = await _service.CreateAsync(entity);
+        if (res <= 0) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Create failed" });
+
+        var dto = new AutoFeed_Backend.Models.Responses.ChickenBarnResponse
+        {
+            CbarnId = entity.CbarnId,
+            BarnId = entity.BarnId,
+            ChickenLid = entity.ChickenLid,
+            FlockId = entity.FlockId,
+            StartDate = entity.StartDate,
+            ExportDate = entity.ExportDate,
+            Note = entity.Note,
+            Status = entity.Status,
+            AvatarUrl = entity.ChickenL != null ? entity.ChickenL.Url : null
+        };
+        return CreatedAtAction(nameof(Get), new { id = entity.CbarnId }, new ApiResponse<object> { Status = true, HttpCode = 201, Data = dto, Description = "Created" });
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateChickenBarnRequest model)
+    {
+        if (model == null) return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
+        var existing = await _service.GetByIdAsync(id);
+        if (existing == null) return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
+
+        // Only update export date, note and status as requested
+        if (model.ExportDate.HasValue) existing.ExportDate = model.ExportDate.Value;
+        if (model.Note != null) existing.Note = model.Note;
+        if (!string.IsNullOrWhiteSpace(model.Status)) existing.Status = model.Status;
+
+        var ok = await _service.UpdateAsync(existing);
+        if (!ok) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Update failed" });
+
+        var dto = new AutoFeed_Backend.Models.Responses.ChickenBarnResponse
+        {
+            CbarnId = existing.CbarnId,
+            BarnId = existing.BarnId,
+            ChickenLid = existing.ChickenLid,
+            FlockId = existing.FlockId,
+            StartDate = existing.StartDate,
+            ExportDate = existing.ExportDate,
+            Note = existing.Note,
+            Status = existing.Status,
+            AvatarUrl = existing.ChickenL != null ? existing.ChickenL.Url : null
+        };
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Update success" });
+    }
+
+    [HttpPost("{id:int}/export")]
+    public async Task<IActionResult> Export(int id)
+    {
+        var ok = await _service.ExportAsync(id);
+        if (!ok) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Export failed" });
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Chicken Exported" });
+    }
+    [HttpPut("{id:int}/export")]
+    public async Task<IActionResult> Export(int id)
+    {
+        var ok = await _service.ExportAsync(id);
+        if (!ok) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Export failed" });
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Exported" });
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var ok = await _service.DeleteAsync(id);
+        if (!ok) return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found or Delete failed" });
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Delete success" });
+    }
+
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] int? barnId, [FromQuery] int? flockId, [FromQuery] int? chickenLid, [FromQuery] bool includeInactive = false)
+    {
+        var items = await _service.SearchAsync(barnId, flockId, chickenLid, includeInactive);
+        var dto = items.Select(i => new AutoFeed_Backend.Models.Responses.ChickenBarnResponse
+        {
+            CbarnId = i.CbarnId,
+            BarnId = i.BarnId,
+            ChickenLid = i.ChickenLid,
+            FlockId = i.FlockId,
+            StartDate = i.StartDate,
+            ExportDate = i.ExportDate,
+            Note = i.Note,
+            Status = i.Status,
+            AvatarUrl = i.ChickenL != null ? i.ChickenL.Url : null
+        }).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
+    }
+}
