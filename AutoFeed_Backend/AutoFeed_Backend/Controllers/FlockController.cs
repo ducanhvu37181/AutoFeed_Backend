@@ -25,7 +25,13 @@ public class FlockController : ControllerBase
     [HttpGet("dashboard")]
     public async Task<IActionResult> GetDashboard([FromQuery] string? searchTerm, [FromQuery] int? barnId, [FromQuery] string? status)
     {
-        // Fallback to returning all flocks as dashboard data (service doesn't provide filtered dashboard)
+        var data = await _flockService.GetFlocksDashboardAsync(searchTerm, barnId, status);
+        return Ok(new { Success = true, Data = data });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
         var data = await _flockService.GetAllFlocksAsync();
         return Ok(new { Success = true, Data = data });
     }
@@ -37,25 +43,52 @@ public class FlockController : ControllerBase
         return data != null ? Ok(new { Success = true, Data = data }) : NotFound();
     }
 
-    //[HttpPost]
-    //public async Task<IActionResult> Create([FromBody] FlockChicken flock, [FromQuery] int barnId)
-    //{
-    //    var res = await _flockService.CreateFlockAsync(flock, barnId);
-    //    return res ? Ok(new { Message = "Created" }) : BadRequest();
-    //}
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] FlockCreateRequest model)
+    {
+        if (model == null)
+            return BadRequest(new { Success = false, Message = "Invalid request" });
 
-    //[HttpPut]
-    //public async Task<IActionResult> Update([FromBody] FlockChicken flock)
-    //{
-    //    var res = await _flockService.UpdateFlockAsync(flock);
-    //    return res ? Ok(new { Message = "Updated" }) : BadRequest();
-    //}
+        var flockId = await _flockService.CreateFlockAsync(model);
+        return flockId.HasValue
+            ? Ok(new { Success = true, FlockId = flockId.Value, Message = "Created" })
+            : BadRequest(new { Success = false, Message = "Create failed" });
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> UpdateById(int id, [FromBody] FlockUpdateRequest model)
+    {
+        if (model == null)
+            return BadRequest(new { Success = false, Message = "Invalid request" });
+
+        model.FlockID = id;
+        var res = await _flockService.UpdateFlockAsync(model);
+        return res
+            ? Ok(new { Success = true, FlockId = id, Message = "Updated" })
+            : NotFound(new { Success = false, Message = "Flock not found or update failed" });
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> Update([FromBody] FlockUpdateRequest model)
+    {
+        if (model == null)
+            return BadRequest(new { Success = false, Message = "Invalid request" });
+
+        var res = await _flockService.UpdateFlockAsync(model);
+        return res
+            ? Ok(new { Success = true, FlockId = model.FlockID, Message = "Updated" })
+            : NotFound(new { Success = false, Message = "Flock not found or update failed" });
+    }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var res = await _flockService.DeleteFlockAsync(id);
-        return res ? Ok(new { Message = "Deleted" }) : NotFound();
+        var (success, error) = await _flockService.DeleteFlockAsync(id);
+        if (success)
+            return Ok(new { Success = true, Message = "Deleted" });
+        if (error == "Flock not found")
+            return NotFound(new { Success = false, Message = error });
+        return Conflict(new { Success = false, Message = error });
     }
 
     [HttpPost("assign-flock-to-largeBarn")]

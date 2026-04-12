@@ -26,8 +26,8 @@ namespace AutoFeed_Backend.Controllers
         [HttpPost("detail")]
         public async Task<IActionResult> AddDetail(RuleDetailCreateDto dto)
         {
-            var success = await _feedingRuleService.AddDetailAsync(dto);
-            return success ? Ok("Successfully") : BadRequest("Failed");
+            var (success, message) = await _feedingRuleService.AddDetailAsync(dto);
+            return success ? Ok(new { success = true, message }) : BadRequest(new { success = false, message });
         }
 
         [HttpPost]
@@ -53,9 +53,13 @@ namespace AutoFeed_Backend.Controllers
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, FeedingRuleUpdateDto dto)
-       {
-            var success = await _feedingRuleService.UpdateRuleAsync(id, dto);
-              return success ? Ok("Updated") : NotFound();
+        {
+            var (success, message) = await _feedingRuleService.UpdateRuleAsync(id, dto);
+            if (success)
+                return Ok(new { success = true, message });
+            if (message == "Rule not found")
+                return NotFound(new { success = false, message });
+            return BadRequest(new { success = false, message });
         }
         
 

@@ -6,6 +6,7 @@ using AutoFeed_Backend_DAO.Models; // Thêm dòng này để nhận diện DbCon
 using Microsoft.EntityFrameworkCore; // Thêm dòng này để dùng UseSqlServer
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Logging;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +16,11 @@ builder.Services.AddDbContext<AutoFeedDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 // ---------------------------------------------------------
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(o =>
+    {
+        o.JsonSerializerOptions.Converters.Add(new AutoFeed_Backend.Json.FlexibleDateOnlyJsonConverter());
+    });
 builder.Services.AddServiceProvider();
 builder.Services.AddScoped<AutoFeed_Backend_Repositories.UnitOfWork.IUnitOfWork, AutoFeed_Backend_Repositories.UnitOfWork.UnitOfWork>();
 builder.Services.AddScoped<IIoTDeviceService, IoTDeviceService>();
@@ -56,11 +61,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 //builder.WebHost.UseUrls("http://localhost:5207");
 var app = builder.Build();
 
-
-using (var scope = app.Services.CreateScope())
+var startupLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Startup");
+try
 {
-    var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
-    await userService.MigratePasswordsAsync();
+    using (var scope = app.Services.CreateScope())
+    {
+        var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+        await userService.MigratePasswordsAsync();
+    }
+}
+catch (Exception ex)
+{
+    startupLogger.LogWarning(ex, "Password migration skipped: database not reachable. Start SQL Server (e.g. docker compose up -d) and restart the app.");
 }
 
 if (app.Environment.IsDevelopment())

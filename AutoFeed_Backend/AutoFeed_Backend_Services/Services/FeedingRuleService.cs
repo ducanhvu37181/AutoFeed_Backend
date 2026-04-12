@@ -70,14 +70,23 @@ namespace AutoFeed_Backend_Services.Services
             return await _context.SaveChangesAsync() > 0;
         }
 
+        private static int CountActiveDetails(FeedingRule rule) =>
+            rule.FeedingRuleDetails.Count(d => d.Status != false);
+
         // 4. Cập nhật Rule gốc (Hàm  vừa yêu cầu thêm)
-        public async Task<bool> UpdateRuleAsync(int id, FeedingRuleUpdateDto dto)
+        public async Task<(bool Success, string Message)> UpdateRuleAsync(int id, FeedingRuleUpdateDto dto)
         {
             var rule = await _context.FeedingRules
                 .Include(r => r.FeedingRuleDetails)
                 .FirstOrDefaultAsync(r => r.RuleId == id);
 
-            if (rule == null) return false;
+            if (rule == null)
+                return (false, "Rule not found");
+
+            var activeDetails = CountActiveDetails(rule);
+            if (dto.Times < activeDetails)
+                return (false, $"Times ({dto.Times}) cannot be less than active feeding details ({activeDetails}).");
+
             rule.ChickenLid = dto.ChickenLid;
             rule.FlockId = dto.FlockId;
             rule.Times = dto.Times;
@@ -87,12 +96,27 @@ namespace AutoFeed_Backend_Services.Services
             rule.Note = dto.Note;
 
             _context.FeedingRules.Update(rule);
-            return await _context.SaveChangesAsync() > 0;
+            var saved = await _context.SaveChangesAsync() > 0;
+            return saved ? (true, "OK") : (false, "Save failed");
         }
 
         // 5. Thêm một bữa ăn mới vào Rule (Bảng con)
-        public async Task<bool> AddDetailAsync(RuleDetailCreateDto dto)
+        public async Task<(bool Success, string Message)> AddDetailAsync(RuleDetailCreateDto dto)
         {
+            var rule = await _context.FeedingRules
+                .Include(r => r.FeedingRuleDetails)
+                .FirstOrDefaultAsync(r => r.RuleId == dto.RuleID);
+
+            if (rule == null)
+                return (false, "Rule not found");
+
+            var activeCount = CountActiveDetails(rule);
+            if (rule.Times <= 0)
+                return (false, "Rule Times must be greater than 0 to add feeding details");
+
+            if (activeCount >= rule.Times)
+                return (false, $"Cannot add detail: rule already has {activeCount} active meal(s), maximum is {rule.Times} (Times).");
+
             var detail = new FeedingRuleDetail
             {
                 RuleId = dto.RuleID,
@@ -105,7 +129,8 @@ namespace AutoFeed_Backend_Services.Services
             };
 
             _context.FeedingRuleDetails.Add(detail);
-            return await _context.SaveChangesAsync() > 0;
+            var saved = await _context.SaveChangesAsync() > 0;
+            return saved ? (true, "OK") : (false, "Save failed");
         }
 
         // 6. Cập nhật thông tin một bữa ăn (Sửa giờ, thức ăn...)

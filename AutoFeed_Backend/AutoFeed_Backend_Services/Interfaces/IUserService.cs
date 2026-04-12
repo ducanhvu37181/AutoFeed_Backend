@@ -7,7 +7,8 @@ namespace AutoFeed_Backend_Services.Interfaces;
 
 public interface IUserService
 {
-    Task<List<User>> GetAllAsync();
+    /// <param name="roleDescriptionContains">If set, only users whose Role.Description contains this text (case-insensitive), e.g. "manager".</param>
+    Task<List<User>> GetAllAsync(string? roleDescriptionContains = null);
     Task<List<User>> GetActiveAsync();
     Task<List<User>> GetInactiveAsync();
     Task<User?> GetByIdAsync(int id);
