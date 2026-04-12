@@ -24,14 +24,14 @@ namespace AutoFeed_Backend.Controllers
         }
 
         [HttpPost("detail")]
-        public async Task<IActionResult> AddDetail([FromBody] RuleDetailCreateDto dto)
+        public async Task<IActionResult> AddDetail(RuleDetailCreateDto dto)
         {
             var (success, message) = await _feedingRuleService.AddDetailAsync(dto);
             return success ? Ok(new { success = true, message }) : BadRequest(new { success = false, message });
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] FeedingRuleCreateDto dto)
+        public async Task<IActionResult> Create(FeedingRuleCreateDto dto)
         {
             var success = await _feedingRuleService.CreateRuleAsync(dto);
             return success ? Ok("Created") : BadRequest("Failed");
