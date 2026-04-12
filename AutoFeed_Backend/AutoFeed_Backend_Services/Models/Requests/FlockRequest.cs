@@ -7,8 +7,9 @@ namespace AutoFeed_Backend.Models.Requests.Flock
         public string Name { get; set; } = null!;
         public int Quantity { get; set; }
         public decimal Weight { get; set; }
-        public DateTime DoB { get; set; }
-        public DateTime TransferDate { get; set; }
+        /// <summary>Chỉ ngày (JSON: "2026-01-01") — không cần giờ.</summary>
+        public DateOnly DoB { get; set; }
+        public DateOnly TransferDate { get; set; }
         public string HealthStatus { get; set; } = "healthy";
         public string? Note { get; set; }
     }

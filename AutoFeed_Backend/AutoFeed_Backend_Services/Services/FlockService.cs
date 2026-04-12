@@ -3,6 +3,7 @@ using AutoFeed_Backend_Repositories.UnitOfWork;
 using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend.Models.Requests.Flock;
 using AutoFeed_Backend.Models.Responses;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,11 +14,24 @@ namespace AutoFeed_Backend_Services.Services
     public class FlockService : IFlockService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly AutoFeedDBContext _db;
 
-        public FlockService(IUnitOfWork unitOfWork)
+        public FlockService(IUnitOfWork unitOfWork, AutoFeedDBContext db)
         {
             _unitOfWork = unitOfWork;
+            _db = db;
         }
+
+        private static FlockResponse MapToResponse(FlockChicken f) => new FlockResponse
+        {
+            FlockId = f.FlockId,
+            Name = f.Name,
+            Quantity = f.Quantity,
+            Weight = f.Weight,
+            DoB = f.DoB,
+            HealthStatus = f.HealthStatus,
+            Note = f.Note
+        };
 
         // 1. Get all flocks
         public async Task<IEnumerable<FlockResponse>> GetAllFlocksAsync()
@@ -25,16 +39,35 @@ namespace AutoFeed_Backend_Services.Services
             var flocks = await _unitOfWork.Flocks.GetAllAsync();
             if (flocks == null) return Enumerable.Empty<FlockResponse>();
 
-            return flocks.Select(f => new FlockResponse
+            return flocks.Select(MapToResponse);
+        }
+
+        public async Task<IEnumerable<FlockResponse>> GetFlocksDashboardAsync(string? searchTerm, int? barnId, string? status)
+        {
+            var flocks = await _unitOfWork.Flocks.GetAllWithBarnAsync();
+            IEnumerable<FlockChicken> query = flocks;
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                FlockId = f.FlockId,
-                Name = f.Name,
-                Quantity = f.Quantity,
-                Weight = f.Weight,
-                DoB = f.DoB.ToDateTime(System.TimeOnly.MinValue),
-                HealthStatus = f.HealthStatus,
-                Note = f.Note
-            });
+                var term = searchTerm.Trim();
+                query = query.Where(f => f.Name != null && f.Name.Contains(term, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (barnId.HasValue)
+            {
+                query = query.Where(f => f.ChickenBarn != null && f.ChickenBarn.BarnId == barnId.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                var st = status.Trim();
+                query = query.Where(f =>
+                    f.ChickenBarn != null &&
+                    f.ChickenBarn.Status != null &&
+                    f.ChickenBarn.Status.Equals(st, StringComparison.OrdinalIgnoreCase));
+            }
+
+            return query.Select(MapToResponse);
         }
 
         // 2. Get flock by ID
@@ -43,20 +76,11 @@ namespace AutoFeed_Backend_Services.Services
             var f = await _unitOfWork.Flocks.GetByIdAsync(id);
             if (f == null) return null;
 
-            return new FlockResponse
-            {
-                FlockId = f.FlockId,
-                Name = f.Name,
-                Quantity = f.Quantity,
-                Weight = f.Weight,
-                DoB = f.DoB.ToDateTime(System.TimeOnly.MinValue),
-                HealthStatus = f.HealthStatus,
-                Note = f.Note
-            };
+            return MapToResponse(f);
         }
 
         // 3. Create new flock
-        public async Task<bool> CreateFlockAsync(FlockCreateRequest req)
+        public async Task<int?> CreateFlockAsync(FlockCreateRequest req)
         {
             try
             {
@@ -65,15 +89,16 @@ namespace AutoFeed_Backend_Services.Services
                     Name = req.Name,
                     Quantity = req.Quantity,
                     Weight = req.Weight,
-                    DoB = DateOnly.FromDateTime(req.DoB),
-                    TransferDate = DateOnly.FromDateTime(req.TransferDate),
+                    DoB = req.DoB,
+                    TransferDate = req.TransferDate,
                     HealthStatus = req.HealthStatus ?? "Healthy",
                     Note = req.Note
                 };
+                // GenericRepository.CreateAsync already SaveChanges; a second save returns 0 rows and would falsely fail.
                 await _unitOfWork.Flocks.CreateAsync(flock);
-                return (await _unitOfWork.SaveChangesWithTransactionAsync()) > 0;
+                return flock.FlockId > 0 ? flock.FlockId : null;
             }
-            catch (Exception) { return false; }
+            catch (Exception) { return null; }
         }
 
         // 4. Update flock information
@@ -88,18 +113,68 @@ namespace AutoFeed_Backend_Services.Services
             f.HealthStatus = req.HealthStatus;
             f.Note = req.Note;
 
-            await _unitOfWork.Flocks.UpdateAsync(f);
-            return (await _unitOfWork.SaveChangesWithTransactionAsync()) > 0;
+            // GenericRepository.UpdateAsync already persists; second SaveChanges returns 0 rows.
+            var n = await _unitOfWork.Flocks.UpdateAsync(f);
+            return n > 0;
         }
 
-        // 5. Delete flock
-        public async Task<bool> DeleteFlockAsync(int id)
+        // 5. Delete flock (cascade dependents — FK từ FeedingRule, ChickenBarn, LargeChicken, Schedule chặn xóa trực tiếp)
+        public async Task<(bool Success, string? Error)> DeleteFlockAsync(int id)
         {
-            var f = await _unitOfWork.Flocks.GetByIdAsync(id);
-            if (f == null) return false;
+            await using var tx = await _db.Database.BeginTransactionAsync();
+            try
+            {
+                if (!await _db.FlockChickens.AnyAsync(f => f.FlockId == id))
+                {
+                    await tx.RollbackAsync();
+                    return (false, "Flock not found");
+                }
 
-            await _unitOfWork.Flocks.RemoveAsync(f);
-            return (await _unitOfWork.SaveChangesWithTransactionAsync()) > 0;
+                var lcIds = await _db.LargeChickens.Where(l => l.FlockId == id).Select(l => l.ChickenLid).ToListAsync();
+
+                var cbByFlock = _db.ChickenBarns.Where(cb => cb.FlockId == id);
+                var cbByLc = _db.ChickenBarns.Where(cb => cb.ChickenLid != null && lcIds.Contains(cb.ChickenLid.Value));
+                var cbList = await cbByFlock.Union(cbByLc).ToListAsync();
+                var cbarnIds = cbList.Select(c => c.CbarnId).ToList();
+
+                var schedules = await _db.Schedules.Where(s => cbarnIds.Contains(s.CbarnId)).ToListAsync();
+                if (schedules.Count > 0)
+                    _db.Schedules.RemoveRange(schedules);
+
+                if (cbList.Count > 0)
+                    _db.ChickenBarns.RemoveRange(cbList);
+
+                var ruleIds = await _db.FeedingRules
+                    .Where(r => r.FlockId == id || (r.ChickenLid != null && lcIds.Contains(r.ChickenLid.Value)))
+                    .Select(r => r.RuleId)
+                    .ToListAsync();
+
+                var details = await _db.FeedingRuleDetails.Where(d => ruleIds.Contains(d.RuleId)).ToListAsync();
+                if (details.Count > 0)
+                    _db.FeedingRuleDetails.RemoveRange(details);
+
+                var rules = await _db.FeedingRules.Where(r => ruleIds.Contains(r.RuleId)).ToListAsync();
+                if (rules.Count > 0)
+                    _db.FeedingRules.RemoveRange(rules);
+
+                var larges = await _db.LargeChickens.Where(l => l.FlockId == id).ToListAsync();
+                if (larges.Count > 0)
+                    _db.LargeChickens.RemoveRange(larges);
+
+                var flock = await _db.FlockChickens.FindAsync(id);
+                if (flock != null)
+                    _db.FlockChickens.Remove(flock);
+
+                await _db.SaveChangesAsync();
+                await tx.CommitAsync();
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                await tx.RollbackAsync();
+                var msg = ex.InnerException?.Message ?? ex.Message;
+                return (false, msg);
+            }
         }
 
         // 6. UPGRADE LOGIC: Move a chicken from Flock to Large Chicken Barn

@@ -47,4 +47,16 @@ public class UserRepository : GenericRepository<User>
         if (roleId.HasValue) query = query.Where(u => u.RoleId == roleId.Value);
         return await query.ToListAsync();
     }
+
+    /// <summary>Case-insensitive substring match on Role.Description (e.g. role=manager).</summary>
+    public async Task<List<User>> GetAllByRoleDescriptionContainsAsync(string roleSubstring)
+    {
+        var term = roleSubstring.Trim().ToLowerInvariant();
+        return await _context.Set<User>()
+            .Include(u => u.Role)
+            .Where(u => u.Role != null &&
+                        u.Role.Description != null &&
+                        u.Role.Description.ToLower().Contains(term))
+            .ToListAsync();
+    }
 }

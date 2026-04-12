@@ -52,9 +52,11 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<List<User>> GetAllAsync()
+    public async Task<List<User>> GetAllAsync(string? roleDescriptionContains = null)
     {
-        return await _unitOfWork.Users.GetAllAsync();
+        if (string.IsNullOrWhiteSpace(roleDescriptionContains))
+            return await _unitOfWork.Users.GetAllAsync();
+        return await _unitOfWork.Users.GetAllByRoleDescriptionContainsAsync(roleDescriptionContains);
     }
 
     public async System.Threading.Tasks.Task<List<User>> GetActiveAsync()

@@ -8,7 +8,8 @@ namespace AutoFeed_Backend.Models.Responses
         public string Name { get; set; } = null!;
         public int Quantity { get; set; }
         public decimal Weight { get; set; }
-        public DateTime DoB { get; set; }
+        /// <summary>Date-only in JSON (no 00:00:00 time component).</summary>
+        public DateOnly DoB { get; set; }
         public string HealthStatus { get; set; } = null!;
         public string? Note { get; set; }
     }

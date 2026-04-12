@@ -59,9 +59,10 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] string? role)
     {
-        var items = await _service.GetAllAsync();
+        var roleFilter = string.IsNullOrWhiteSpace(role) ? null : role.Trim();
+        var items = await _service.GetAllAsync(roleFilter);
         var dto = items.Select(u => new UserResponse {
             UserId = u.UserId,
             RoleId = u.RoleId,

@@ -1,0 +1,11 @@
+# Local SQL Server for AutoFeed (matches DefaultConnection in appsettings.json)
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
+    container_name: autofeed-sql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "123456Abc!"
+    ports:
+      - "1433:1433"
