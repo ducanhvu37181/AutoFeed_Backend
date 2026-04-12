@@ -8,7 +8,6 @@ public interface IBarnService
 {
     Task<IEnumerable<Barn>> GetAllAsync();
     Task<Barn?> GetByIdAsync(int id);
-    Task<List<Barn>> GetAvailableAsync();
     Task<bool> CreateBarnAsync(Barn barn);
     Task<bool> UpdateBarnAsync(Barn barn);
     Task<bool> DeleteBarnAsync(int id);
