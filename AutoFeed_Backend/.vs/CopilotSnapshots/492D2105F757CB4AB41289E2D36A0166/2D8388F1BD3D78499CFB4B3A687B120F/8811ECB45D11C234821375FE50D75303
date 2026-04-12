@@ -58,21 +58,6 @@ public class BarnController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("available")]
-    public async Task<IActionResult> GetAvailableBarns()
-    {
-        var barns = await _barnService.GetAvailableAsync();
-        var result = barns.Select(b => new {
-            b.BarnId,
-            b.Temperature,
-            b.Humidity,
-            b.Type,
-            b.Area,
-            b.CreateDate
-        });
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = result, Description = "Success" });
-    }
-
     [HttpGet("{id}")]
     public async Task<IActionResult> GetBarnById(int id)
     {

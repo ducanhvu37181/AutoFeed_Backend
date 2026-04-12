@@ -19,8 +19,6 @@ public class BarnService : IBarnService
 
     public async Task<Barn?> GetByIdAsync(int id) => await _unitOfWork.Barns.GetByIdAsync(id);
 
-    public async Task<List<Barn>> GetAvailableAsync() => await _unitOfWork.Barns.GetAvailableAsync();
-
     public async Task<bool> CreateBarnAsync(Barn barn)
     {
         _unitOfWork.Barns.PrepareCreate(barn);

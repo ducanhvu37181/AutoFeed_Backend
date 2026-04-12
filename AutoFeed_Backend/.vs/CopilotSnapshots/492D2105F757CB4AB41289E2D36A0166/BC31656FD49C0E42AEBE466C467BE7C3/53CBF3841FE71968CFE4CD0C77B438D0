@@ -1,0 +1,10 @@
+﻿using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Repositories.BasicRepo;
+
+namespace AutoFeed_Backend_Repositories.Repositories;
+
+public class BarnRepository : GenericRepository<Barn>
+{
+    public BarnRepository() : base() { }
+    public BarnRepository(AutoFeedDBContext context) : base(context) { }
+}

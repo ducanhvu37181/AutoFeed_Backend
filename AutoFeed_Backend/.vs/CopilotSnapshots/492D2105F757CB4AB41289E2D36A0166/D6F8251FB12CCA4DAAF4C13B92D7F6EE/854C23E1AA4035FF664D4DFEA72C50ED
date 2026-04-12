@@ -58,21 +58,6 @@ public class BarnController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("available")]
-    public async Task<IActionResult> GetAvailableBarns()
-    {
-        var barns = await _barnService.GetAvailableAsync();
-        var result = barns.Select(b => new {
-            b.BarnId,
-            b.Temperature,
-            b.Humidity,
-            b.Type,
-            b.Area,
-            b.CreateDate
-        });
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = result, Description = "Success" });
-    }
-
     [HttpGet("{id}")]
     public async Task<IActionResult> GetBarnById(int id)
     {
@@ -105,25 +90,12 @@ public class BarnController : ControllerBase
             CreateDate = DateTime.Now
         };
 
-        try
-        {
-            var result = await _barnService.CreateBarnAsync(barn);
-            if (!result) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Create failed" });
+        var result = await _barnService.CreateBarnAsync(barn);
+        if (!result) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Create failed" });
 
-            var dto = new { BarnId = barn.BarnId, Type = barn.Type, Area = barn.Area, Temperature = barn.Temperature, Humidity = barn.Humidity };
-            var response = new ApiResponse<object> { Status = true, HttpCode = 201, Data = dto, Description = "Created" };
-            return CreatedAtAction(nameof(GetBarnById), new { id = barn.BarnId }, response);
-        }
-        catch (Microsoft.EntityFrameworkCore.DbUpdateException dbEx)
-        {
-            // Provide inner exception message for easier debugging of constraint/SQL issues
-            var message = dbEx.InnerException?.Message ?? dbEx.Message;
-            return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = message });
-        }
-        catch (System.Exception ex)
-        {
-            return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = ex.Message });
-        }
+        var dto = new { BarnId = barn.BarnId, Type = barn.Type, Area = barn.Area, Temperature = barn.Temperature, Humidity = barn.Humidity };
+        var response = new ApiResponse<object> { Status = true, HttpCode = 201, Data = dto, Description = "Created" };
+        return CreatedAtAction(nameof(GetBarnById), new { id = barn.BarnId }, response);
     }
 
     [HttpPut]
