@@ -15,6 +15,7 @@ public class RequestRepository : GenericRepository<Request>
 
     public async Task<List<Request>> GetActiveAsync()
     {
+        // Deprecated: use GetByStatusAsync
         return await _context.Set<Request>()
             .Where(r => r.Status != null && (r.Status.ToLower() == "pending" || r.Status.ToLower() == "approved"))
             .ToListAsync();
@@ -22,6 +23,7 @@ public class RequestRepository : GenericRepository<Request>
 
     public async Task<List<Request>> GetInactiveAsync()
     {
+        // Deprecated: use GetByStatusAsync
         return await _context.Set<Request>()
             .Where(r => r.Status != null && r.Status.ToLower() == "rejected")
             .ToListAsync();
@@ -31,6 +33,17 @@ public class RequestRepository : GenericRepository<Request>
     {
         return await _context.Set<Request>()
             .Where(r => r.UserId == userId)
+            .ToListAsync();
+    }
+
+    public async Task<List<Request>> GetByStatusAsync(string status)
+    {
+        if (string.IsNullOrWhiteSpace(status))
+            return new List<Request>();
+
+        var s = status.Trim().ToLower();
+        return await _context.Set<Request>()
+            .Where(r => r.Status != null && r.Status.ToLower() == s)
             .ToListAsync();
     }
 

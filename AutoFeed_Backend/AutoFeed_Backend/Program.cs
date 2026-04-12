@@ -53,7 +53,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false
         };
     });
-builder.WebHost.UseUrls("http://localhost:5001");
+//builder.WebHost.UseUrls("http://localhost:5207");
 var app = builder.Build();
 
 
