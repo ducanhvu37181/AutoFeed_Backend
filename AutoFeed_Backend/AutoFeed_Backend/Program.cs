@@ -48,12 +48,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Chuoi_Key_Bi_Mat_Cua_Kien_SE170416_FPT_University")),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("key")),
             ValidateIssuer = false,
             ValidateAudience = false
         };
     });
-
+builder.WebHost.UseUrls("http://localhost:5001");
 var app = builder.Build();
 
 

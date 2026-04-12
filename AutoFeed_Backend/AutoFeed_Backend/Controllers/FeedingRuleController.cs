@@ -51,6 +51,14 @@ namespace AutoFeed_Backend.Controllers
             return success ? Ok("Updated") : BadRequest();
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, FeedingRuleUpdateDto dto)
+       {
+            var success = await _feedingRuleService.UpdateRuleAsync(id, dto);
+              return success ? Ok("Updated") : NotFound();
+        }
+        
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

@@ -70,7 +70,7 @@ namespace AutoFeed_Backend_Services.Services
             return await _context.SaveChangesAsync() > 0;
         }
 
-        // 4. Cập nhật Rule gốc (Hàm Kiên vừa yêu cầu thêm)
+        // 4. Cập nhật Rule gốc (Hàm  vừa yêu cầu thêm)
         public async Task<bool> UpdateRuleAsync(int id, FeedingRuleUpdateDto dto)
         {
             var rule = await _context.FeedingRules
@@ -138,6 +138,7 @@ namespace AutoFeed_Backend_Services.Services
             _context.FeedingRuleDetails.Update(detail);
             return await _context.SaveChangesAsync() > 0;
         }
+        
 
         // 8. Xóa Rule (Xóa cả cha lẫn con)
         public async Task<bool> DeleteRuleAsync(int id)

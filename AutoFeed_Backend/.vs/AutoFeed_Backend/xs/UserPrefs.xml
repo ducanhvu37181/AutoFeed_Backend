@@ -1,9 +1,7 @@
 ﻿<Properties StartupConfiguration="{595447D5-E8B3-4CEA-A806-FBE53645CD98}|https">
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="AutoFeed_Backend_Services/Services/FlockService.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="AutoFeed_Backend/appsettings.json">
     <Files>
-      <File FileName="AutoFeed_Backend/appsettings.json" />
+      <File FileName="AutoFeed_Backend/appsettings.json" Line="24" Column="2" />
       <File FileName="AutoFeed_Backend/Controllers/AuthController.cs" />
       <File FileName="AutoFeed_Backend/Controllers/FoodController.cs" />
       <File FileName="AutoFeed_Backend_Services/Interfaces/IUserService.cs" />
@@ -23,13 +21,12 @@
       <File FileName="AutoFeed_Backend_DAO/Models/FeedingRuleDetail.cs" />
       <File FileName="AutoFeed_Backend_DAO/Models/BarnIoTDevice.cs" />
       <File FileName="AutoFeed_Backend_DAO/Models/IoTDevice.cs" />
-      <File FileName="AutoFeed_Backend_DAO/Models/FeedingRuleDto.cs" />
       <File FileName="AutoFeed_Backend_Services/Interfaces/IFeedingRuleService.cs" />
-      <File FileName="AutoFeed_Backend_Services/Services/FeedingRuleService.cs" />
+      <File FileName="AutoFeed_Backend_Services/Services/FeedingRuleService.cs" Line="151" Column="2" />
       <File FileName="AutoFeed_Backend_Services/Services/DashboardTechService.cs" />
       <File FileName="AutoFeed_Backend/Controllers/FeedingRuleController.cs" />
       <File FileName="AutoFeed_Backend_Services/Services/EmailService.cs" />
-      <File FileName="AutoFeed_Backend_Services/Services/FlockService.cs" Line="162" Column="2" />
+      <File FileName="AutoFeed_Backend_Services/Services/FlockService.cs" />
       <File FileName="AutoFeed_Backend_Services/Services/InventoryService.cs" />
       <File FileName="AutoFeed_Backend/Models/Requests/Request/CreateRequestRequest.cs" />
       <File FileName="AutoFeed_Backend_DAO/Models/Food.cs" />
@@ -38,32 +35,24 @@
       <File FileName="AutoFeed_Backend_Repositories/BasicRepo/GenericRepository.cs" />
       <File FileName="AutoFeed_Backend/Models/Requests/Food/FoodCreateRequest.cs" />
       <File FileName="AutoFeed_Backend/Models/Requests/Inventory/RequestNewItemRequest.cs" />
-      <File FileName="AutoFeed_Backend/Models/Responses/DeviceResponse.cs" />
       <File FileName="AutoFeed_Backend/Controllers/DeviceController.cs" />
       <File FileName="AutoFeed_Backend/Models/Responses/RequestResponse.cs" />
       <File FileName="AutoFeed_Backend/AutoFeed_Backend.http" />
       <File FileName="AutoFeed_Backend/Controllers/FlockController.cs" />
-      <File FileName="AutoFeed_Backend_Services/Interfaces/IFlockService.cs" Line="2" Column="46" />
+      <File FileName="AutoFeed_Backend_Services/Interfaces/IFlockService.cs" />
       <File FileName="AutoFeed_Backend/Controllers/ChickenBarnController.cs" />
       <File FileName="AutoFeed_Backend_DAO/Models/ChickenBarn.cs" />
       <File FileName="AutoFeed_Backend_DAO/Models/Barn.cs" />
-      <File FileName="AutoFeed_Backend_DAO/Models/FlockChicken.cs" Line="12" Column="17" />
+      <File FileName="AutoFeed_Backend_DAO/Models/FlockChicken.cs" />
       <File FileName="AutoFeed_Backend_DAO/Models/LargeChicken.cs" />
-      <File FileName="AutoFeed_Backend/Models/Responses/FlockResponse.cs" Line="15" Column="2" />
-      <File FileName="AutoFeed_Backend/Models/Responses/UpgradeResponse.cs" Line="12" Column="2" />
-      <File FileName="AutoFeed_Backend/Models/Requests/Flock/FlockRequest.cs" Line="34" Column="2" />
+      <File FileName="AutoFeed_Backend_Services/Models/Requests/FeedingRuleRequest.cs" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="AutoFeed_Backend">
-            <Node name="AutoFeed_Backend">
-              <Node name="Models" expanded="True">
-                <Node name="Requests" expanded="True">
-                  <Node name="Flock" expanded="True" />
-                </Node>
-                <Node name="Responses" expanded="True" />
-              </Node>
+            <Node name="AutoFeed_Backend" expanded="True">
+              <Node name="appsettings.json" selected="True" />
             </Node>
             <Node name="AutoFeed_Backend_DAO" expanded="True">
               <Node name="Models" expanded="True" />
@@ -71,20 +60,19 @@
             <Node name="AutoFeed_Backend_Repositories" expanded="True">
               <Node name="BasicRepo" expanded="True" />
             </Node>
-            <Node name="AutoFeed_Backend_Services">
-              <Node name="Interfaces" expanded="True" />
-              <Node name="Services" expanded="True">
-                <Node name="FlockService.cs" selected="True" />
-              </Node>
+            <Node name="AutoFeed_Backend_Services" expanded="True">
+              <Node name="Services" expanded="True" />
             </Node>
           </Node>
         </State>
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.ItemProperties.AutoFeed__Backend PreferredExecutionTarget="/Applications/Google Chrome.app" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MultiItemStartupConfigurations />
-  <MonoDevelop.Ide.ItemProperties.AutoFeed__Backend PreferredExecutionTarget="/Applications/Google Chrome.app" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
 </Properties>
