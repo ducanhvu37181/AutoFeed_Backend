@@ -65,30 +65,10 @@ namespace AutoFeed_Backend_Services.Services
                 EndDate = dto.EndDate,
                 Description = dto.Description,
                 Note = dto.Note,
-                Status = "active"
+                Status = "Active"
             };
-            // Validate uniqueness constraints enforced by DB indexes to avoid exceptions
-            if (rule.FlockId.HasValue)
-            {
-                var exists = await _context.FeedingRules.AnyAsync(r => r.FlockId == rule.FlockId.Value);
-                if (exists) return false; // a rule for this flock already exists
-            }
-            if (rule.ChickenLid.HasValue)
-            {
-                var exists = await _context.FeedingRules.AnyAsync(r => r.ChickenLid == rule.ChickenLid.Value);
-                if (exists) return false; // a rule for this chicken already exists
-            }
-
-            try
-            {
-                _context.FeedingRules.Add(rule);
-                return await _context.SaveChangesAsync() > 0;
-            }
-            catch (DbUpdateException)
-            {
-                // swallow DB update exceptions and return false to caller
-                return false;
-            }
+            _context.FeedingRules.Add(rule);
+            return await _context.SaveChangesAsync() > 0;
         }
 
         private static int CountActiveDetails(FeedingRule rule) =>
