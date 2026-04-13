@@ -18,7 +18,7 @@ public class InventoryController : ControllerBase
         _service = service;
     }
 
-    // GET api/inventory?search=xxx&type=yyy
+    // GET api/Inventory?search=xxx&type=yyy
     // Tìm kiếm food trong kho inventory, lọc theo tên và loại
     [HttpGet]
     public async Task<IActionResult> Search([FromQuery] string? search, [FromQuery] string? type)
@@ -33,7 +33,7 @@ public class InventoryController : ControllerBase
         });
     }
 
-    // GET api/inventory/expiring?days=30
+    // GET api/Inventory/expiring?days=30
     // Lấy danh sách hàng sắp hết hạn trong n ngày tới
     [HttpGet("expiring")]
     public async Task<IActionResult> GetExpiringSoon([FromQuery] int days = 30)
@@ -48,21 +48,13 @@ public class InventoryController : ControllerBase
         });
     }
 
-    // POST api/inventory/add
+    // POST api/Inventory/add
     // Manager nhập kho: thêm một lô hàng mới vào inventory
     [HttpPost("add")]
     public async Task<IActionResult> AddInventory([FromBody] AddInventoryRequest model)
     {
-        if (model == null || model.FoodId <= 0 || model.Quantity <= 0)
-            return BadRequest(new ApiResponse<object>
-            {
-                Status = false,
-                HttpCode = 400,
-                Data = null,
-                Description = "Invalid request"
-            });
-
         if (!DateOnly.TryParse(model.ExpiredDate, out var expiredDate))
+        {
             return BadRequest(new ApiResponse<object>
             {
                 Status = false,
@@ -70,6 +62,7 @@ public class InventoryController : ControllerBase
                 Data = null,
                 Description = "Invalid date format. Use yyyy-MM-dd"
             });
+        }
 
         var entity = new Inventory
         {
@@ -79,26 +72,37 @@ public class InventoryController : ControllerBase
             ExpiredDate = expiredDate
         };
 
-        var ok = await _service.AddInventoryAsync(entity);
-        if (!ok)
-            return StatusCode(500, new ApiResponse<object>
+        try
+        {
+            var ok = await _service.AddInventoryAsync(entity);
+
+            return Ok(new ApiResponse<object>
+            {
+                Status = true,
+                HttpCode = 200,
+                Data = new
+                {
+                    entity.FoodId,
+                    entity.Quantity,
+                    entity.ExpiredDate
+                },
+                Description = "Inventory added successfully"
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new ApiResponse<object>
             {
                 Status = false,
-                HttpCode = 500,
+                HttpCode = 400,
                 Data = null,
-                Description = "Add inventory failed"
+                Description = ex.Message
             });
-
-        return Ok(new ApiResponse<object>
-        {
-            Status = true,
-            HttpCode = 200,
-            Data = null,
-            Description = "Inventory added successfully"
-        });
+        }
     }
 
-    // POST api/inventory/request-item
+
+    // POST api/Inventory/request-item
     // Farmer gửi request lên manager để xin nhập thêm hàng
     [HttpPost("request-item")]
     public async Task<IActionResult> RequestNewItem([FromBody] RequestNewItemRequest model)
@@ -128,6 +132,90 @@ public class InventoryController : ControllerBase
             HttpCode = 200,
             Data = null,
             Description = "Request sent successfully"
+        });
+    }
+
+    // POST api/Inventory/consume
+    // Farmer xuất kho theo lịch cho gà ăn mà không cần gửi request đến manager
+    [HttpPost("consume")]
+    public async Task<IActionResult> Consume([FromBody] ConsumeInventoryRequest model)
+    {
+        if (model.FoodId <= 0 || model.Quantity <= 0)
+        {
+            return BadRequest(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Description = "Invalid request"
+            });
+        }
+
+        try
+        {
+            var ok = await _service.ConsumeInventoryAsync(model.FoodId, model.Quantity);
+
+            return Ok(new ApiResponse<object>
+            {
+                Status = true,
+                HttpCode = 200,
+                Description = "Consume inventory successfully"
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Description = ex.Message
+            });
+        }
+    }
+    
+    // GET api/Inventory/nearest-expired
+    // Lấy patch gần hết hạn trước
+    [HttpGet("nearest-expired")]
+    public async Task<IActionResult> GetNearestExpired()
+    {
+        var data = await _service.GetNearestExpiredAsync();
+
+        return Ok(new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = data,
+            Description = "Success"
+        });
+    }
+
+    // POST api/Inventory/start-feeding-session
+    // Farmer xuất kho theo lịch cho gà ăn mà không cần gửi request đến manager, có kiểm tra lại xem dùng thực tế là bao nhiêu
+    [HttpPost("start-feeding-session")]
+    public async Task<IActionResult> StartFeeding([FromBody] StartFeedingSessionRequest model)
+    {
+        var id = await _service.CreateFeedingSessionAsync(model.FoodId, model.Quantity);
+
+        return Ok(new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = new { SessionId = id },
+            Description = "Session created"
+        });
+    }
+
+    // POST api/Inventory/complete-feeding-session
+    // Farmer xuất kho theo lịch cho gà ăn mà không cần gửi request đến manager, có kiểm tra lại xem dùng thực tế là bao nhiêu
+    [HttpPost("complete-feeding-session")]
+    public async Task<IActionResult> CompleteFeeding([FromBody] CompleteFeedingSessionRequest model)
+    {
+        await _service.CompleteFeedingSessionAsync(model.SessionId, model.ActualQuantity);
+
+        return Ok(new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Description = "Feeding completed"
         });
     }
 }
