@@ -69,45 +69,51 @@ namespace AutoFeed_Backend_Services.Services
         }
 
         public async Task<bool> CreateRuleAsync(FeedingRuleCreateDto dto)
-        {
-            if (dto.Times <= 0)
-                return false; // Không cho tạo rule nếu times <= 0
+{
+    if (dto.Times <= 0)
+        return false; // Không cho tạo rule nếu times <= 0
 
-            var rule = new FeedingRule
-            {
-                ChickenLid = dto.ChickenLid,
-                FlockId = dto.FlockId,
-                Times = dto.Times,
-                StartDate = dto.StartDate,
-                EndDate = dto.EndDate,
-                Description = dto.Description,
-                Note = dto.Note,
-                Status = "active"
-            };
-            // Validate uniqueness constraints enforced by DB indexes to avoid exceptions
-            if (rule.FlockId.HasValue)
-            {
-                var exists = await _context.FeedingRules.AnyAsync(r => r.FlockId == rule.FlockId.Value);
-                if (exists) return false; // a rule for this flock already exists
-            }
-            if (rule.ChickenLid.HasValue)
-            {
-                var exists = await _context.FeedingRules.AnyAsync(r => r.ChickenLid == rule.ChickenLid.Value);
-                if (exists) return false; // a rule for this chicken already exists
-            }
+    // Chỉ cho phép 1 trong 2 id, không được nhập cả hai hoặc cả hai đều null
+    bool hasChicken = dto.ChickenLid != null;
+    bool hasFlock = dto.FlockId != null;
+    if (hasChicken == hasFlock) // cả hai đều null hoặc cả hai đều có giá trị
+        return false;
 
-            try
-            {
-                _context.FeedingRules.Add(rule);
-                return await _context.SaveChangesAsync() > 0;
-            }
-            catch (DbUpdateException)
-            {
-                // swallow DB update exceptions and return false to caller
-                return false;
-            }
-        }
+    // Kiểm tra trùng rule
+    if (hasChicken)
+    {
+        bool exists = await _context.FeedingRules.AnyAsync(r => r.ChickenLid == dto.ChickenLid);
+        if (exists) return false;
+    }
+    else // hasFlock
+    {
+        bool exists = await _context.FeedingRules.AnyAsync(r => r.FlockId == dto.FlockId);
+        if (exists) return false;
+    }
 
+    var rule = new FeedingRule
+    {
+        ChickenLid = hasChicken ? dto.ChickenLid : null,
+        FlockId = hasFlock ? dto.FlockId : null,
+        Times = dto.Times,
+        StartDate = dto.StartDate,
+        EndDate = dto.EndDate,
+        Description = dto.Description,
+        Note = dto.Note,
+        Status = "active"
+    };
+
+    try
+    {
+        _context.FeedingRules.Add(rule);
+        return await _context.SaveChangesAsync() > 0;
+    }
+    catch (DbUpdateException)
+    {
+        // swallow DB update exceptions and return false to caller
+        return false;
+    }
+}
         private static int CountActiveDetails(FeedingRule rule) =>
             rule.FeedingRuleDetails.Count(d => d.Status != false);
 

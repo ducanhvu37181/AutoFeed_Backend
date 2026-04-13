@@ -30,22 +30,29 @@ namespace AutoFeed_Backend.Controllers
         }
 
         [HttpPost]
-public async Task<IActionResult> Create(FeedingRuleCreateDto dto)
-{
-    try
-    {
-        var success = await _feedingRuleService.CreateRuleAsync(dto);
-        return success ? Ok("Created") : BadRequest("Failed");
-    }
-    catch (Microsoft.EntityFrameworkCore.DbUpdateException ex) when (ex.InnerException?.Message.Contains("UIX_FRule_Flock") == true)
-    {
-        return BadRequest("Duplicate rule for this chickenLid and flockId.");
-    }
-    catch
-    {
-        return StatusCode(500, "Internal server error");
-    }
-}
+        public async Task<IActionResult> Create(FeedingRuleCreateDto dto)
+        {
+            // Kiểm tra chỉ cho phép nhập 1 trong 2 trường
+            bool hasChicken = dto.ChickenLid != null;
+            bool hasFlock = dto.FlockId != null;
+            if (hasChicken == hasFlock) // cả hai đều null hoặc cả hai đều có giá trị
+            {
+                return BadRequest("Bạn chỉ được nhập 1 trong 2 trường chickenLid hoặc flockId, không được nhập cả hai hoặc cả hai đều null.");
+            }
+            try
+            {
+                var success = await _feedingRuleService.CreateRuleAsync(dto);
+                return success ? Ok("Created") : BadRequest("Failed");
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateException ex) when (ex.InnerException?.Message.Contains("UIX_FRule_Flock") == true)
+            {
+                return BadRequest("Duplicate rule for this chickenLid and flockId.");
+            }
+            catch
+            {
+                return StatusCode(500, "Internal server error");
+            }
+        }
 
         [HttpPut("detail/{detailId}/disable")]
         public async Task<IActionResult> DisableDetail(int detailId)
