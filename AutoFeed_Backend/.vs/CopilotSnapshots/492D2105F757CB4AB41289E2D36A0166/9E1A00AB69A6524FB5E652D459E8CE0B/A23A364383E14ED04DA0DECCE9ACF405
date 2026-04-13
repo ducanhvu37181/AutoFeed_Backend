@@ -38,8 +38,6 @@ namespace AutoFeed_Backend_Services.Services
         public async Task<FeedingRuleFullResponse?> GetRuleByIdAsync(int id)
         {
             var rule = await _context.FeedingRules
-                .Include(r => r.ChickenL)
-                .Include(r => r.Flock)
                 .Include(r => r.FeedingRuleDetails)
                 .ThenInclude(d => d.Food)
                 .FirstOrDefaultAsync(r => r.RuleId == id);
