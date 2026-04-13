@@ -18,20 +18,7 @@ namespace AutoFeed_Backend_Services.Services
         public async Task<IEnumerable<object>> GetAllRulesAsync()
         {
             return await _context.FeedingRules
-                .Include(r => r.ChickenL)
-                .Include(r => r.Flock)
-                .Select(r => new
-                {
-                    r.RuleId,
-                    r.Description,
-                    r.Times,
-                    r.StartDate,
-                    r.EndDate,
-                    ChickenLid = r.ChickenLid,
-                    ChickenName = r.ChickenL != null ? r.ChickenL.Name : null,
-                    FlockId = r.FlockId,
-                    FlockName = r.Flock != null ? r.Flock.Name : null
-                })
+                .Select(r => new { r.RuleId, r.Description, r.Times, r.StartDate, r.EndDate })
                 .ToListAsync();
         }
 
@@ -51,10 +38,6 @@ namespace AutoFeed_Backend_Services.Services
                 Times = rule.Times,
                 StartDate = rule.StartDate,
                 EndDate = rule.EndDate,
-                ChickenLid = rule.ChickenLid,
-                ChickenName = rule.ChickenL?.Name,
-                FlockId = rule.FlockId,
-                FlockName = rule.Flock?.Name,
                 Details = rule.FeedingRuleDetails.Select(d => new RuleDetailResponse
                 {
                     FeedRuleDetailID = d.FeedRuleDetailId,
