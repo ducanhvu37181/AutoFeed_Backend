@@ -43,4 +43,7 @@ public interface IScheduleService
     Task<bool> HasConflictAsync(int cbarnId, int taskId, DateOnly startDate, DateOnly? endDate);
 
     Task<List<ScheduleResponse>> GetSchedulesByUserAndDateAsync(int userId, System.DateTime date);
+
+    // Best-effort batch create: try to create each schedule, return per-item results
+    Task<List<(int? SchedId, bool Success, string Message)>> CreateSchedulesAsync(IEnumerable<ScheduleModel> schedules);
 }
