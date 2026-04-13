@@ -11,10 +11,24 @@ public interface IInventoryService
 
     // Lấy inventory sắp hết hạn
     Task<IEnumerable<object>> GetExpiringSoonAsync(int days = 30);
+    //Lấy patch gần hết hạn nhất
+    Task<IEnumerable<object>> GetNearestExpiredAsync();
 
     // Thêm inventory mới (nhập kho)
     Task<bool> AddInventoryAsync(Inventory item);
 
+    //Xuất kho: farmer lấy food từ inventory để cho vào máy cho ăn tự động
+    Task<bool> ConsumeInventoryAsync(int foodId, int quantity);
+
     // Farmer gửi request xin nhập thêm hàng cho manager
     Task<bool> RequestNewItemAsync(int userId, string foodName, string description);
+
+    //Lấy tổng kho theo food
+    Task<IEnumerable<object>> GetInventorySummaryAsync();
+
+    // Tạo feeding session, để khi farmer lấy bao thức ăn dùng còn dư thì không bị mất dữ liệu
+    Task<int> CreateFeedingSessionAsync(int foodId, decimal quantity);
+
+    // Farmer confirm lại số lượng dùng
+    Task<bool> CompleteFeedingSessionAsync(int sessionId, decimal actualQuantity);
 }

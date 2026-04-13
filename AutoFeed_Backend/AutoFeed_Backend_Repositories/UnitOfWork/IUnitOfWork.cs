@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using AutoFeed_Backend_DAO.Models;
 using AutoFeed_Backend_Repositories.Repositories;
 
 namespace AutoFeed_Backend_Repositories.UnitOfWork;
@@ -17,6 +18,9 @@ public interface IUnitOfWork
     RequestRepository Requests { get; }
     BarnRepository Barns { get; }
     InventoryRepository Inventories { get; }
+    FeedingSessionRepository FeedingSessions { get; }
+    FeedingSessionDetailRepository FeedingSessionDetails { get; }
+
     ReportRepository Reports { get; }
     DataIoTRepository DataIoTs { get; }
 

@@ -13,15 +13,18 @@ public partial class FeedingRuleDetail
 
     public int FoodId { get; set; }
 
+    public DateOnly StartDate { get; set; }
+
+    public DateOnly EndDate { get; set; }
+
     public int FeedHour { get; set; }
 
     public int FeedMinute { get; set; }
 
     public decimal Amount { get; set; }
-
     public string Description { get; set; }
 
-    public bool? Status { get; set; }
+    public bool Status { get; set; }
 
     public virtual Food Food { get; set; }
 
