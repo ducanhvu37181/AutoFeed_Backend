@@ -48,8 +48,6 @@ namespace AutoFeed_Backend_Services.Services
             var query = _context.FeedingRules
                 .Include(r => r.ChickenL)
                 .Include(r => r.Flock)
-                .Include(r => r.FeedingRuleDetails)
-                .ThenInclude(d => d.Food)
                 .Where(r => (r.ChickenLid.HasValue && chickenIds.Contains(r.ChickenLid.Value))
                          || (r.FlockId.HasValue && flockIds.Contains(r.FlockId.Value)))
                 .Select(r => new
@@ -62,17 +60,7 @@ namespace AutoFeed_Backend_Services.Services
                     ChickenLid = r.ChickenLid,
                     ChickenName = r.ChickenL != null ? r.ChickenL.Name : null,
                     FlockId = r.FlockId,
-                    FlockName = r.Flock != null ? r.Flock.Name : null,
-                    Details = r.FeedingRuleDetails.Select(d => new RuleDetailResponse
-                    {
-                        FeedRuleDetailID = d.FeedRuleDetailId,
-                        FoodID = d.FoodId,
-                        FoodName = d.Food != null ? d.Food.Name : "Unknown",
-                        FeedHour = d.FeedHour,
-                        FeedMinute = d.FeedMinute,
-                        Amount = d.Amount,
-                        Status = d.Status ?? false
-                    }).ToList()
+                    FlockName = r.Flock != null ? r.Flock.Name : null
                 });
 
             return await query.ToListAsync();
