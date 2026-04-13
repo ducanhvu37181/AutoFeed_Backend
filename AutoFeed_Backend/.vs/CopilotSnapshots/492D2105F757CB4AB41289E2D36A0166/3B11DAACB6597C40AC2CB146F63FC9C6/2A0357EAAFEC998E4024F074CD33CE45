@@ -35,49 +35,6 @@ namespace AutoFeed_Backend_Services.Services
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<object>> GetRulesByBarnIdAsync(int barnId)
-        {
-            // find chickenBarns with this barnId, get their chickenLid or flockId, then find feeding rules
-            var cbarns = await _context.ChickenBarns
-                .Where(cb => cb.BarnId == barnId)
-                .ToListAsync();
-
-            var chickenIds = cbarns.Where(c => c.ChickenLid.HasValue).Select(c => c.ChickenLid.Value).Distinct().ToList();
-            var flockIds = cbarns.Where(c => c.FlockId.HasValue).Select(c => c.FlockId.Value).Distinct().ToList();
-
-            var query = _context.FeedingRules
-                .Include(r => r.ChickenL)
-                .Include(r => r.Flock)
-                .Include(r => r.FeedingRuleDetails)
-                .ThenInclude(d => d.Food)
-                .Where(r => (r.ChickenLid.HasValue && chickenIds.Contains(r.ChickenLid.Value))
-                         || (r.FlockId.HasValue && flockIds.Contains(r.FlockId.Value)))
-                .Select(r => new
-                {
-                    r.RuleId,
-                    r.Description,
-                    r.Times,
-                    r.StartDate,
-                    r.EndDate,
-                    ChickenLid = r.ChickenLid,
-                    ChickenName = r.ChickenL != null ? r.ChickenL.Name : null,
-                    FlockId = r.FlockId,
-                    FlockName = r.Flock != null ? r.Flock.Name : null,
-                    Details = r.FeedingRuleDetails.Select(d => new RuleDetailResponse
-                    {
-                        FeedRuleDetailID = d.FeedRuleDetailId,
-                        FoodID = d.FoodId,
-                        FoodName = d.Food != null ? d.Food.Name : "Unknown",
-                        FeedHour = d.FeedHour,
-                        FeedMinute = d.FeedMinute,
-                        Amount = d.Amount,
-                        Status = d.Status ?? false
-                    }).ToList()
-                });
-
-            return await query.ToListAsync();
-        }
-
         public async Task<FeedingRuleFullResponse?> GetRuleByIdAsync(int id)
         {
             var rule = await _context.FeedingRules

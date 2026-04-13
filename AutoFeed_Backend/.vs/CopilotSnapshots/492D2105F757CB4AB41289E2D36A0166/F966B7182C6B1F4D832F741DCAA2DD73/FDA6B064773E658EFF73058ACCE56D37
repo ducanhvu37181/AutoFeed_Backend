@@ -15,13 +15,6 @@ namespace AutoFeed_Backend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll() => Ok(await _feedingRuleService.GetAllRulesAsync());
 
-        [HttpGet("barn/{barnId}")]
-        public async Task<IActionResult> GetByBarn(int barnId)
-        {
-            var result = await _feedingRuleService.GetRulesByBarnIdAsync(barnId);
-            return Ok(result);
-        }
-
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
