@@ -21,10 +21,27 @@ public class UserRepository : GenericRepository<User>
                                  && u.Status == true);
     }
 
-    public async Task<List<User>> GetActiveAsync() => await _context.Set<User>().Where(u => u.Status == true).ToListAsync();
-    public async Task<List<User>> GetInactiveAsync() => await _context.Set<User>().Where(u => u.Status != true).ToListAsync();
-    public async Task<User?> GetByEmailAsync(string email) => await _context.Set<User>().FirstOrDefaultAsync(u => u.Email == email);
-    public async Task<User?> GetByUsernameAsync(string username) => await _context.Set<User>().FirstOrDefaultAsync(u => u.Username == username);
+    public async Task<List<User>> GetActiveAsync() => 
+        await _context.Set<User>().Include(u => u.Role).Where(u => u.Status == true).ToListAsync();
+
+    public async Task<List<User>> GetInactiveAsync() => 
+        await _context.Set<User>().Include(u => u.Role).Where(u => u.Status != true).ToListAsync();
+
+    public async Task<User?> GetByEmailAsync(string email) => 
+        await _context.Set<User>().Include(u => u.Role).FirstOrDefaultAsync(u => u.Email == email);
+
+    public async Task<User?> GetByUsernameAsync(string username) => 
+        await _context.Set<User>().Include(u => u.Role).FirstOrDefaultAsync(u => u.Username == username);
+
+    public async Task<List<User>> GetAllWithRoleAsync()
+    {
+        return await _context.Set<User>().Include(u => u.Role).ToListAsync();
+    }
+
+    public async Task<User?> GetByIdWithRoleAsync(int id)
+    {
+        return await _context.Set<User>().Include(u => u.Role).FirstOrDefaultAsync(u => u.UserId == id);
+    }
 
     public async Task<bool> IsEmailOrUsernameExistsAsync(string email, string username, int? excludeUserId = null)
     {
@@ -35,7 +52,7 @@ public class UserRepository : GenericRepository<User>
 
     public async Task<List<User>> SearchAsync(string? keyword, int? roleId, bool includeInactive)
     {
-        var query = _context.Set<User>().AsQueryable();
+        var query = _context.Set<User>().Include(u => u.Role).AsQueryable();
         if (!includeInactive) query = query.Where(u => u.Status == true);
         if (!string.IsNullOrWhiteSpace(keyword))
         {

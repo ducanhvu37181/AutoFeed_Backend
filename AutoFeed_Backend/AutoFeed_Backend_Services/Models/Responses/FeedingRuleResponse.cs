@@ -21,6 +21,10 @@ namespace AutoFeed_Backend_Services.Models.Responses
         public int Times { get; set; }
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
+        public int? ChickenLid { get; set; }
+        public string? ChickenName { get; set; }
+        public int? FlockId { get; set; }
+        public string? FlockName { get; set; }
         public List<RuleDetailResponse> Details { get; set; } = new();
     }
 }

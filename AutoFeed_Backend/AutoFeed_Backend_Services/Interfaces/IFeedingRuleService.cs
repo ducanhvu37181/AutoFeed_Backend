@@ -8,6 +8,7 @@ namespace AutoFeed_Backend_Services.Interfaces
     public interface IFeedingRuleService
     {
         Task<IEnumerable<object>> GetAllRulesAsync();
+        Task<IEnumerable<object>> GetRulesByBarnIdAsync(int barnId);
         Task<FeedingRuleFullResponse?> GetRuleByIdAsync(int id);
         Task<bool> CreateRuleAsync(FeedingRuleCreateDto dto);
         Task<bool> DisableDetailAsync(int detailId);
