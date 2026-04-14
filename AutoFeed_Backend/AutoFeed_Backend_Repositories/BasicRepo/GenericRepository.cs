@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -130,6 +131,32 @@ namespace AutoFeed_Backend_Repositories.BasicRepo
         public async Task<T> GetByIdAsync(Guid code)
         {
             return await _context.Set<T>().FindAsync(code);
+        }
+
+        public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _context.Set<T>()
+                .FirstOrDefaultAsync(predicate);
+        }
+
+        public async Task<List<T>> GetAsync<TKey>(Expression<Func<T, bool>>? predicate = null, Expression<Func<T, TKey>>? orderBy = null,
+                                                  bool isDescending = false)
+        {
+            IQueryable<T> query = _context.Set<T>();
+
+            if (predicate != null)
+            {
+                query = query.Where(predicate);
+            }
+
+            if (orderBy != null)
+            {
+                query = isDescending
+                    ? query.OrderByDescending(orderBy)
+                    : query.OrderBy(orderBy);
+            }
+
+            return await query.ToListAsync();
         }
 
         public void PrepareCreate(T entity)

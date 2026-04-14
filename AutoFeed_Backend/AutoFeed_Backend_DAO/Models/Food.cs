@@ -17,6 +17,8 @@ public partial class Food
 
     public virtual ICollection<FeedingRuleDetail> FeedingRuleDetails { get; set; } = new List<FeedingRuleDetail>();
 
+    public virtual ICollection<FeedingSession> FeedingSessions { get; set; } = new List<FeedingSession>();
+
     public virtual ICollection<FoodStorage> FoodStorages { get; set; } = new List<FoodStorage>();
 
     public virtual ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();

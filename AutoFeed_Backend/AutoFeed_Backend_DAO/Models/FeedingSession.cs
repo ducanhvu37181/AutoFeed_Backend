@@ -5,19 +5,25 @@ using System.Collections.Generic;
 
 namespace AutoFeed_Backend_DAO.Models;
 
-public partial class Inventory
+public partial class FeedingSession
 {
-    public int InventId { get; set; }
+    public int SessionId { get; set; }
 
     public int FoodId { get; set; }
 
-    public decimal Quantity { get; set; }
+    public int? UserId { get; set; }
 
-    public decimal WeightPerBag { get; set; }
+    public decimal PlannedQuantity { get; set; }
 
-    public DateOnly ExpiredDate { get; set; }
+    public decimal? ActualQuantity { get; set; }
+
+    public string Status { get; set; }
+
+    public DateTime? CreatedAt { get; set; }
 
     public virtual ICollection<FeedingSessionDetail> FeedingSessionDetails { get; set; } = new List<FeedingSessionDetail>();
 
     public virtual Food Food { get; set; }
+
+    public virtual User User { get; set; }
 }
