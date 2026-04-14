@@ -15,18 +15,74 @@ namespace AutoFeed_Backend_Services.Services
         private readonly AutoFeedDBContext _context;
         public FeedingRuleService(AutoFeedDBContext context) => _context = context;
 
-        // 1. Lấy danh sách tất cả Rules (Dùng cho trang chủ)
         public async Task<IEnumerable<object>> GetAllRulesAsync()
         {
             return await _context.FeedingRules
-                .Select(r => new { r.RuleId, r.Description, r.Times })
+                .Include(r => r.ChickenL)
+                .Include(r => r.Flock)
+                .Select(r => new
+                {
+                    r.RuleId,
+                    r.Description,
+                    r.Times,
+                    r.StartDate,
+                    r.EndDate,
+                    ChickenLid = r.ChickenLid,
+                    ChickenName = r.ChickenL != null ? r.ChickenL.Name : null,
+                    FlockId = r.FlockId,
+                    FlockName = r.Flock != null ? r.Flock.Name : null
+                })
                 .ToListAsync();
         }
 
-        // 2. Lấy chi tiết Rule và các bữa ăn (Dùng để lấy ID bữa ăn đi test Disable/Update)
+        public async Task<IEnumerable<object>> GetRulesByBarnIdAsync(int barnId)
+        {
+            // find chickenBarns with this barnId, get their chickenLid or flockId, then find feeding rules
+            var cbarns = await _context.ChickenBarns
+                .Where(cb => cb.BarnId == barnId)
+                .ToListAsync();
+
+            var chickenIds = cbarns.Where(c => c.ChickenLid.HasValue).Select(c => c.ChickenLid.Value).Distinct().ToList();
+            var flockIds = cbarns.Where(c => c.FlockId.HasValue).Select(c => c.FlockId.Value).Distinct().ToList();
+
+            var query = _context.FeedingRules
+                .Include(r => r.ChickenL)
+                .Include(r => r.Flock)
+                .Include(r => r.FeedingRuleDetails)
+                .ThenInclude(d => d.Food)
+                .Where(r => (r.ChickenLid.HasValue && chickenIds.Contains(r.ChickenLid.Value))
+                         || (r.FlockId.HasValue && flockIds.Contains(r.FlockId.Value)))
+                .Select(r => new
+                {
+                    r.RuleId,
+                    r.Description,
+                    r.Times,
+                    r.StartDate,
+                    r.EndDate,
+                    ChickenLid = r.ChickenLid,
+                    ChickenName = r.ChickenL != null ? r.ChickenL.Name : null,
+                    FlockId = r.FlockId,
+                    FlockName = r.Flock != null ? r.Flock.Name : null,
+                    Details = r.FeedingRuleDetails.Select(d => new RuleDetailResponse
+                    {
+                        FeedRuleDetailID = d.FeedRuleDetailId,
+                        FoodID = d.FoodId,
+                        FoodName = d.Food != null ? d.Food.Name : "Unknown",
+                        FeedHour = d.FeedHour,
+                        FeedMinute = d.FeedMinute,
+                        Amount = d.Amount,
+                        Status = d.Status ?? false
+                    }).ToList()
+                });
+
+            return await query.ToListAsync();
+        }
+
         public async Task<FeedingRuleFullResponse?> GetRuleByIdAsync(int id)
         {
             var rule = await _context.FeedingRules
+                .Include(r => r.ChickenL)
+                .Include(r => r.Flock)
                 .Include(r => r.FeedingRuleDetails)
                 .ThenInclude(d => d.Food)
                 .FirstOrDefaultAsync(r => r.RuleId == id);
@@ -40,6 +96,10 @@ namespace AutoFeed_Backend_Services.Services
                 Times = rule.Times,
                 StartDate = rule.StartDate,
                 EndDate = rule.EndDate,
+                ChickenLid = rule.ChickenLid,
+                ChickenName = rule.ChickenL?.Name,
+                FlockId = rule.FlockId,
+                FlockName = rule.Flock?.Name,
                 Details = rule.FeedingRuleDetails.Select(d => new RuleDetailResponse
                 {
                     FeedRuleDetailID = d.FeedRuleDetailId,
@@ -48,32 +108,60 @@ namespace AutoFeed_Backend_Services.Services
                     FeedHour = d.FeedHour,
                     FeedMinute = d.FeedMinute,
                     Amount = d.Amount,
-                    Status = d.Status,                    
+                    Status = d.Status ?? false,
                 }).ToList()
             };
         }
 
-        // 3. Tạo mới Rule gốc (Bảng cha)
         public async Task<bool> CreateRuleAsync(FeedingRuleCreateDto dto)
-        {
-            var rule = new FeedingRule
-            {
-                ChickenLid = dto.ChickenLid,
-                FlockId = dto.FlockId,
-                Times = dto.Times,
-                StartDate = dto.StartDate,
-                EndDate = dto.EndDate,
-                Description = dto.Description,
-                Note = dto.Note
-            };
-            _context.FeedingRules.Add(rule);
-            return await _context.SaveChangesAsync() > 0;
-        }
+{
+    if (dto.Times <= 0)
+        return false; // Không cho tạo rule nếu times <= 0
 
+    // Chỉ cho phép 1 trong 2 id, không được nhập cả hai hoặc cả hai đều null
+    bool hasChicken = dto.ChickenLid != null;
+    bool hasFlock = dto.FlockId != null;
+    if (hasChicken == hasFlock) // cả hai đều null hoặc cả hai đều có giá trị
+        return false;
+
+    // Kiểm tra trùng rule
+    if (hasChicken)
+    {
+        bool exists = await _context.FeedingRules.AnyAsync(r => r.ChickenLid == dto.ChickenLid);
+        if (exists) return false;
+    }
+    else // hasFlock
+    {
+        bool exists = await _context.FeedingRules.AnyAsync(r => r.FlockId == dto.FlockId);
+        if (exists) return false;
+    }
+
+    var rule = new FeedingRule
+    {
+        ChickenLid = hasChicken ? dto.ChickenLid : null,
+        FlockId = hasFlock ? dto.FlockId : null,
+        Times = dto.Times,
+        StartDate = dto.StartDate,
+        EndDate = dto.EndDate,
+        Description = dto.Description,
+        Note = dto.Note,
+        Status = "active"
+    };
+
+    try
+    {
+        _context.FeedingRules.Add(rule);
+        return await _context.SaveChangesAsync() > 0;
+    }
+    catch (DbUpdateException)
+    {
+        // swallow DB update exceptions and return false to caller
+        return false;
+    }
+}
         private static int CountActiveDetails(FeedingRule rule) =>
             rule.FeedingRuleDetails.Count(d => d.Status != false);
 
-        // 4. Cập nhật Rule gốc (Hàm  vừa yêu cầu thêm)
         public async Task<(bool Success, string Message)> UpdateRuleAsync(int id, FeedingRuleUpdateDto dto)
         {
             var rule = await _context.FeedingRules
@@ -100,7 +188,6 @@ namespace AutoFeed_Backend_Services.Services
             return saved ? (true, "OK") : (false, "Save failed");
         }
 
-        // 5. Thêm một bữa ăn mới vào Rule (Bảng con)
         public async Task<(bool Success, string Message)> AddDetailAsync(RuleDetailCreateDto dto)
         {
             var rule = await _context.FeedingRules
@@ -120,7 +207,7 @@ namespace AutoFeed_Backend_Services.Services
             var detail = new FeedingRuleDetail
             {
                 RuleId = dto.RuleID,
-                FoodId = dto.FoodID,                
+                FoodId = dto.FoodID,
                 FeedHour = dto.FeedHour,
                 FeedMinute = dto.FeedMinute,
                 Amount = dto.Amount,
@@ -133,7 +220,6 @@ namespace AutoFeed_Backend_Services.Services
             return saved ? (true, "OK") : (false, "Save failed");
         }
 
-        // 6. Cập nhật thông tin một bữa ăn (Sửa giờ, thức ăn...)
         public async Task<bool> UpdateDetailAsync(int detailId, RuleDetailUpdateDto dto)
         {
             var detail = await _context.FeedingRuleDetails
@@ -141,7 +227,7 @@ namespace AutoFeed_Backend_Services.Services
 
             if (detail == null) return false;
 
-            detail.FoodId = dto.FoodID;            
+            detail.FoodId = dto.FoodID;
             detail.FeedHour = dto.FeedHour;
             detail.Amount = dto.Amount;
             detail.FeedMinute = dto.FeedMinute;
@@ -151,7 +237,6 @@ namespace AutoFeed_Backend_Services.Services
             return await _context.SaveChangesAsync() > 0;
         }
 
-        // 7. Vô hiệu hóa bữa ăn (Hàm Kiên đang test lỗi - Đã sửa logic tìm ID)
         public async Task<bool> DisableDetailAsync(int detailId)
         {
             var detail = await _context.FeedingRuleDetails
@@ -163,9 +248,7 @@ namespace AutoFeed_Backend_Services.Services
             _context.FeedingRuleDetails.Update(detail);
             return await _context.SaveChangesAsync() > 0;
         }
-        
 
-        // 8. Xóa Rule (Xóa cả cha lẫn con)
         public async Task<bool> DeleteRuleAsync(int id)
         {
             var rule = await _context.FeedingRules.FindAsync(id);

@@ -2,12 +2,10 @@
 using AutoFeed_Backend_Repositories.UnitOfWork;
 using AutoFeed_Backend_Services.Interfaces;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Linq;
-using Microsoft.EntityFrameworkCore; // Cần để dùng ToListAsync cho Migrate
+using Microsoft.EntityFrameworkCore;
 using BCrypt.Net;
-
-// Giải quyết lỗi trùng tên Task giữa System và Model
+// Thêm dòng này để dùng alias cho Task của .NET:
 using Task = System.Threading.Tasks.Task;
 
 namespace AutoFeed_Backend_Services.Services;
@@ -15,12 +13,12 @@ namespace AutoFeed_Backend_Services.Services;
 public class UserService : IUserService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IEmailService _emailService;
+    private readonly IEmailService? _emailService;
 
-    // Giữ nguyên 2 Constructor của bạn Kiên
     public UserService()
     {
         _unitOfWork = new UnitOfWork();
+        _emailService = null;
     }
 
     public UserService(IUnitOfWork unitOfWork, IEmailService emailService)
@@ -29,10 +27,8 @@ public class UserService : IUserService
         _emailService = emailService;
     }
 
-    // --- CHÈN THÊM: Hàm Migrate để tự động mã hóa dữ liệu cũ ---
     public async Task MigratePasswordsAsync()
     {
-        // Phải truy cập qua _unitOfWork.Users hoặc Context tùy theo cấu trúc bạn Kiên
         var users = await _unitOfWork.Users.GetAllAsync();
         bool isChanged = false;
 
@@ -55,44 +51,43 @@ public class UserService : IUserService
     public async Task<List<User>> GetAllAsync(string? roleDescriptionContains = null)
     {
         if (string.IsNullOrWhiteSpace(roleDescriptionContains))
-            return await _unitOfWork.Users.GetAllAsync();
+            return await _unitOfWork.Users.GetAllWithRoleAsync();
         return await _unitOfWork.Users.GetAllByRoleDescriptionContainsAsync(roleDescriptionContains);
     }
 
-    public async System.Threading.Tasks.Task<List<User>> GetActiveAsync()
+    public async Task<List<User>> GetActiveAsync()
     {
         return await _unitOfWork.Users.GetActiveAsync();
     }
 
-    public async System.Threading.Tasks.Task<List<User>> GetInactiveAsync()
+    public async Task<List<User>> GetInactiveAsync()
     {
         return await _unitOfWork.Users.GetInactiveAsync();
     }
 
-    public async System.Threading.Tasks.Task<User?> GetByIdAsync(int id)
+    public async Task<User?> GetByIdAsync(int id)
     {
-        return await _unitOfWork.Users.GetByIdAsync(id);
+        return await _unitOfWork.Users.GetByIdWithRoleAsync(id);
     }
 
-    public async System.Threading.Tasks.Task<List<User>> SearchAsync(string? keyword, int? roleId, bool includeInactive)
+    public async Task<List<User>> SearchAsync(string? keyword, int? roleId, bool includeInactive)
     {
         return await _unitOfWork.Users.SearchAsync(keyword, roleId, includeInactive);
     }
 
-    public async System.Threading.Tasks.Task<int> CreateAsync(User entity)
+    public async Task<int> CreateAsync(User entity)
     {
         string plainPassword = GenerateRandomPassword();
         var exists = await _unitOfWork.Users.IsEmailOrUsernameExistsAsync(entity.Email, entity.Username);
         if (exists) return -1;
 
         entity.Status = true;
-        // SỬA: Thêm mã hóa BCrypt cho mật khẩu mới
         entity.Password = BCrypt.Net.BCrypt.HashPassword(plainPassword);
 
         _unitOfWork.Users.PrepareCreate(entity);
         var result = await _unitOfWork.SaveChangesWithTransactionAsync();
 
-        if (result > 0)
+        if (result > 0 && _emailService != null)
         {
             try
             {
@@ -102,15 +97,12 @@ public class UserService : IUserService
                     plainPassword: plainPassword
                 );
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[EmailService] Gửi mail thất bại: {ex.Message}");
-            }
+            catch { }
         }
         return result;
     }
 
-    public async System.Threading.Tasks.Task<bool> UpdateAsync(User entity)
+    public async Task<bool> UpdateAsync(User entity)
     {
         try
         {
@@ -125,12 +117,11 @@ public class UserService : IUserService
         catch { return false; }
     }
 
-    public async System.Threading.Tasks.Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword)
+    public async Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword)
     {
         var entity = await _unitOfWork.Users.GetByIdAsync(userId);
         if (entity == null || entity.Status != true) return false;
 
-        // SỬA: Dùng BCrypt.Verify để kiểm tra mật khẩu cũ
         if (!BCrypt.Net.BCrypt.Verify(oldPassword, entity.Password)) return false;
         if (BCrypt.Net.BCrypt.Verify(newPassword, entity.Password)) return false;
 
@@ -140,18 +131,17 @@ public class UserService : IUserService
         return result > 0;
     }
 
-    public async System.Threading.Tasks.Task<bool> ResetPasswordAsync(string email)
+    public async Task<bool> ResetPasswordAsync(string email)
     {
         var entity = await _unitOfWork.Users.GetByEmailAsync(email);
         if (entity == null || entity.Status != true) return false;
 
         var newPassword = GenerateRandomPassword();
-        // SỬA: Hash mật khẩu reset
         entity.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
         _unitOfWork.Users.PrepareUpdate(entity);
         var result = await _unitOfWork.SaveChangesWithTransactionAsync();
 
-        if (result > 0)
+        if (result > 0 && _emailService != null)
         {
             try
             {
@@ -163,7 +153,7 @@ public class UserService : IUserService
         return false;
     }
 
-    public async System.Threading.Tasks.Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
         var entity = await _unitOfWork.Users.GetByIdAsync(id);
         if (entity == null) return false;
@@ -174,7 +164,7 @@ public class UserService : IUserService
         return result > 0;
     }
 
-    public async System.Threading.Tasks.Task<bool> RestoreAsync(int id)
+    public async Task<bool> RestoreAsync(int id)
     {
         var entity = await _unitOfWork.Users.GetByIdAsync(id);
         if (entity == null) return false;
@@ -185,7 +175,7 @@ public class UserService : IUserService
         return result > 0;
     }
 
-    public async System.Threading.Tasks.Task<Dictionary<int, string>> GetUserNameMapAsync(IEnumerable<int> userIds)
+    public async Task<Dictionary<int, string>> GetUserNameMapAsync(IEnumerable<int> userIds)
     {
         var ids = userIds?.ToList() ?? new List<int>();
         var result = new Dictionary<int, string>();
@@ -200,6 +190,6 @@ public class UserService : IUserService
         const string validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()";
         var random = new Random();
         return new string(Enumerable.Repeat(validChars, passwordLength)
-                                    .Select(s => s[random.Next(s.Length)]).ToArray());
+            .Select(s => s[random.Next(s.Length)]).ToArray());
     }
 }

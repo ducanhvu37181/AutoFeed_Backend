@@ -210,24 +210,13 @@ public class ScheduleController : ControllerBase
             });
         }
 
-        var createdDtos = new List<object>();
         var end = model.EndDate.Value;
-        // Pre-check whole range for conflicts to avoid partial creations
-        var hasConflict = await _service.HasConflictAsync(model.CbarnId, model.TaskId, model.StartDate, model.EndDate);
-        if (hasConflict)
-        {
-            return StatusCode(409, new ApiResponse<object>
-            {
-                Status = false,
-                HttpCode = 409,
-                Data = null,
-                Description = "Schedule conflict: overlapping schedule exists in the requested range"
-            });
-        }
 
+        // build schedules for each date in range
+        var schedules = new List<ScheduleModel>();
         for (var date = model.StartDate; date <= end; date = date.AddDays(1))
         {
-            var schedule = new ScheduleModel
+            schedules.Add(new ScheduleModel
             {
                 UserId = model.UserId,
                 TaskId = model.TaskId,
@@ -238,32 +227,37 @@ public class ScheduleController : ControllerBase
                 Status = model.Status ?? "pending",
                 StartDate = date,
                 EndDate = date
-            };
-
-            var id = await _service.CreateScheduleAsync(schedule);
-
-            if (id <= 0)
-            {
-                return StatusCode(500, new ApiResponse<object>
-                {
-                    Status = false,
-                    HttpCode = 500,
-                    Data = null,
-                    Description = "Create failed"
-                });
-            }
-
-            var responseDto = await _service.GetScheduleResponseByIdAsync(id);
-            if (responseDto != null)
-                createdDtos.Add(responseDto);
+            });
         }
 
-        return StatusCode(201, new ApiResponse<object>
+        var results = await _service.CreateSchedulesAsync(schedules);
+
+        var responseItems = new List<object>();
+        for (int i = 0; i < results.Count; i++)
         {
-            Status = true,
-            HttpCode = 201,
-            Data = createdDtos,
-            Description = "Created"
+            var res = results[i];
+            var sched = schedules[i];
+            object item;
+            if (res.Success && res.SchedId.HasValue)
+            {
+                var dto = await _service.GetScheduleResponseByIdAsync(res.SchedId.Value);
+                item = new { Date = sched.StartDate, Success = true, Message = res.Message, Schedule = dto };
+            }
+            else
+            {
+                item = new { Date = sched.StartDate, Success = false, Message = res.Message };
+            }
+            responseItems.Add(item);
+        }
+
+        // if any failed, return 207 Multi-Status semantics; otherwise 201
+        var anyFailed = results.Any(r => !r.Success);
+        return StatusCode(anyFailed ? 207 : 201, new ApiResponse<object>
+        {
+            Status = !anyFailed,
+            HttpCode = anyFailed ? 207 : 201,
+            Data = responseItems,
+            Description = anyFailed ? "Partial success" : "Created"
         });
     }
 

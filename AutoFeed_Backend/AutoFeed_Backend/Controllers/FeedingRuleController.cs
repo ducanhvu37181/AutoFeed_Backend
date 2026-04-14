@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Services.Models.Requests.FeedingRuleRequest;
-using AutoFeed_Backend_Services.Models.Responses;
 using System.Threading.Tasks;
 
 namespace AutoFeed_Backend.Controllers
@@ -16,6 +15,13 @@ namespace AutoFeed_Backend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll() => Ok(await _feedingRuleService.GetAllRulesAsync());
 
+        [HttpGet("barn/{barnId}")]
+        public async Task<IActionResult> GetByBarn(int barnId)
+        {
+            var result = await _feedingRuleService.GetRulesByBarnIdAsync(barnId);
+            return Ok(result);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -24,7 +30,7 @@ namespace AutoFeed_Backend.Controllers
         }
 
         [HttpPost("detail")]
-        public async Task<IActionResult> AddDetail(RuleDetailCreateDto dto)
+        public async Task<IActionResult> AddDetail([FromBody] RuleDetailCreateDto dto)
         {
             var (success, message) = await _feedingRuleService.AddDetailAsync(dto);
             return success ? Ok(new { success = true, message }) : BadRequest(new { success = false, message });
@@ -33,8 +39,26 @@ namespace AutoFeed_Backend.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(FeedingRuleCreateDto dto)
         {
-            var success = await _feedingRuleService.CreateRuleAsync(dto);
-            return success ? Ok("Created") : BadRequest("Failed");
+            // Kiểm tra chỉ cho phép nhập 1 trong 2 trường
+            bool hasChicken = dto.ChickenLid != null;
+            bool hasFlock = dto.FlockId != null;
+            if (hasChicken == hasFlock) // cả hai đều null hoặc cả hai đều có giá trị
+            {
+                return BadRequest("Bạn chỉ được nhập 1 trong 2 trường chickenLid hoặc flockId, không được nhập cả hai hoặc cả hai đều null.");
+            }
+            try
+            {
+                var success = await _feedingRuleService.CreateRuleAsync(dto);
+                return success ? Ok("Created") : BadRequest("Failed");
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateException ex) when (ex.InnerException?.Message.Contains("UIX_FRule_Flock") == true)
+            {
+                return BadRequest("Duplicate rule for this chickenLid and flockId.");
+            }
+            catch
+            {
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         [HttpPut("detail/{detailId}/disable")]
@@ -61,7 +85,6 @@ namespace AutoFeed_Backend.Controllers
                 return NotFound(new { success = false, message });
             return BadRequest(new { success = false, message });
         }
-        
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
