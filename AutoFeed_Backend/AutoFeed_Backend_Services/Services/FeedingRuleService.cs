@@ -71,7 +71,7 @@ namespace AutoFeed_Backend_Services.Services
                         FeedHour = d.FeedHour,
                         FeedMinute = d.FeedMinute,
                         Amount = d.Amount,
-                        Status = d.Status ?? false
+                        Status = d.Status 
                     }).ToList()
                 });
 
@@ -108,7 +108,7 @@ namespace AutoFeed_Backend_Services.Services
                     FeedHour = d.FeedHour,
                     FeedMinute = d.FeedMinute,
                     Amount = d.Amount,
-                    Status = d.Status ?? false,
+                    Status = d.Status ,
                 }).ToList()
             };
         }
