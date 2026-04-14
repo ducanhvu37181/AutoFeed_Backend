@@ -39,6 +39,8 @@ CREATE TABLE [dbo].[Barn] (
     [humidity] DECIMAL(5, 2) NOT NULL,
     [type] NVARCHAR(50) NOT NULL,
     [area] DECIMAL(18, 2) NOT NULL,
+    [waterAmount] INT NOT NULL,
+    [foodAmount] DECIMAL(18, 2) NOT NULL,
     [createDate] DATETIME DEFAULT GETDATE(),
     CONSTRAINT [CK_Barn_Type] CHECK ([type] IN ('Flock barn', 'flock sick barn', 'large chicken barn'))
 );
@@ -134,63 +136,6 @@ CREATE TABLE [dbo].[Inventory] (
     CONSTRAINT [FK_Inventory_Food] FOREIGN KEY([foodID]) REFERENCES [dbo].[Food] ([foodID])
 );
 
-CREATE TABLE [dbo].[FoodStorage] (
-    [storageID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-    [foodID] INT NOT NULL,
-    [barnID] INT NOT NULL,
-    [food_weight] DECIMAL(18, 2) NOT NULL,
-    [leftover_food] DECIMAL(18, 2) NOT NULL,
-    [note] NVARCHAR(MAX) NULL,
-    CONSTRAINT [FK_Storage_Barn] FOREIGN KEY([barnID]) REFERENCES [dbo].[Barn] ([barnID]),
-    CONSTRAINT [FK_Storage_Food] FOREIGN KEY([foodID]) REFERENCES [dbo].[Food] ([foodID])
-);
-
-CREATE TABLE [dbo].[FeedingSession] (
-    [sessionID] INT IDENTITY(1,1) PRIMARY KEY,
-
-    [foodID] INT NOT NULL,
-    [userID] INT NULL,
-
-    [plannedQuantity] DECIMAL(10,2) NOT NULL,
-    [actualQuantity] DECIMAL(10,2) NULL,
-
-    [status] NVARCHAR(20) DEFAULT 'pending',
-
-    [createdAt] DATETIME DEFAULT GETDATE(),
-
-    CONSTRAINT FK_FS_Food FOREIGN KEY(foodID) REFERENCES Food(foodID),
-    CONSTRAINT FK_FS_User FOREIGN KEY(userID) REFERENCES [User](userID),
-
-    CONSTRAINT CK_FS_Status CHECK (status IN ('pending', 'completed'))
-);
-
-CREATE TABLE [dbo].[FeedingSessionDetail] (
-    [detailID] INT IDENTITY(1,1) PRIMARY KEY,
-
-    [sessionID] INT NOT NULL,
-    [inventID] INT NOT NULL,
-
-    [quantity] DECIMAL(10,2) NOT NULL,
-
-    CONSTRAINT FK_FSD_Session FOREIGN KEY(sessionID) REFERENCES FeedingSession(sessionID),
-    CONSTRAINT FK_FSD_Inventory FOREIGN KEY(inventID) REFERENCES Inventory(inventID)
-);
-
-CREATE TABLE [dbo].[InventoryLog] (
-    [logID] INT IDENTITY(1,1) PRIMARY KEY,
-
-    [foodID] INT,
-    [inventID] INT NULL,
-
-    [type] NVARCHAR(20),
-
-    [quantity] DECIMAL(10,2),
-
-    [note] NVARCHAR(MAX),
-
-    [createdAt] DATETIME DEFAULT GETDATE()
-);
-GO
 
 -- ======================================================
 -- 4. RELATIONSHIP TABLES (Level 2)
@@ -274,7 +219,6 @@ CREATE TABLE [dbo].[Request] (
     CONSTRAINT [FK_Request_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID])
 );
 
--- UPDATED: Status now includes 'disabled'
 CREATE TABLE [dbo].[Schedule] (
     [schedID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [userID] INT NOT NULL,
@@ -290,7 +234,7 @@ CREATE TABLE [dbo].[Schedule] (
     CONSTRAINT [FK_Sched_CBarn] FOREIGN KEY([CBarnID]) REFERENCES [dbo].[ChickenBarn] ([CBarnID]),
     CONSTRAINT [FK_Sched_Task] FOREIGN KEY([taskID]) REFERENCES [dbo].[Task] ([taskID]),
     CONSTRAINT [FK_Sched_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID]),
-    CONSTRAINT [CK_Schedule_Status] CHECK ([status] IN ('pending', 'in progress', 'completed', 'disabled')), -- Added disabled
+    CONSTRAINT [CK_Schedule_Status] CHECK ([status] IN ('pending', 'in progress', 'completed', 'disabled')),
     CONSTRAINT [CK_Schedule_Priority] CHECK ([priority] IN ('low', 'medium', 'high'))
 );
 GO
@@ -328,13 +272,13 @@ INSERT INTO [Food] (name, type, note) VALUES
 ('Mineral Block', 'Supp', 'N'), ('Pellets', 'Processed', 'N'), ('Oats', 'Grain', 'N'),
 ('Seeds', 'Organic', 'N'), ('Mix C', 'Processed', 'N'), ('Mix D', 'Processed', 'N');
 
--- Barns (15)
-INSERT INTO [Barn] (temperature, humidity, type, area) VALUES 
-(25, 60, 'Flock barn', 300), (25, 60, 'Flock barn', 300), (25, 60, 'Flock barn', 300),
-(25, 60, 'Flock barn', 300), (25, 60, 'Flock barn', 300), (22, 70, 'flock sick barn', 150),
-(22, 70, 'flock sick barn', 150), (22, 70, 'flock sick barn', 150), (22, 70, 'flock sick barn', 150),
-(22, 70, 'flock sick barn', 150), (24, 55, 'large chicken barn', 100), (24, 55, 'large chicken barn', 100),
-(24, 55, 'large chicken barn', 100), (24, 55, 'large chicken barn', 100), (24, 55, 'large chicken barn', 100);
+-- Barns (15) - UPDATED: waterAmount now uses values between 0 and 100
+INSERT INTO [Barn] (temperature, humidity, type, area, waterAmount, foodAmount) VALUES 
+(25, 60, 'Flock barn', 300, 85, 150.50), (25, 60, 'Flock barn', 300, 90, 150.50), (25, 60, 'Flock barn', 300, 75, 150.50),
+(25, 60, 'Flock barn', 300, 40, 150.50), (25, 60, 'Flock barn', 300, 65, 150.50), (22, 70, 'flock sick barn', 150, 20, 75.25),
+(22, 70, 'flock sick barn', 150, 35, 75.25), (22, 70, 'flock sick barn', 150, 55, 75.25), (22, 70, 'flock sick barn', 150, 92, 75.25),
+(22, 70, 'flock sick barn', 150, 15, 75.25), (24, 55, 'large chicken barn', 100, 80, 40.00), (24, 55, 'large chicken barn', 100, 70, 40.00),
+(24, 55, 'large chicken barn', 100, 60, 40.00), (24, 55, 'large chicken barn', 100, 50, 40.00), (24, 55, 'large chicken barn', 100, 45, 40.00);
 
 -- FlockChicken (15)
 INSERT INTO [FlockChicken] (name, quantity, weight, DoB, transferDate, healthStatus) VALUES 
@@ -378,7 +322,7 @@ INSERT INTO [Task] (title, description, startTime, endTime) VALUES
 ('T6','Clean','09:00','10:00'), ('T7','Check','11:00','12:00'), ('T8','Check','11:00','12:00'), ('T9','Check','11:00','12:00'), ('T10','Vet','13:00','14:00'),
 ('T11','Vet','13:00','14:00'), ('T12','Vet','13:00','14:00'), ('T13','Light','18:00','19:00'), ('T14','Light','18:00','19:00'), ('T15','Light','18:00','19:00');
 
--- Schedule (15) - Includes 'disabled' status
+-- Schedule (15) 
 INSERT INTO [Schedule] (userID, taskID, CBarnID, description, note, priority, status, startDate, endDate) VALUES 
 (3, 1, 1, 'D', 'N', 'high', 'pending', '2026-04-07', '2026-04-10'), (4, 2, 2, 'D', 'N', 'high', 'in progress', '2026-04-07', '2026-04-10'),
 (5, 3, 3, 'D', 'N', 'high', 'completed', '2026-04-07', '2026-04-10'), (6, 4, 4, 'D', 'N', 'medium', 'disabled', '2026-04-07', '2026-04-10'),
@@ -414,37 +358,4 @@ INSERT INTO [Request] (userID, type, description, url) VALUES
 (3,'S','D1','u1'), (4,'S','D2','u2'), (5,'S','D3','u3'), (6,'S','D4','u4'), (7,'S','D5','u5'),
 (8,'S','D6','u6'), (9,'S','D7','u7'), (10,'S','D8','u8'), (11,'S','D9','u9'), (12,'S','D10','u10'),
 (13,'S','D11','u11'), (14,'S','D12','u12'), (15,'S','D13','u13'), (3,'S','D14','u14'), (4,'S','D15','u15');
-
--- FoodStorage (15)
-INSERT INTO [FoodStorage] (foodID, barnID, food_weight, leftover_food) VALUES 
-(1,1,100,10), (2,2,100,10), (3,3,100,10), (4,4,100,10), (5,5,100,10),
-(6,6,100,10), (7,7,100,10), (8,8,100,10), (9,9,100,10), (10,10,100,10),
-(11,11,100,10), (12,12,100,10), (13,13,100,10), (14,14,100,10), (15,15,100,10);
-
--- FeedingSession (5)
-INSERT INTO [FeedingSession] (foodID, userID, plannedQuantity, actualQuantity, status)
-VALUES 
-(1, 3, 50, 48, 'completed'),
-(2, 4, 40, NULL, 'pending'),
-(3, 5, 30, 29, 'completed'),
-(4, 6, 60, 58, 'completed'),
-(5, 7, 45, NULL, 'pending');
-
---FeedingSessionDetail (5)
-INSERT INTO [FeedingSessionDetail] (sessionID, inventID, quantity)
-VALUES
-(1, 1, 20),
-(1, 2, 28),
-(2, 3, 40),
-(3, 4, 29),
-(4, 5, 58);
-
---InventoryLog (5)
-INSERT INTO [InventoryLog] (foodID, inventID, type, quantity, note)
-VALUES
-(1, 1, 'consume', 20, 'Feeding session 1'),
-(2, 2, 'consume', 28, 'Feeding session 1'),
-(3, 3, 'consume', 40, 'Feeding session 2'),
-(4, 4, 'consume', 29, 'Feeding session 3'),
-(5, 5, 'consume', 58, 'Feeding session 4');
 GO

@@ -18,8 +18,7 @@ public interface IUnitOfWork
     RequestRepository Requests { get; }
     BarnRepository Barns { get; }
     InventoryRepository Inventories { get; }
-    FeedingSessionRepository FeedingSessions { get; }
-    FeedingSessionDetailRepository FeedingSessionDetails { get; }
+    
 
     ReportRepository Reports { get; }
     DataIoTRepository DataIoTs { get; }
