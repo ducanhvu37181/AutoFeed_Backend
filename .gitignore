@@ -52,3 +52,7 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+/AutoFeed_Backend/.vs/ProjectEvaluation/autofeed_backend.metadata.v10.bin
+/AutoFeed_Backend/.vs/ProjectEvaluation/autofeed_backend.projects.v10.bin
+/AutoFeed_Backend/.vs/ProjectEvaluation/autofeed_backend.strings.v10.bin
+/AutoFeed_Backend/.vs/AutoFeed_Backend/v18/.futdcache.v2
