@@ -30,7 +30,8 @@ namespace AutoFeed_Backend_Services.Services
                     ChickenLid = r.ChickenLid,
                     ChickenName = r.ChickenL != null ? r.ChickenL.Name : null,
                     FlockId = r.FlockId,
-                    FlockName = r.Flock != null ? r.Flock.Name : null
+                    FlockName = r.Flock != null ? r.Flock.Name : null,
+                    Status = r.Status
                 })
                 .ToListAsync();
         }
@@ -63,6 +64,7 @@ namespace AutoFeed_Backend_Services.Services
                     ChickenName = r.ChickenL != null ? r.ChickenL.Name : null,
                     FlockId = r.FlockId,
                     FlockName = r.Flock != null ? r.Flock.Name : null,
+                    Status = r.Status,
                     Details = r.FeedingRuleDetails.Select(d => new RuleDetailResponse
                     {
                         FeedRuleDetailID = d.FeedRuleDetailId,
@@ -71,7 +73,7 @@ namespace AutoFeed_Backend_Services.Services
                         FeedHour = d.FeedHour,
                         FeedMinute = d.FeedMinute,
                         Amount = d.Amount,
-                        Status = d.Status ?? false
+                        Status = d.Status 
                     }).ToList()
                 });
 
@@ -100,6 +102,7 @@ namespace AutoFeed_Backend_Services.Services
                 ChickenName = rule.ChickenL?.Name,
                 FlockId = rule.FlockId,
                 FlockName = rule.Flock?.Name,
+                Status = rule.Status,
                 Details = rule.FeedingRuleDetails.Select(d => new RuleDetailResponse
                 {
                     FeedRuleDetailID = d.FeedRuleDetailId,
@@ -108,7 +111,7 @@ namespace AutoFeed_Backend_Services.Services
                     FeedHour = d.FeedHour,
                     FeedMinute = d.FeedMinute,
                     Amount = d.Amount,
-                    Status = d.Status ?? false,
+                    Status = d.Status
                 }).ToList()
             };
         }
@@ -253,7 +256,7 @@ namespace AutoFeed_Backend_Services.Services
         {
             var rule = await _context.FeedingRules.FindAsync(id);
             if (rule == null) return false;
-            _context.FeedingRules.Remove(rule);
+            rule.Status = "disabled";
             return await _context.SaveChangesAsync() > 0;
         }
     }
