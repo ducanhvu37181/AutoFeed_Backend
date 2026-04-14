@@ -18,17 +18,17 @@ public interface IInventoryService
     Task<bool> AddInventoryAsync(Inventory item);
 
     //Xuất kho: farmer lấy food từ inventory để cho vào máy cho ăn tự động
-    Task<bool> ConsumeInventoryAsync(int foodId, int quantity);
+    //Task<bool> ConsumeInventoryAsync(int foodId, int quantity);
 
     // Farmer gửi request xin nhập thêm hàng cho manager
-    Task<bool> RequestNewItemAsync(int userId, string foodName, string description);
+    //Task<bool> RequestNewItemAsync(int userId, string foodName, string description);
 
     //Lấy tổng kho theo food
     Task<IEnumerable<object>> GetInventorySummaryAsync();
 
     // Tạo feeding session, để khi farmer lấy bao thức ăn dùng còn dư thì không bị mất dữ liệu
-    Task<int> CreateFeedingSessionAsync(int foodId, decimal quantity);
+    //Task<int> CreateFeedingSessionAsync(int foodId, decimal quantity);
 
     // Farmer confirm lại số lượng dùng
-    Task<bool> CompleteFeedingSessionAsync(int sessionId, decimal actualQuantity);
+    //Task<bool> CompleteFeedingSessionAsync(int sessionId, decimal actualQuantity);
 }
