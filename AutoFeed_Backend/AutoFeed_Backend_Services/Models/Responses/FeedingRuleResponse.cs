@@ -25,6 +25,7 @@ namespace AutoFeed_Backend_Services.Models.Responses
         public string? ChickenName { get; set; }
         public int? FlockId { get; set; }
         public string? FlockName { get; set; }
+        public string Status { get; set; }
         public List<RuleDetailResponse> Details { get; set; } = new();
     }
 }

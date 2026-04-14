@@ -43,6 +43,14 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[FeedingSession]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[FeedingSessionDetail]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[FlockChicken]",
          "ObjectType": 0
       },
@@ -56,6 +64,10 @@
       },
       {
          "Name": "[dbo].[Inventory]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[InventoryLog]",
          "ObjectType": 0
       },
       {
@@ -117,5 +129,6 @@
    "UseSchemaNamespaces": false,
    "UseSpatial": false,
    "UseT4": false,
-   "UseT4Split": false
+   "UseT4Split": false,
+   "UseTypedTvpParameters": true
 }
