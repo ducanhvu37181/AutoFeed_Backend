@@ -27,8 +27,6 @@ public partial class User
 
     public bool? Status { get; set; }
 
-    public virtual ICollection<FeedingSession> FeedingSessions { get; set; } = new List<FeedingSession>();
-
     public virtual ICollection<Report> Reports { get; set; } = new List<Report>();
 
     public virtual ICollection<Request> Requests { get; set; } = new List<Request>();

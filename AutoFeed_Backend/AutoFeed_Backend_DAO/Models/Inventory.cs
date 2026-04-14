@@ -17,7 +17,5 @@ public partial class Inventory
 
     public DateOnly ExpiredDate { get; set; }
 
-    public virtual ICollection<FeedingSessionDetail> FeedingSessionDetails { get; set; } = new List<FeedingSessionDetail>();
-
     public virtual Food Food { get; set; }
 }
