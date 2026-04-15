@@ -42,14 +42,4 @@ public class IoTDeviceRepository : GenericRepository<IoTDevice>
         _context.BarnIoTDevices.Add(newAssignment);
         await _context.SaveChangesAsync();
     }
-
-    // Get devices assigned to a specific barn including device info and installation date
-    public async System.Threading.Tasks.Task<IEnumerable<BarnIoTDevice>> GetDevicesAssignedToBarnAsync(int barnId)
-    {
-        return await _context.BarnIoTDevices
-            .Include(b => b.Device)
-            .Where(b => b.BarnId == barnId)
-            .OrderByDescending(b => b.InstallationDate)
-            .ToListAsync();
-    }
 }

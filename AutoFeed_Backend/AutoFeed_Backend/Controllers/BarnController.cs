@@ -146,7 +146,7 @@ public class BarnController : ControllerBase
 
         // Only update Type and Area
         existing.Type = request.Type;
-        existing.Area = request.Area;
+        existing.Area = request.Area;   
 
         var ok = await _barnService.UpdateBarnAsync(existing);
         if (!ok) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Update failed" });
