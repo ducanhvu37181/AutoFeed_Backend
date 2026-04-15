@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using AutoFeed_Backend_DAO.Models;
 using AutoFeed_Backend_Repositories.Repositories;
 
@@ -25,5 +25,4 @@ public interface IUnitOfWork
 
     int SaveChangesWithTransaction();
     Task<int> SaveChangesWithTransactionAsync();
-    System.Threading.Tasks.Task<Barn?> GetBarnByDeviceIdAsync(int deviceId);
 }
