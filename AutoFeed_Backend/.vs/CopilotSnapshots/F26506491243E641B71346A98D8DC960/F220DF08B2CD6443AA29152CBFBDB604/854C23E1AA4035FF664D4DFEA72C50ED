@@ -43,18 +43,6 @@ public class BarnController : ControllerBase
         public decimal Humidity { get; set; }
     }
 
-    public class UpdateFoodAmountRequest
-    {
-        public int BarnId { get; set; }
-        public decimal FoodAmount { get; set; }
-    }
-
-    public class UpdateWaterAmountRequest
-    {
-        public int BarnId { get; set; }
-        public decimal WaterAmount { get; set; }
-    }
-
     [HttpGet]
     public async Task<IActionResult> GetAllBarns()
     {
@@ -70,32 +58,6 @@ public class BarnController : ControllerBase
             b.CreateDate
         });
         return Ok(result);
-    }
-
-    [HttpPatch("food")]
-    public async Task<IActionResult> UpdateFoodAmount([FromBody] UpdateFoodAmountRequest req)
-    {
-        if (req == null) return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
-
-        var ok = await _barnService.UpdateFoodAmountAsync(req.BarnId, req.FoodAmount);
-        if (!ok) return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Barn not found or update failed" });
-
-        var updated = await _barnService.GetByIdAsync(req.BarnId);
-        var dto = new { BarnId = updated?.BarnId, FoodAmount = updated?.FoodAmount };
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Food amount updated" });
-    }
-
-    [HttpPatch("water")]
-    public async Task<IActionResult> UpdateWaterAmount([FromBody] UpdateWaterAmountRequest req)
-    {
-        if (req == null) return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
-
-        var ok = await _barnService.UpdateWaterAmountAsync(req.BarnId, (int)req.WaterAmount);
-        if (!ok) return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Barn not found or update failed" });
-
-        var updated = await _barnService.GetByIdAsync(req.BarnId);
-        var dto = new { BarnId = updated?.BarnId, WaterAmount = updated?.WaterAmount };
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Water amount updated" });
     }
 
     [HttpGet("available")]
