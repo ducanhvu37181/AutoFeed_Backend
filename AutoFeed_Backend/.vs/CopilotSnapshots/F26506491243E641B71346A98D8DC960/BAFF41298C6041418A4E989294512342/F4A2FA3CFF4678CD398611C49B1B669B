@@ -53,24 +53,4 @@ public class BarnService : IBarnService
         _unitOfWork.Barns.PrepareUpdate(barn);
         return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
     }
-
-    public async Task<bool> UpdateFoodAmountAsync(int barnId, decimal foodAmount)
-    {
-        var barn = await _unitOfWork.Barns.GetByIdAsync(barnId);
-        if (barn == null) return false;
-
-        barn.FoodAmount = foodAmount;
-        _unitOfWork.Barns.PrepareUpdate(barn);
-        return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
-    }
-
-    public async Task<bool> UpdateWaterAmountAsync(int barnId, int waterAmount)
-    {
-        var barn = await _unitOfWork.Barns.GetByIdAsync(barnId);
-        if (barn == null) return false;
-
-        barn.WaterAmount = waterAmount;
-        _unitOfWork.Barns.PrepareUpdate(barn);
-        return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
-    }
 }

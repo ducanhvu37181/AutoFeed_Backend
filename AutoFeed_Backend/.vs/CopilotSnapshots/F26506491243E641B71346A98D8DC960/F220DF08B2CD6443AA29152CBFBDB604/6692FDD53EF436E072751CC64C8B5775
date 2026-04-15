@@ -64,12 +64,12 @@ public class BarnService : IBarnService
         return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
     }
 
-    public async Task<bool> UpdateWaterAmountAsync(int barnId, int waterAmount)
+    public async Task<bool> UpdateWaterAmountAsync(int barnId, decimal waterAmount)
     {
         var barn = await _unitOfWork.Barns.GetByIdAsync(barnId);
         if (barn == null) return false;
 
-        barn.WaterAmount = waterAmount;
+        barn.WaterAmount = (int)waterAmount;
         _unitOfWork.Barns.PrepareUpdate(barn);
         return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
     }

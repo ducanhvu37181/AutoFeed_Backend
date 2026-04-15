@@ -90,10 +90,10 @@ public class BarnController : ControllerBase
     {
         if (req == null) return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
 
-        var ok = await _barnService.UpdateWaterAmountAsync(req.BarnId, (int)req.WaterAmount);
+        var ok = await _barnService.UpdateWaterAmountAsync(req.BarnId, req.WaterAmount);
         if (!ok) return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Barn not found or update failed" });
 
-        var updated = await _barnService.GetByIdAsync(req.BarnId);
+        var updated = await _barn_service.GetByIdAsync(req.BarnId);
         var dto = new { BarnId = updated?.BarnId, WaterAmount = updated?.WaterAmount };
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Water amount updated" });
     }
