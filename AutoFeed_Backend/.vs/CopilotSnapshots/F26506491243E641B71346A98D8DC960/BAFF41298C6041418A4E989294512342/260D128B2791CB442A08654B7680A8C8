@@ -18,20 +18,6 @@ namespace AutoFeed_Backend.Controllers
             _deviceService = deviceService;
         }
 
-        // 1b. Get devices by barn id
-        [HttpGet("barn/{barnId}")]
-        public async Task<IActionResult> GetByBarn(int barnId)
-        {
-            var result = await _deviceService.GetDevicesByBarnIdAsync(barnId);
-            return Ok(new ApiResponse<object>
-            {
-                Status = true,
-                HttpCode = 200,
-                Data = result,
-                Description = $"Devices for barn {barnId} retrieved successfully."
-            });
-        }
-
         // 1. Lấy danh sách tất cả thiết bị
         [HttpGet]
         public async Task<IActionResult> GetAll(string? search, string? type, string? status)

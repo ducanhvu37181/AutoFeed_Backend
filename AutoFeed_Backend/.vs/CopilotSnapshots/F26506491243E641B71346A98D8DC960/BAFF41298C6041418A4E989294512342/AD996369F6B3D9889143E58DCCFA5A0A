@@ -95,20 +95,5 @@ namespace AutoFeed_Backend_Services.Services
             await _unitOfWork.SaveChangesWithTransactionAsync();
             return true;
         }
-
-        // Get devices by barn id
-        public async Task<IEnumerable<object>> GetDevicesByBarnIdAsync(int barnId)
-        {
-            var assignments = await _unitOfWork.IoTDevices.GetDevicesAssignedToBarnAsync(barnId);
-
-            return assignments.Select(a => new
-            {
-                deviceId = a.Device?.DeviceId ?? 0,
-                deviceName = a.Device?.Name ?? "Unknown",
-                description = a.Device?.Description ?? "",
-                installationDate = a.InstallationDate,
-                status = a.Device?.Status == true ? "Online" : "Offline"
-            });
-        }
     }
 }

@@ -111,6 +111,7 @@ namespace AutoFeed_Backend_Services.Services
                     FeedHour = d.FeedHour,
                     FeedMinute = d.FeedMinute,
                     Amount = d.Amount,
+                    Description = d.Description,
                     Status = d.Status ?? false
                 }).ToList()
             };
