@@ -94,6 +94,7 @@ public class FlockController : ControllerBase
     [HttpPost("assign-flock-to-largeBarn")]
     public async Task<IActionResult> AssignIds([FromBody] AsssignToLargeChickRequest model)
     {
+        //var res = await _flockService.AssignIdsToLargeChickensAsync(id);
         if (model == null)
         {
             var error = new ApiResponse<object>
@@ -102,32 +103,6 @@ public class FlockController : ControllerBase
                 HttpCode = 400,
                 Data = null,
                 Description = "Invalid request"
-            };
-            return BadRequest(error);
-        }
-
-        // Check flock exists and has available quantity
-        var flock = await _flockService.GetFlockByIdAsync(model.FlockId);
-        if (flock == null)
-        {
-            var error = new ApiResponse<object>
-            {
-                Status = false,
-                HttpCode = 404,
-                Data = null,
-                Description = "Flock not found"
-            };
-            return NotFound(error);
-        }
-
-        if (flock.Quantity <= 0)
-        {
-            var error = new ApiResponse<object>
-            {
-                Status = false,
-                HttpCode = 400,
-                Data = null,
-                Description = "Cannot assign - flock quantity is zero"
             };
             return BadRequest(error);
         }
@@ -161,8 +136,7 @@ public class FlockController : ControllerBase
             ChickenLid = chickenLid,
             StartDate = DateOnly.FromDateTime(DateTime.Now),
             Note = model.Note,
-            Status = "active",
-            FlockId = model.FlockId
+            Status = "active"
         };
 
         var result = await _chickenBarnService.CreateAsync(chickenBarn);
@@ -176,30 +150,6 @@ public class FlockController : ControllerBase
                 Description = "Failed to assign - could not create ChickenBarn"
             };
             return BadRequest(error);
-        }
-
-        // Decrement flock quantity by 1
-        var updateReq = new FlockUpdateRequest
-        {
-            FlockID = flock.FlockId,
-            Name = flock.Name ?? string.Empty,
-            Quantity = flock.Quantity - 1,
-            Weight = flock.Weight,
-            HealthStatus = flock.HealthStatus ?? "Healthy",
-            Note = flock.Note
-        };
-
-        var updRes = await _flockService.UpdateFlockAsync(updateReq);
-        if (!updRes)
-        {
-            var error = new ApiResponse<object>
-            {
-                Status = false,
-                HttpCode = 500,
-                Data = null,
-                Description = "Assigned but failed to decrement flock quantity"
-            };
-            return StatusCode(500, error);
         }
 
         var flockUpdateResult = new AssignFlockToLargeChickResponse
