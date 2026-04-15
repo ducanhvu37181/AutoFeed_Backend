@@ -32,17 +32,6 @@ namespace AutoFeed_Backend.Controllers
             });
         }
 
-        // 1c. Get barn assigned to a device (latest assignment)
-        [HttpGet("{deviceId}/barn")]
-        public async Task<IActionResult> GetBarnByDevice(int deviceId)
-        {
-            var result = await _deviceService.GetBarnByDeviceIdAsync(deviceId);
-            if (result == null)
-                return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Barn not found for device." });
-
-            return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = result, Description = "Barn retrieved successfully." });
-        }
-
         // 1. Lấy danh sách tất cả thiết bị
         [HttpGet]
         public async Task<IActionResult> GetAll(string? search, string? type, string? status)

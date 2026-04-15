@@ -110,22 +110,5 @@ namespace AutoFeed_Backend_Services.Services
                 status = a.Device?.Status == true ? "Online" : "Offline"
             });
         }
-
-        public async Task<object?> GetBarnByDeviceIdAsync(int deviceId)
-        {
-            var barn = await _unitOfWork.GetBarnByDeviceIdAsync(deviceId);
-            if (barn == null) return null;
-
-            return new
-            {
-                barn.BarnId,
-                barn.Type,
-                barn.Temperature,
-                barn.Humidity,
-                barn.FoodAmount,
-                barn.WaterAmount,
-                barn.CreateDate
-            };
-        }
     }
 }

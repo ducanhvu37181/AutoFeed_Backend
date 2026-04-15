@@ -52,16 +52,4 @@ public class IoTDeviceRepository : GenericRepository<IoTDevice>
             .OrderByDescending(b => b.InstallationDate)
             .ToListAsync();
     }
-
-    // Get the latest barn assigned to a device (by installation date)
-    public async System.Threading.Tasks.Task<Barn?> GetBarnByDeviceIdAsync(int deviceId)
-    {
-        var assignment = await _context.BarnIoTDevices
-            .Include(b => b.Barn)
-            .Where(b => b.DeviceId == deviceId)
-            .OrderByDescending(b => b.InstallationDate)
-            .FirstOrDefaultAsync();
-
-        return assignment?.Barn;
-    }
 }
