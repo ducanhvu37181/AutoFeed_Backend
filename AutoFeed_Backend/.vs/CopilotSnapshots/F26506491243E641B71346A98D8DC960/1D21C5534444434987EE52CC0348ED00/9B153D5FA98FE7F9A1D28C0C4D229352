@@ -1,4 +1,4 @@
-using AutoFeed_Backend_DAO.Settings;
+﻿using AutoFeed_Backend_DAO.Settings;
 using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Services.ServiceProvider;
 using AutoFeed_Backend_Services.Services;
@@ -20,7 +20,6 @@ builder.Services.AddControllers()
     .AddJsonOptions(o =>
     {
         o.JsonSerializerOptions.Converters.Add(new AutoFeed_Backend.Json.FlexibleDateOnlyJsonConverter());
-        o.JsonSerializerOptions.Converters.Add(new AutoFeed_Backend.Json.FlexibleTimeOnlyJsonConverter());
     });
 builder.Services.AddServiceProvider();
 builder.Services.AddScoped<AutoFeed_Backend_Repositories.UnitOfWork.IUnitOfWork, AutoFeed_Backend_Repositories.UnitOfWork.UnitOfWork>();
