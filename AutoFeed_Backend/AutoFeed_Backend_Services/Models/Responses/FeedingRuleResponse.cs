@@ -11,6 +11,7 @@ namespace AutoFeed_Backend_Services.Models.Responses
         public int FeedHour { get; set; }
         public int FeedMinute { get; set; }
         public decimal Amount { get; set; }
+        public string Description { get; set; } 
         public bool Status { get; set; }       
     }
 
