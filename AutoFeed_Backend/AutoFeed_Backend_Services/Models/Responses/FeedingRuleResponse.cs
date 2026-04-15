@@ -11,6 +11,7 @@ namespace AutoFeed_Backend_Services.Models.Responses
         public int FeedHour { get; set; }
         public int FeedMinute { get; set; }
         public decimal Amount { get; set; }
+        public string Description { get; set; } 
         public bool Status { get; set; }       
     }
 
@@ -25,6 +26,7 @@ namespace AutoFeed_Backend_Services.Models.Responses
         public string? ChickenName { get; set; }
         public int? FlockId { get; set; }
         public string? FlockName { get; set; }
+        public string Status { get; set; }
         public List<RuleDetailResponse> Details { get; set; } = new();
     }
 }

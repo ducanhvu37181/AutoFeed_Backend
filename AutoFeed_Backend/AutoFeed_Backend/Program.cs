@@ -67,7 +67,7 @@ try
     using (var scope = app.Services.CreateScope())
     {
         var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
-        await userService.MigratePasswordsAsync();
+        //await userService.MigratePasswordsAsync();
     }
 }
 catch (Exception ex)

@@ -129,6 +129,5 @@
    "UseSchemaNamespaces": false,
    "UseSpatial": false,
    "UseT4": false,
-   "UseT4Split": false,
-   "UseTypedTvpParameters": true
+   "UseT4Split": false
 }

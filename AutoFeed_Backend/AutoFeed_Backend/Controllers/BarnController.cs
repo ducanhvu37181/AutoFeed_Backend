@@ -51,6 +51,8 @@ public class BarnController : ControllerBase
             b.BarnId,
             b.Temperature,
             b.Humidity,
+            b.FoodAmount,
+            b.WaterAmount,
             b.Type,
             b.Area,
             b.CreateDate
@@ -66,6 +68,8 @@ public class BarnController : ControllerBase
             b.BarnId,
             b.Temperature,
             b.Humidity,
+            b.FoodAmount,
+            b.WaterAmount,
             b.Type,
             b.Area,
             b.CreateDate
@@ -84,6 +88,8 @@ public class BarnController : ControllerBase
             b.BarnId,
             b.Temperature,
             b.Humidity,
+            b.FoodAmount,
+            b.WaterAmount,
             b.Type,
             b.Area,
             b.CreateDate
@@ -100,6 +106,8 @@ public class BarnController : ControllerBase
         {
             Temperature = 0,
             Humidity = 0,
+            FoodAmount = 0,
+            WaterAmount = 0,
             Type = request.Type,
             Area = request.Area,
             CreateDate = DateTime.Now
@@ -110,7 +118,7 @@ public class BarnController : ControllerBase
             var result = await _barnService.CreateBarnAsync(barn);
             if (!result) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Create failed" });
 
-            var dto = new { BarnId = barn.BarnId, Type = barn.Type, Area = barn.Area, Temperature = barn.Temperature, Humidity = barn.Humidity };
+            var dto = new { BarnId = barn.BarnId, Type = barn.Type, Area = barn.Area, Temperature = barn.Temperature, Humidity = barn.Humidity, FoodAmount = barn.FoodAmount, WaterAmount = barn.WaterAmount};
             var response = new ApiResponse<object> { Status = true, HttpCode = 201, Data = dto, Description = "Created" };
             return CreatedAtAction(nameof(GetBarnById), new { id = barn.BarnId }, response);
         }
@@ -138,7 +146,7 @@ public class BarnController : ControllerBase
 
         // Only update Type and Area
         existing.Type = request.Type;
-        existing.Area = request.Area;
+        existing.Area = request.Area;   
 
         var ok = await _barnService.UpdateBarnAsync(existing);
         if (!ok) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Update failed" });

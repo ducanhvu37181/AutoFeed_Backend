@@ -1,4 +1,4 @@
-using AutoFeed_Backend_DAO.Models;
+﻿using AutoFeed_Backend_DAO.Models;
 using AutoFeed_Backend_Repositories.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
@@ -64,12 +64,6 @@ public class UnitOfWork : IUnitOfWork
     public IoTDeviceRepository IoTDevices
     {
         get { return _ioTDeviceRepository ??= new IoTDeviceRepository(_context); }
-    }
-
-    // Expose helper to get barn by device id through IoTDeviceRepository
-    public async System.Threading.Tasks.Task<Barn?> GetBarnByDeviceIdAsync(int deviceId)
-    {
-        return await IoTDevices.GetBarnByDeviceIdAsync(deviceId);
     }
 
     public BarnRepository Barns

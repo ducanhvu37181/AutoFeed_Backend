@@ -98,55 +98,55 @@ public class InventoryService : IInventoryService
     }
 
     //Xuất kho: farmer lấy food từ inventory để cho vào máy cho ăn tự động
-    public async Task<bool> ConsumeInventoryAsync(int foodId, int quantity)
-    {
-        var inventories = await _unitOfWork.Inventories.GetAsync(
-            x => x.FoodId == foodId && x.Quantity > 0,
-            x => x.ExpiredDate,
-            isDescending: false
-        );
+    //public async Task<bool> ConsumeInventoryAsync(int foodId, int quantity)
+    //{
+    //    var inventories = await _unitOfWork.Inventories.GetAsync(
+    //        x => x.FoodId == foodId && x.Quantity > 0,
+    //        x => x.ExpiredDate,
+    //        isDescending: false
+    //    );
 
-        decimal remaining = quantity;
+    //    decimal remaining = quantity;
 
-        foreach (var item in inventories)
-        {
-            if (remaining <= 0) break;
+    //    foreach (var item in inventories)
+    //    {
+    //        if (remaining <= 0) break;
 
-            if (item.Quantity >= remaining)
-            {
-                item.Quantity -= remaining;
-                remaining = 0;
-            }
-            else
-            {
-                remaining -= item.Quantity;
-                item.Quantity = 0;
-            }
+    //        if (item.Quantity >= remaining)
+    //        {
+    //            item.Quantity -= remaining;
+    //            remaining = 0;
+    //        }
+    //        else
+    //        {
+    //            remaining -= item.Quantity;
+    //            item.Quantity = 0;
+    //        }
 
-            _unitOfWork.Inventories.PrepareUpdate(item);
-        }
+    //        _unitOfWork.Inventories.PrepareUpdate(item);
+    //    }
 
-        if (remaining > 0)
-            throw new Exception("Not enough inventory");
+    //    if (remaining > 0)
+    //        throw new Exception("Not enough inventory");
 
-        return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
-    }
+    //    return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
+    //}
 
     // Farmer gửi request xin nhập thêm hàng — tạo Request với type = "Inventory"
-    public async Task<bool> RequestNewItemAsync(int userId, string foodName, string description)
-    {
-        var request = new Request
-        {
-            UserId = userId,
-            Type = "Inventory",
-            Description = $"Yêu cầu nhập thêm: {foodName}. {description}".Trim(),
-            Status = "pending",
-            CreatedAt = DateTime.UtcNow
-        };
+    //public async Task<bool> RequestNewItemAsync(int userId, string foodName, string description)
+    //{
+    //    var request = new Request
+    //    {
+    //        UserId = userId,
+    //        Type = "Inventory",
+    //        Description = $"Yêu cầu nhập thêm: {foodName}. {description}".Trim(),
+    //        Status = "pending",
+    //        CreatedAt = DateTime.UtcNow
+    //    };
 
-        _unitOfWork.Requests.PrepareCreate(request);
-        return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
-    }
+    //    _unitOfWork.Requests.PrepareCreate(request);
+    //    return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
+    //}
 
     //Lấy tổng kho, grouped theo food
     public async Task<IEnumerable<object>> GetInventorySummaryAsync()
@@ -189,104 +189,104 @@ public class InventoryService : IInventoryService
     }
 
     // Tạo feeding session, để khi farmer lấy bao thức ăn dùng còn dư thì không bị mất dữ liệu
-    public async Task<int> CreateFeedingSessionAsync(int foodId, decimal quantity)
-    {
-        var inventories = await _unitOfWork.Inventories
-            .GetAsync(x => x.FoodId == foodId && x.Quantity > 0,
-                      x => x.ExpiredDate,
-                      isDescending: false);
+    //public async Task<int> CreateFeedingSessionAsync(int foodId, decimal quantity)
+    //{
+    //    var inventories = await _unitOfWork.Inventories
+    //        .GetAsync(x => x.FoodId == foodId && x.Quantity > 0,
+    //                  x => x.ExpiredDate,
+    //                  isDescending: false);
 
-        decimal remaining = quantity;
+    //    decimal remaining = quantity;
 
-        var session = new FeedingSession
-        {
-            FoodId = foodId,
-            PlannedQuantity = quantity,
-            Status = "Pending",
-            CreatedAt = DateTime.UtcNow
-        };
+    //    var session = new FeedingSession
+    //    {
+    //        FoodId = foodId,
+    //        PlannedQuantity = quantity,
+    //        Status = "Pending",
+    //        CreatedAt = DateTime.UtcNow
+    //    };
 
-        _unitOfWork.FeedingSessions.PrepareCreate(session);
-        await _unitOfWork.SaveChangesWithTransactionAsync(); 
+    //    _unitOfWork.FeedingSessions.PrepareCreate(session);
+    //    await _unitOfWork.SaveChangesWithTransactionAsync(); 
 
-        foreach (var item in inventories)
-        {
-            if (remaining <= 0) break;
+    //    foreach (var item in inventories)
+    //    {
+    //        if (remaining <= 0) break;
 
-            decimal taken;
+    //        decimal taken;
 
-            if (item.Quantity >= remaining)
-            {
-                taken = remaining;
-                item.Quantity -= remaining;
-                remaining = 0;
-            }
-            else
-            {
-                taken = item.Quantity;
-                remaining -= item.Quantity;
-                item.Quantity = 0;
-            }
+    //        if (item.Quantity >= remaining)
+    //        {
+    //            taken = remaining;
+    //            item.Quantity -= remaining;
+    //            remaining = 0;
+    //        }
+    //        else
+    //        {
+    //            taken = item.Quantity;
+    //            remaining -= item.Quantity;
+    //            item.Quantity = 0;
+    //        }
 
-            // Lưu detail
-            _unitOfWork.FeedingSessionDetails.PrepareCreate(new FeedingSessionDetail
-            {
-                SessionId = session.SessionId,
-                InventId = item.InventId,
-                Quantity = taken
-            });
+    //        // Lưu detail
+    //        _unitOfWork.FeedingSessionDetails.PrepareCreate(new FeedingSessionDetail
+    //        {
+    //            SessionId = session.SessionId,
+    //            InventId = item.InventId,
+    //            Quantity = taken
+    //        });
 
-            _unitOfWork.Inventories.PrepareUpdate(item);
-        }
+    //        _unitOfWork.Inventories.PrepareUpdate(item);
+    //    }
 
-        if (remaining > 0)
-            throw new Exception("Not enough inventory");
+    //    if (remaining > 0)
+    //        throw new Exception("Not enough inventory");
 
-        await _unitOfWork.SaveChangesWithTransactionAsync();
+    //    await _unitOfWork.SaveChangesWithTransactionAsync();
 
-        return session.SessionId;
-    }
+    //    return session.SessionId;
+    //}
     
-    // Farmer confirm lại số lượng dùng
-    public async Task<bool> CompleteFeedingSessionAsync(int sessionId, decimal actualQuantity)
-    {
-        var session = await _unitOfWork.FeedingSessions.GetByIdAsync(sessionId);
+    //// Farmer confirm lại số lượng dùng
+    //public async Task<bool> CompleteFeedingSessionAsync(int sessionId, decimal actualQuantity)
+    //{
+    //    var session = await _unitOfWork.FeedingSessions.GetByIdAsync(sessionId);
 
-        if (session == null)
-            throw new Exception("Session not found");
+    //    if (session == null)
+    //        throw new Exception("Session not found");
 
-        var details = await _unitOfWork.FeedingSessionDetails
-            .GetAsync(x => x.SessionId == sessionId,
-            x => x.DetailId,
-            isDescending: true);
+    //    var details = await _unitOfWork.FeedingSessionDetails
+    //        .GetAsync(x => x.SessionId == sessionId,
+    //        x => x.DetailId,
+    //        isDescending: true);
 
-        decimal planned = session.PlannedQuantity;
-        decimal diff = planned - actualQuantity;
+    //    decimal planned = session.PlannedQuantity;
+    //    decimal diff = planned - actualQuantity;
 
-        if (diff > 0)
-        {
-            // trả lại kho
-            foreach (var d in details.OrderByDescending(x => x.SessionId))
-            {
-                if (diff <= 0) break;
+    //    if (diff > 0)
+    //    {
+    //        // trả lại kho
+    //        foreach (var d in details.OrderByDescending(x => x.SessionId))
+    //        {
+    //            if (diff <= 0) break;
 
-                var inventory = await _unitOfWork.Inventories
-                    .GetByIdAsync(d.InventId);
+    //            var inventory = await _unitOfWork.Inventories
+    //                .GetByIdAsync(d.InventId);
 
-                decimal giveBack = Math.Min(diff, d.Quantity);
+    //            decimal giveBack = Math.Min(diff, d.Quantity);
 
-                inventory.Quantity += giveBack;
-                diff -= giveBack;
+    //            inventory.Quantity += giveBack;
+    //            diff -= giveBack;
 
-                _unitOfWork.Inventories.PrepareUpdate(inventory);
-            }
-        }
+    //            _unitOfWork.Inventories.PrepareUpdate(inventory);
+    //        }
+    //    }
 
-        session.ActualQuantity = actualQuantity;
-        session.Status = "completed";
+    //    session.ActualQuantity = actualQuantity;
+    //    session.Status = "completed";
 
-        _unitOfWork.FeedingSessions.PrepareUpdate(session);
+    //    _unitOfWork.FeedingSessions.PrepareUpdate(session);
 
-        return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
-    }
+    //    return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
+    //}
 }

@@ -11,13 +11,11 @@ public partial class Inventory
 
     public int FoodId { get; set; }
 
-    public decimal Quantity { get; set; }
+    public int Quantity { get; set; }
 
     public decimal WeightPerBag { get; set; }
 
     public DateOnly ExpiredDate { get; set; }
-
-    public virtual ICollection<FeedingSessionDetail> FeedingSessionDetails { get; set; } = new List<FeedingSessionDetail>();
 
     public virtual Food Food { get; set; }
 }

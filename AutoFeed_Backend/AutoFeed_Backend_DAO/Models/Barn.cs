@@ -17,6 +17,10 @@ public partial class Barn
 
     public decimal Area { get; set; }
 
+    public int WaterAmount { get; set; }
+
+    public decimal FoodAmount { get; set; }
+
     public DateTime? CreateDate { get; set; }
 
     public virtual ICollection<BarnIoTDevice> BarnIoTDevices { get; set; } = new List<BarnIoTDevice>();
@@ -24,6 +28,4 @@ public partial class Barn
     public virtual ICollection<ChickenBarn> ChickenBarns { get; set; } = new List<ChickenBarn>();
 
     public virtual ICollection<DataIoT> DataIoTs { get; set; } = new List<DataIoT>();
-
-    public virtual ICollection<FoodStorage> FoodStorages { get; set; } = new List<FoodStorage>();
 }
