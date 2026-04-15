@@ -17,5 +17,5 @@ public interface IBarnService
     // Update food amount for a barn
     Task<bool> UpdateFoodAmountAsync(int barnId, decimal foodAmount);
     // Update water amount for a barn
-    Task<bool> UpdateWaterAmountAsync(int barnId, int waterAmount);
+    Task<bool> UpdateWaterAmountAsync(int barnId, decimal waterAmount);
 }
