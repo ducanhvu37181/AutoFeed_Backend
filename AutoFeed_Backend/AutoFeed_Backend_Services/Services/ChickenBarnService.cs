@@ -72,50 +72,58 @@ public class ChickenBarnService : IChickenBarnService
 
     public async Task<bool> ExportAsync(int id)
     {
-        // 1. Load chicken barn with related large chicken, feeding rules and schedules
-        var cb = await _unitOfWork.ChickenBarns.GetByIdAsync(id);
-        if (cb == null) return false;
-
-        // Mark chicken barn exported
-        cb.Status = "export";
-        _unitOfWork.ChickenBarns.PrepareUpdate(cb);
-
-        // 2. If there is a LargeChicken assigned, mark it inactive
-        if (cb.ChickenLid.HasValue)
+        try
         {
-            var lc = await _unitOfWork.LargeChickens.GetByIdAsync(cb.ChickenLid.Value);
-            if (lc != null)
+            // 1. Load chicken barn with related large chicken, feeding rules and schedules
+            var cb = await _unitOfWork.ChickenBarns.GetByIdAsync(id);
+            if (cb == null) return false;
+
+            // Mark chicken barn as exported with export date
+            cb.Status = "export";
+            cb.ExportDate = DateOnly.FromDateTime(DateTime.Now);
+            _unitOfWork.ChickenBarns.PrepareUpdate(cb);
+
+            // 2. If there is a LargeChicken assigned, mark it inactive
+            if (cb.ChickenLid.HasValue)
             {
-                lc.IsActive = false;
-                _unitOfWork.LargeChickens.PrepareUpdate(lc);
-
-                // 3. Disable feeding rules associated with this large chicken
-                var rules = await _unitOfWork.FeedingRules.GetByChickenIdAsync(lc.ChickenLid);
-                foreach (var r in rules)
+                var lc = await _unitOfWork.LargeChickens.GetByIdAsync(cb.ChickenLid.Value);
+                if (lc != null)
                 {
-                    r.Status = "disabled";
-                    _unitOfWork.FeedingRules.PrepareUpdate(r);
+                    lc.IsActive = false;
+                    _unitOfWork.LargeChickens.PrepareUpdate(lc);
 
-                    // disable each detail (they are tracked because we included them in the query)
-                    foreach (var d in r.FeedingRuleDetails)
+                    // 3. Disable feeding rules associated with this large chicken
+                    var rules = await _unitOfWork.FeedingRules.GetByChickenIdAsync(lc.ChickenLid);
+                    foreach (var r in rules)
                     {
-                        d.Status = false;
+                        r.Status = "disabled";
+                        _unitOfWork.FeedingRules.PrepareUpdate(r);
+
+                        // disable each detail (they are tracked because we included them in the query)
+                        foreach (var d in r.FeedingRuleDetails)
+                        {
+                            d.Status = false;
+                        }
                     }
                 }
             }
-        }
 
-        // 4. Disable schedules related to this chicken barn
-        var schedules = await _unitOfWork.Schedules.GetByChickenBarnIdAsync(cb.CbarnId);
-        foreach (var s in schedules)
+            // 4. Disable schedules related to this chicken barn
+            var schedules = await _unitOfWork.Schedules.GetByChickenBarnIdAsync(cb.CbarnId);
+            foreach (var s in schedules)
+            {
+                s.Status = "disabled";
+                _unitOfWork.Schedules.PrepareUpdate(s);
+            }
+
+            // Commit changes
+            var res = await _unitOfWork.SaveChangesWithTransactionAsync();
+            return res > 0;
+        }
+        catch
         {
-            s.Status = "disabled";
-            _unitOfWork.Schedules.PrepareUpdate(s);
+            return false;
         }
-
-        // Commit changes
-        var res = await _unitOfWork.SaveChangesWithTransactionAsync();
-        return res > 0;
     }
 
     public async Task<List<ChickenBarnModel>> SearchAsync(int? barnId, int? flockId, int? chickenLid, bool includeInactive = false)
