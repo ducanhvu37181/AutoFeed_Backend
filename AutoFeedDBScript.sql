@@ -336,8 +336,8 @@ INSERT INTO [Report] (userID, type, description, status, url, createDate) VALUES
 -- 5 Requests
 INSERT INTO [Request] (userID, type, description, status, createdAt) VALUES 
 (4, 'Supplies', 'Need 10 bags of finisher feed', 'pending', '2026-04-08'),
-(3, 'Equipment', 'Replacement for faulty V2 sensor', 'reviewed', '2026-04-09'),
+(3, 'Equipment', 'Replacement for faulty V2 sensor', 'approved', '2026-04-09'),
 (5, 'Medicine', 'Order Newcastle vaccines', 'pending', '2026-04-11'),
-(4, 'Personal', 'Request day off for family matter', 'reviewed', '2026-04-12'),
-(2, 'Utility', 'Check water pipe leakage sector A', 'pending', '2026-04-14');
+(4, 'Personal', 'Request day off for family matter', 'approved', '2026-04-12'),
+(2, 'Utility', 'Check water pipe leakage sector A', 'rejected', '2026-04-14');
 GO

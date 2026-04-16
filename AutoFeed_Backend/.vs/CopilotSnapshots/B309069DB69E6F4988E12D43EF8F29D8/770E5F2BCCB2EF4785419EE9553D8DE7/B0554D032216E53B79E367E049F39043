@@ -1,4 +1,4 @@
-using AutoFeed_Backend_Services.Interfaces;
+﻿using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Repositories.UnitOfWork;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -16,7 +16,7 @@ public class ScheduleService : IScheduleService
         _unitOfWork = new UnitOfWork();
     }
 
-    public async Task<List<(int? SchedId, bool Success, string Message)>> CreateSingleScheduleAsync(IEnumerable<ScheduleModel> schedules)
+    public async Task<List<(int? SchedId, bool Success, string Message)>> CreateSchedulesAsync(IEnumerable<ScheduleModel> schedules)
     {
         var results = new List<(int? SchedId, bool Success, string Message)>();
         if (schedules == null) return results;
@@ -154,7 +154,7 @@ public class ScheduleService : IScheduleService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<int> CreateMultipleScheduleAsync(ScheduleModel schedule)
+    public async Task<int> CreateScheduleAsync(ScheduleModel schedule)
     {
         // Check for conflicts:
         // 1) same cbarn + same task cannot have multiple schedules at the same date
@@ -424,6 +424,8 @@ public class ScheduleService : IScheduleService
 
         var result = itemList.Select(s => {
             var username = userMap.ContainsKey(s.UserId) ? userMap[s.UserId] : null;
+            var endDate = s.EndDate ?? s.StartDate;
+            var isSingleDay = s.StartDate == endDate;
             var resp = new ScheduleResponse
             {
                 SchedId = s.SchedId,
@@ -434,13 +436,14 @@ public class ScheduleService : IScheduleService
                 Note = s.Note,
                 Priority = s.Priority,
                 Status = s.Status,
-                StartDate = s.StartDate, // No change
-                EndDate = s.EndDate, // No change
+                StartDate = s.StartDate,
+                EndDate = s.EndDate,
                 Username = username,
                 BarnId = cbarnMap.ContainsKey(s.CbarnId) ? cbarnMap[s.CbarnId] : (int?)null,
                 TaskTitle = taskMap.ContainsKey(s.TaskId) ? taskMap[s.TaskId] : null,
                 StartTime = taskTimes.ContainsKey(s.TaskId) ? taskTimes[s.TaskId].start : (TimeOnly?)null,
-                EndTime = taskTimes.ContainsKey(s.TaskId) ? taskTimes[s.TaskId].end : (TimeOnly?)null
+                EndTime = taskTimes.ContainsKey(s.TaskId) ? taskTimes[s.TaskId].end : (TimeOnly?)null,
+                IsSingleDay = isSingleDay
             };
             return resp;
         }).ToList();
