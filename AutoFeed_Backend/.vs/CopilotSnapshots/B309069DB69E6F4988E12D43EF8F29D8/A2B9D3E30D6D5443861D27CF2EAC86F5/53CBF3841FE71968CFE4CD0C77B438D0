@@ -1,0 +1,27 @@
+﻿using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Repositories.BasicRepo;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace AutoFeed_Backend_Repositories.Repositories;
+
+public class BarnRepository : GenericRepository<Barn>
+{
+    public BarnRepository() : base() { }
+    public BarnRepository(AutoFeedDBContext context) : base(context) { }
+
+    /// <summary>
+    /// Get barns that are available: no ChickenBarn assigned to them OR all assigned ChickenBarns are exported.
+    /// </summary>
+    public async Task<List<Barn>> GetAvailableAsync()
+    {
+        // A barn is available when there is no ChickenBarn for it with status != 'exported'
+        var query = _context.Barns
+            .Where(b => !_context.ChickenBarns
+                .Any(cb => cb.BarnId == b.BarnId && cb.Status != null && cb.Status.ToLower() != "exported"));
+
+        return await query.ToListAsync();
+    }
+}

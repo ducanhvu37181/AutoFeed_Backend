@@ -1,0 +1,12 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace AutoFeed_Backend.Models.Requests.Flock
+{
+	public class AssignToFlockBarnRequest
+	{
+		public int FlockId { get; set; }
+		public List<int> BarnIds { get; set; } = new List<int>();
+		public string Note { get; set; }
+	}
+}

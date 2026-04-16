@@ -25,7 +25,6 @@
     <None Remove="Models\Requests\IotDevice\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Models\Requests\Flock\" />
     <Folder Include="Models\Requests\FeedingRuleRequest\" />
     <Folder Include="Models\Requests\IotDevice\" />
   </ItemGroup>
