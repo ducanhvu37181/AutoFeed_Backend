@@ -21,15 +21,6 @@ public class BarnService : IBarnService
 
     public async Task<List<Barn>> GetAvailableAsync() => await _unitOfWork.Barns.GetAvailableAsync();
 
-    public async Task<List<Barn>> GetAvailableByTypeAsync(string type)
-    {
-        if (string.IsNullOrWhiteSpace(type))
-            return new List<Barn>();
-
-        var allAvailable = await _unitOfWork.Barns.GetAvailableAsync();
-        return allAvailable.Where(b => b.Type?.Equals(type, System.StringComparison.OrdinalIgnoreCase) ?? false).ToList();
-    }
-
     public async Task<bool> CreateBarnAsync(Barn barn)
     {
         _unitOfWork.Barns.PrepareCreate(barn);
