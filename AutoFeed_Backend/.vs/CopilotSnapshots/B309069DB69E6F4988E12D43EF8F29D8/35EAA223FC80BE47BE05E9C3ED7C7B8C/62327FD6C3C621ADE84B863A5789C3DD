@@ -1,0 +1,225 @@
+﻿using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Services.Interfaces;
+using AutoFeed_Backend.Models.Requests.Request;
+using AutoFeed_Backend.Models.Responses;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System;
+using System.Text;
+using System.Text.Json;
+using System.IO;
+using AutoFeed_Backend.Helpers;
+
+namespace AutoFeed_Backend.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class RequestController : ControllerBase
+{
+    private readonly IRequestService _service;
+    private readonly IUserService _userService;
+
+    public RequestController(IRequestService service, IUserService userService)
+    {
+        _service = service;
+        _userService = userService;
+    }
+
+    private async Task<RequestResponse> ToDtoAsync(Request r)
+    {
+        var user = await _userService.GetUserByIdAsync(r.UserId);
+        return new RequestResponse
+        {
+            RequestId = r.RequestId,
+            UserId = r.UserId,
+            UserName = user?.Username ?? "Unknown",
+            Type = r.Type,
+            Description = r.Description,
+            Status = r.Status,
+            Url = r.Url,
+            CreatedAt = r.CreatedAt
+        };
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var items = await _service.GetAllRequestsAsync();
+        var dto = new List<RequestResponse>();
+        foreach (var item in items)
+        {
+            dto.Add(await ToDtoAsync(item));
+        }
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
+    }
+
+
+
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] string q)
+    {
+        var items = await _service.SearchRequestsAsync(q);
+        var dto = items.Select(ToDto).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> Get(int id)
+    {
+        var item = await _service.GetRequestByIdAsync(id);
+        if (item == null)
+            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = ToDto(item), Description = "Success" });
+    }
+
+    // GET api/request/user/5  — lấy tất cả request của 1 user
+    [HttpGet("user/{userId:int}")]
+    public async Task<IActionResult> GetByUserId(int userId)
+    {
+        var items = await _service.GetByUserIdAsync(userId);
+        var dto = items.Select(ToDto).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
+    }
+
+    [HttpGet("status/{status}")]
+    public async Task<IActionResult> GetByStatus(string status)
+    {
+        if (string.IsNullOrWhiteSpace(status))
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid status" });
+
+        var normalized = status.Trim().ToLower();
+        if (normalized != "pending" && normalized != "approved" && normalized != "rejected")
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Allowed statuses: pending, approved, rejected" });
+
+        var items = await _service.GetByStatusAsync(normalized);
+        var dto = items.Select(ToDto).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
+    }
+
+    [HttpPost]
+    [Consumes("multipart/form-data")]
+    // Accept multipart/form-data so callers can upload a file. The file will be uploaded to
+    // Firebase Storage and the returned URL saved in the request's Url field.
+    public async Task<IActionResult> Create([FromForm] CreateRequestRequest model, IFormFile? file, [FromServices] IConfiguration config)
+    {
+        // If caller sent application/json instead of multipart/form-data, the model will be null here.
+        // Try to read and deserialize JSON body as a fallback so file upload remains optional.
+        if (model == null)
+        {
+            try
+            {
+                Request.EnableBuffering();
+                using var reader = new StreamReader(Request.Body, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
+                var body = await reader.ReadToEndAsync();
+                Request.Body.Position = 0;
+                if (!string.IsNullOrWhiteSpace(body))
+                    model = JsonSerializer.Deserialize<CreateRequestRequest>(body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            catch
+            {
+                // ignore deserialization errors and let validation handle null model
+            }
+        }
+
+        if (model == null || string.IsNullOrWhiteSpace(model.Type))
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
+
+        var entity = new Request
+        {
+            UserId = model.UserId,
+            Type = model.Type,
+            Description = model.Description
+        };
+
+        // if a file was uploaded, upload it to Firebase and set entity.Url
+        var fileToUse = file ?? model?.File;
+        if (fileToUse != null && fileToUse.Length > 0)
+        {
+            var bucket = config.GetValue<string>("Firebase:Bucket");
+            var saPath = config.GetValue<string>("Firebase:ServiceAccountPath");
+            if (string.IsNullOrWhiteSpace(bucket) || string.IsNullOrWhiteSpace(saPath))
+                return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Firebase not configured" });
+
+            try
+            {
+                var url = await FirebaseStorageHelper.UploadFileAndGetSignedUrlAsync(fileToUse, bucket, saPath, TimeSpan.FromDays(30));
+                entity.Url = url;
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = ex.Message });
+            }
+        }
+        else
+        {
+            // No file was sent; explicitly set Url to null
+            entity.Url = null;
+        }
+
+        var id = await _service.CreateRequestAsync(entity);
+        if (id <= 0)
+            return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Create failed" });
+
+        return CreatedAtAction(nameof(Get), new { id = entity.RequestId },
+            new ApiResponse<object> { Status = true, HttpCode = 201, Data = ToDto(entity), Description = "Created" });
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateRequestRequest model)
+    {
+        if (model == null || string.IsNullOrWhiteSpace(model.Type))
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
+
+        var existing = await _service.GetRequestByIdAsync(id);
+        if (existing == null)
+            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
+
+        if (model.UserId.HasValue)
+            existing.UserId = model.UserId.Value;
+        existing.Type = model.Type;
+        existing.Description = model.Description;
+        if (!string.IsNullOrWhiteSpace(model.Status))
+            existing.Status = model.Status;
+
+        var ok = await _service.UpdateRequestAsync(existing);
+        if (!ok)
+            return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Update failed" });
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = ToDto(existing), Description = "Update success" });
+    }
+
+    // PATCH api/request/5/status  — chỉ cập nhật status
+    [HttpPatch("{id:int}/status")]
+    public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateRequestStatusRequest model)
+    {
+        if (model == null || string.IsNullOrWhiteSpace(model.Status))
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
+
+        var ok = await _service.UpdateStatusAsync(id, model.Status);
+        if (!ok)
+            return BadRequest(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Not Found or invalid status. Allowed: pending, approved, rejected"
+            });
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Status updated" });
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var ok = await _service.DeleteRequestAsync(id);
+        if (!ok)
+            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found or Delete failed" });
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Delete success" });
+    }
+}
