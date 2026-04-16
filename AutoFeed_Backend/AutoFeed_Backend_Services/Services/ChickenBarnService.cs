@@ -23,7 +23,8 @@ public class ChickenBarnService : IChickenBarnService
     public async Task<int> CreateAsync(ChickenBarnModel entity)
     {
         _unitOfWork.ChickenBarns.PrepareCreate(entity);
-        return await _unitOfWork.SaveChangesWithTransactionAsync();
+        await _unitOfWork.SaveChangesWithTransactionAsync();
+        return entity.CbarnId;  // Return the actual ID, not the row count
     }
 
     public async Task<ChickenBarnModel?> GetByIdAsync(int id)
