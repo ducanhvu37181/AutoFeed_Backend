@@ -131,4 +131,9 @@ public class ChickenBarnService : IChickenBarnService
     {
         return await _unitOfWork.ChickenBarns.SearchAsync(barnId, flockId, chickenLid, includeInactive);
     }
+
+    public async Task<List<dynamic>> GetChickenBarnDetailAsync(int? barnId, string? barnType)
+    {
+        return await _unitOfWork.ChickenBarns.GetChickenBarnDetailAsync(barnId, barnType);
+    }
 }

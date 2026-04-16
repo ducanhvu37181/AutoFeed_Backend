@@ -211,4 +211,17 @@ public class ChickenBarnController : ControllerBase
         }).ToList();
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
+
+    [HttpGet("detail")]
+    public async Task<IActionResult> GetChickenBarnDetail([FromQuery] int? barnId, [FromQuery] string? barnType)
+    {
+        if (barnId == null && string.IsNullOrEmpty(barnType))
+        {
+            var allDetails = await _service.GetChickenBarnDetailAsync(null, null);
+            return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = allDetails, Description = "Success" });
+        }
+
+        var items = await _service.GetChickenBarnDetailAsync(barnId, barnType);
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = items, Description = "Success" });
+    }
 }

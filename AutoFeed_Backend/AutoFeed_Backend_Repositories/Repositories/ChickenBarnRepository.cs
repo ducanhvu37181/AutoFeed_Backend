@@ -59,4 +59,35 @@ public class ChickenBarnRepository : GenericRepository<ChickenBarn>
         if (list == null || list.Count == 0) return new List<ChickenBarn>();
         return await _context.Set<ChickenBarn>().Where(cb => list.Contains(cb.CbarnId)).ToListAsync();
     }
+
+    public async Task<List<dynamic>> GetChickenBarnDetailAsync(int? barnId, string? barnType)
+    {
+        var query = _context.Set<ChickenBarn>()
+            .Include(cb => cb.Barn)
+            .Include(cb => cb.ChickenL)
+            .Include(cb => cb.Flock)
+            .AsQueryable();
+
+        if (barnId.HasValue)
+            query = query.Where(x => x.BarnId == barnId.Value);
+
+        if (!string.IsNullOrEmpty(barnType))
+            query = query.Where(x => x.Barn.Type.ToLower() == barnType.ToLower());
+
+        var result = await query.Select(cb => new
+        {
+            CbarnId = cb.CbarnId,
+            BarnId = cb.BarnId,
+            BarnType = cb.Barn.Type,
+            ChickenName = cb.ChickenL != null ? cb.ChickenL.Name : null,
+            FlockName = cb.Flock != null ? cb.Flock.Name : null,
+            Status = cb.Status,
+            StartDate = (cb.Status != null && cb.Status.ToLower() == "active") ? (DateOnly?)cb.StartDate : null,
+            ExportDate = (cb.ChickenL != null && cb.Status == "export") ? cb.ExportDate : null,
+            TransferDate = cb.Flock != null ? (DateOnly?)cb.Flock.TransferDate : null,
+            AvatarUrl = cb.ChickenL != null ? cb.ChickenL.Url : null
+        }).ToListAsync();
+
+        return result.Cast<dynamic>().ToList();
+    }
 }
