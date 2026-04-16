@@ -26,15 +26,13 @@ namespace AutoFeed_Backend_Services.Services
 
             if (d == null) return null;
 
-            var latestAssignment = d.BarnIoTDevices.OrderByDescending(b => b.InstallationDate).FirstOrDefault();
-
             return new DeviceDetailResponse
             {
                 DeviceID = d.DeviceId,
                 DeviceName = d.Name,
                 Description = d.Description ?? "",
-                AssignedTo = latestAssignment?.Barn?.Type ?? "Unassigned",
-                BarnId = latestAssignment?.BarnId,
+                AssignedTo = d.BarnIoTDevices.OrderByDescending(b => b.InstallationDate)
+                                .FirstOrDefault()?.Barn?.Type ?? "Unassigned",
                 Status = d.Status == true ? "Online" : "Offline"
             };
         }
@@ -43,16 +41,13 @@ namespace AutoFeed_Backend_Services.Services
         {
             var devices = await _unitOfWork.IoTDevices.GetDevicesWithBarnAsync(search, type, status);
 
-            return devices.Select(d => {
-                var latestAssignment = d.BarnIoTDevices.OrderByDescending(b => b.InstallationDate).FirstOrDefault();
-                return new {
-                    DeviceID = d.DeviceId,
-                    DeviceName = d.Name,
-                    Description = d.Description,
-                    AssignedTo = latestAssignment?.Barn?.Type ?? "Unassigned",
-                    BarnId = latestAssignment?.BarnId,
-                    Status = d.Status == true ? "Online" : "Offline"
-                };
+            return devices.Select(d => new {
+                DeviceID = d.DeviceId,
+                DeviceName = d.Name,
+                Description = d.Description,
+                AssignedTo = d.BarnIoTDevices.OrderByDescending(b => b.InstallationDate)
+                             .FirstOrDefault()?.Barn?.Type ?? "Unassigned",
+                Status = d.Status == true ? "Online" : "Offline"
             });
         }
 
@@ -111,7 +106,6 @@ namespace AutoFeed_Backend_Services.Services
                 deviceId = a.Device?.DeviceId ?? 0,
                 deviceName = a.Device?.Name ?? "Unknown",
                 description = a.Device?.Description ?? "",
-                barnId = a.BarnId,
                 installationDate = a.InstallationDate,
                 status = a.Device?.Status == true ? "Online" : "Offline"
             });

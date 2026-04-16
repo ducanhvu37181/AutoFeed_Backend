@@ -5,7 +5,6 @@
         public int DeviceID { get; set; }
         public string DeviceName { get; set; } = null!;
         public string AssignedTo { get; set; } = null!;
-        public int? BarnId { get; set; }
         public string Status { get; set; } = null!;
         public string Description { get; set; } = null!;
     }
