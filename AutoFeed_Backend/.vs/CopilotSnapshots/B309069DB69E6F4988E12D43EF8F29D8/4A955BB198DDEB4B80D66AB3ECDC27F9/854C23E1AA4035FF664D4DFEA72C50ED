@@ -99,19 +99,9 @@ public class BarnController : ControllerBase
     }
 
     [HttpGet("available")]
-    public async Task<IActionResult> GetAvailableBarns([FromQuery] string? type = null)
+    public async Task<IActionResult> GetAvailableBarns()
     {
-        List<Barn> barns;
-
-        if (string.IsNullOrWhiteSpace(type))
-        {
-            barns = await _barnService.GetAvailableAsync();
-        }
-        else
-        {
-            barns = await _barnService.GetAvailableByTypeAsync(type);
-        }
-
+        var barns = await _barnService.GetAvailableAsync();
         var result = barns.Select(b => new {
             b.BarnId,
             b.Temperature,
