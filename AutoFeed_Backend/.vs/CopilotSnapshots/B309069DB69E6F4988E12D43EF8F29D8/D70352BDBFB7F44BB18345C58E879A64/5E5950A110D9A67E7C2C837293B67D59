@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using ScheduleModel = AutoFeed_Backend_DAO.Models.Schedule;
 using AutoFeed_Backend_Services.Models.Responses;
@@ -8,7 +8,23 @@ namespace AutoFeed_Backend_Services.Interfaces;
 
 public interface IScheduleService
 {
-    Task<int> CreateMultipleScheduleAsync(ScheduleModel schedule);
+    /// <summary>
+    /// Creates a single schedule with basic validation only (no conflict checking).
+    /// Use this for simple schedule creation when you don't need conflict detection.
+    /// Returns: schedule ID on success, 0 on validation/creation failure
+    /// </summary>
+    Task<int> CreateScheduleAsync(ScheduleModel schedule);
+
+    /// <summary>
+    /// Creates a single schedule with comprehensive conflict detection.
+    /// Checks for:
+    /// 1) same cbarn + same task cannot have multiple schedules at the same date
+    /// 2) one user can only have one task at the same time (no overlapping task times)
+    /// 3) one user cannot be assigned schedules for 2 cbarnId at the same time
+    /// Returns: schedule ID (>0) on success, 0 on validation failure, -1 on conflict
+    /// </summary>
+    Task<int> CreateScheduleWithConflictCheckAsync(ScheduleModel schedule);
+
     Task<ScheduleModel?> GetScheduleByIdAsync(int id);
     Task<List<ScheduleModel>> GetAllSchedulesAsync();
     Task<bool> UpdateScheduleAsync(ScheduleModel schedule);
@@ -44,6 +60,10 @@ public interface IScheduleService
 
     Task<List<ScheduleResponse>> GetSchedulesByUserAndDateAsync(int userId, System.DateTime date);
 
-    // Best-effort batch create: try to create each schedule, return per-item results
-    Task<List<(int? SchedId, bool Success, string Message)>> CreateSingleScheduleAsync(IEnumerable<ScheduleModel> schedules);
+    /// <summary>
+    /// Batch creation with comprehensive conflict detection for each schedule.
+    /// Checks conflicts against database and previously created schedules in the same batch.
+    /// Returns per-item results including success/failure status and messages.
+    /// </summary>
+    Task<List<(int? SchedId, bool Success, string Message)>> CreateSchedulesAsync(IEnumerable<ScheduleModel> schedules);
 }

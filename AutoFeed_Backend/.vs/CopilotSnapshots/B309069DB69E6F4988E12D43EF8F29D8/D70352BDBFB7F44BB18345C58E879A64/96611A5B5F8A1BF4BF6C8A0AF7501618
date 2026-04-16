@@ -1,4 +1,4 @@
-using AutoFeed_Backend_Services.Interfaces;
+﻿using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Repositories.UnitOfWork;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -16,7 +16,7 @@ public class ScheduleService : IScheduleService
         _unitOfWork = new UnitOfWork();
     }
 
-    public async Task<List<(int? SchedId, bool Success, string Message)>> CreateSingleScheduleAsync(IEnumerable<ScheduleModel> schedules)
+    public async Task<List<(int? SchedId, bool Success, string Message)>> CreateSchedulesAsync(IEnumerable<ScheduleModel> schedules)
     {
         var results = new List<(int? SchedId, bool Success, string Message)>();
         if (schedules == null) return results;
@@ -154,9 +154,36 @@ public class ScheduleService : IScheduleService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<int> CreateMultipleScheduleAsync(ScheduleModel schedule)
+    public async Task<int> CreateScheduleAsync(ScheduleModel schedule)
     {
-        // Check for conflicts:
+        // Simple single schedule creation with basic validation
+        // This method performs basic validation and creates one schedule at a time
+        if (schedule == null)
+            return 0;
+
+        // Validate task exists
+        var task = await _unitOfWork.Tasks.GetByIdAsync(schedule.TaskId);
+        if (task == null)
+            return 0;
+
+        try
+        {
+            _unitOfWork.Schedules.PrepareCreate(schedule);
+            var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+            if (result > 0)
+                return schedule.SchedId;
+            return 0;
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+
+    public async Task<int> CreateScheduleWithConflictCheckAsync(ScheduleModel schedule)
+    {
+        // Comprehensive single schedule creation with full conflict detection
+        // This method checks for:
         // 1) same cbarn + same task cannot have multiple schedules at the same date
         // 2) one user can only have one task at the same time (no overlapping task times)
         // 3) one user cannot be assigned schedules for 2 cbarnId at the same time (also covered by overlapping task times)
