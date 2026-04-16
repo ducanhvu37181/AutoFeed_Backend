@@ -111,7 +111,6 @@ namespace AutoFeed_Backend_Services.Services
                 deviceId = a.Device?.DeviceId ?? 0,
                 deviceName = a.Device?.Name ?? "Unknown",
                 description = a.Device?.Description ?? "",
-                barnId = a.BarnId,
                 installationDate = a.InstallationDate,
                 status = a.Device?.Status == true ? "Online" : "Offline"
             });
