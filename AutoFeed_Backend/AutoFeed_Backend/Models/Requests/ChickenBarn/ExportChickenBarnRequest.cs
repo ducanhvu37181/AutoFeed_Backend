@@ -1,0 +1,7 @@
+namespace AutoFeed_Backend.Models.Requests.ChickenBarn;
+
+public class ExportChickenBarnRequest
+{
+    public int LargeChickenId { get; set; }
+}
+

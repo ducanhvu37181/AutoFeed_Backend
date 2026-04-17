@@ -60,6 +60,19 @@ public class ChickenBarnRepository : GenericRepository<ChickenBarn>
         return await _context.Set<ChickenBarn>().Where(cb => list.Contains(cb.CbarnId)).ToListAsync();
     }
 
+    public async Task<ChickenBarn?> GetByLargeChickenIdAsync(int largeChickenId)
+    {
+        return await _context.Set<ChickenBarn>()
+            .FirstOrDefaultAsync(x => x.ChickenLid == largeChickenId);
+    }
+
+    public async Task<ChickenBarn?> GetByIdAsNoTrackingAsync(int id)
+    {
+        return await _context.Set<ChickenBarn>()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.CbarnId == id);
+    }
+
     public async Task<List<dynamic>> GetChickenBarnDetailAsync(int? barnId, string? barnType)
     {
         var query = _context.Set<ChickenBarn>()
