@@ -16,6 +16,5 @@ namespace AutoFeed_Backend.Models.Responses
         /// <summary>Age of the flock in months calculated from date of birth to today.</summary>
         public int AgeInMonths { get; set; }
         public bool? IsActive { get; set; }
-        public int? BarnId { get; set; }
     }
 }

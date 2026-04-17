@@ -173,8 +173,7 @@ public class LargeChickenController : ControllerBase
             HealthStatus = entity.HealthStatus,
             Note = entity.Note,
             Url = entity.Url,
-            IsActive = entity.IsActive,
-            BarnId = entity.IsActive == true && entity.ChickenBarns != null && entity.ChickenBarns.Count > 0 ? entity.ChickenBarns.FirstOrDefault()?.BarnId : null
+            IsActive = entity.IsActive
         };
 
         return CreatedAtAction(nameof(Get), new { id = entity.ChickenLid },

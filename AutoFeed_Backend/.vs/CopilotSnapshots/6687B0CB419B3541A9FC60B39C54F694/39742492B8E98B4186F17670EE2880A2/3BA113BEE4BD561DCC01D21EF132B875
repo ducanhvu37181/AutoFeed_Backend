@@ -67,8 +67,7 @@ public class LargeChickenController : ControllerBase
             HealthStatus = i.HealthStatus,
             Note = i.Note,
             Url = i.Url,
-            IsActive = i.IsActive,
-            BarnId = i.IsActive == true && i.ChickenBarns != null && i.ChickenBarns.Count > 0 ? i.ChickenBarns.FirstOrDefault()?.BarnId : null
+            IsActive = i.IsActive
         }).ToList();
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
@@ -86,8 +85,7 @@ public class LargeChickenController : ControllerBase
             HealthStatus = i.HealthStatus,
             Note = i.Note,
             Url = i.Url,
-            IsActive = i.IsActive,
-            BarnId = i.ChickenBarns != null && i.ChickenBarns.Count > 0 ? i.ChickenBarns.FirstOrDefault()?.BarnId : null
+            IsActive = i.IsActive
         }).ToList();
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
@@ -125,8 +123,7 @@ public class LargeChickenController : ControllerBase
             HealthStatus = item.HealthStatus,
             Note = item.Note,
             Url = item.Url,
-            IsActive = item.IsActive,
-            BarnId = item.IsActive == true && item.ChickenBarns != null && item.ChickenBarns.Count > 0 ? item.ChickenBarns.FirstOrDefault()?.BarnId : null
+            IsActive = item.IsActive
         };
 
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
@@ -173,8 +170,7 @@ public class LargeChickenController : ControllerBase
             HealthStatus = entity.HealthStatus,
             Note = entity.Note,
             Url = entity.Url,
-            IsActive = entity.IsActive,
-            BarnId = entity.IsActive == true && entity.ChickenBarns != null && entity.ChickenBarns.Count > 0 ? entity.ChickenBarns.FirstOrDefault()?.BarnId : null
+            IsActive = entity.IsActive
         };
 
         return CreatedAtAction(nameof(Get), new { id = entity.ChickenLid },
