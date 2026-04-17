@@ -1,4 +1,4 @@
-namespace AutoFeed_Backend.Models.Requests.LargeChicken;
+﻿namespace AutoFeed_Backend.Models.Requests.LargeChicken;
 
 public class UpdateLargeChickenRequest
 {

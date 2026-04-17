@@ -190,9 +190,10 @@ public class LargeChickenController : ControllerBase
         existing.FlockId = model.FlockId;
         existing.Name = model.Name;
         existing.Weight = model.Weight;
-        existing.HealthStatus = model.HealthStatus;
-        existing.Note = model.Note;
-        existing.IsActive = existing.IsActive;
+        existing.HealthStatus = model.HealthStatus; // Updating HealthStatus
+        existing.Note = model.Note; // Updating Note
+        existing.IsActive = existing.IsActive; // keep current status
+        if (!string.IsNullOrWhiteSpace(model.Url)) existing.Url = model.Url; // update image url if provided
 
         var ok = await _service.UpdateAsync(existing);
         if (!ok)
