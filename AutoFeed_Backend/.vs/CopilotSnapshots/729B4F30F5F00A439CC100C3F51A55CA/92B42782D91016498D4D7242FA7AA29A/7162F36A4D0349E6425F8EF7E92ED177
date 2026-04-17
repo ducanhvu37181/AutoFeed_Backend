@@ -1,0 +1,355 @@
+﻿using AutoFeed_Backend.Models.Requests.Report;
+using AutoFeed_Backend.Models.Responses;
+using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using System.Text;
+using System.Text.Json;
+using System.IO;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+
+namespace AutoFeed_Backend.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class ReportController : ControllerBase
+{
+    private readonly IReportService _service;
+
+    public ReportController(IReportService service)
+    {
+        _service = service;
+    }
+
+
+    private static ReportResponse ToDto(Report r) => new()
+    {
+        ReportId = r.ReportId,
+        UserId = r.UserId,
+        UserName = r.User?.FullName,
+        UserRole = r.User?.Role?.Description,
+        Type = r.Type,
+        Description = r.Description,
+        Status = r.Status,
+        Url = r.Url,
+        CreateDate = r.CreateDate
+    };
+
+ 
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAllReports()
+    {
+        var items = await _service.GetAllReportsAsync();
+        return Ok(new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = items.Select(ToDto),
+            Description = "Success"
+        });
+    }
+
+
+    [HttpGet("farmer")]
+    public async Task<IActionResult> GetFarmerReports()
+    {
+        var items = await _service.GetFarmerReportsAsync();
+        return Ok(new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = items.Select(ToDto),
+            Description = "Success"
+        });
+    }
+
+
+    [HttpGet("tech-farmer")]
+    public async Task<IActionResult> GetTechFarmerReports()
+    {
+        var items = await _service.GetTechFarmerReportsAsync();
+        return Ok(new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = items.Select(ToDto),
+            Description = "Success"
+        });
+    }
+
+
+    [HttpGet("status/{status}")]
+    public async Task<IActionResult> GetReportsByStatus(string status)
+    {
+        var allowed = new[] { "pending", "reviewed", "rejected" };
+        if (!allowed.Contains(status.ToLower()))
+            return BadRequest(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Invalid status. Allowed: pending, reviewed, rejected"
+            });
+
+        var items = await _service.GetReportsByStatusAsync(status);
+        return Ok(new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = items.Select(ToDto),
+            Description = "Success"
+        });
+    }
+
+
+    [HttpGet("user/{userId:int}")]
+    public async Task<IActionResult> GetReportsByUserId(int userId)
+    {
+        var items = await _service.GetReportsByUserIdAsync(userId);
+        return Ok(new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = items.Select(ToDto),
+            Description = "Success"
+        });
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetReportById(int id)
+    {
+        var item = await _service.GetReportByIdAsync(id);
+        if (item == null)
+            return NotFound(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 404,
+                Data = null,
+                Description = "Report not found"
+            });
+
+        return Ok(new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = ToDto(item),
+            Description = "Success"
+        });
+    }
+
+    // Tìm kiếm report theo năm (bắt buộc), kết hợp tuỳ chọn: type, description, userId
+    // Ví dụ: GET /api/report/search?year=2024&amp;type=health&amp;userId=3
+    
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchReportsByYear(
+        [FromQuery] int year,
+        [FromQuery] string? type,
+        [FromQuery] string? description,
+        [FromQuery] int? userId)
+    {
+        if (year < 2000 || year > DateTime.UtcNow.Year + 1)
+            return BadRequest(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Invalid year"
+            });
+
+        var items = await _service.SearchReportsByYearAsync(year, type, description, userId);
+        return Ok(new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = items.Select(ToDto),
+            Description = "Success"
+        });
+    }
+
+    [HttpPost]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> CreateReport([FromForm] CreateReportRequest model, IFormFile? file, [FromServices] IConfiguration config)
+    {
+        // If caller sent application/json instead of multipart/form-data, try to deserialize JSON body as fallback
+        if (model == null)
+        {
+            try
+            {
+                Request.EnableBuffering();
+                using var reader = new StreamReader(Request.Body, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
+                var body = await reader.ReadToEndAsync();
+                Request.Body.Position = 0;
+                if (!string.IsNullOrWhiteSpace(body))
+                    model = JsonSerializer.Deserialize<CreateReportRequest>(body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+
+        if (model == null || string.IsNullOrWhiteSpace(model.Type))
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
+
+        string? url = null;
+
+        var uploadFile = file ?? model?.File;
+        if (uploadFile != null && uploadFile.Length > 0)
+        {
+            var allowedExt = new[] { ".jpg", ".jpeg", ".png", ".gif", ".pdf", ".doc", ".docx", ".xlsx", ".mp4", ".mp3" };
+                var ext = Path.GetExtension(uploadFile.FileName).ToLowerInvariant();
+            if (!allowedExt.Contains(ext))
+                return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = $"Invalid file type. Allowed: {string.Join(", ", allowedExt)}" });
+
+            try
+            {
+                var bucket = config.GetValue<string>("Firebase:Bucket");
+                var saPath = config.GetValue<string>("Firebase:ServiceAccountPath");
+
+                if (string.IsNullOrWhiteSpace(bucket) || string.IsNullOrWhiteSpace(saPath))
+                    return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Firebase not configured" });
+
+                url = await AutoFeed_Backend.Helpers.FirebaseStorageHelper
+                    .UploadFileAndGetSignedUrlAsync(uploadFile, bucket, saPath, TimeSpan.FromDays(30));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[FirebaseUpload] Upload failed: {ex.Message}");
+                return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = $"File upload failed: {ex.Message}" });
+            }
+        }
+
+        try
+        {
+            var entity = new Report
+            {
+                UserId = model.UserId,
+                Type = model.Type,
+                Description = model.Description,
+                Url = url
+            };
+
+            var id = await _service.CreateReportAsync(entity);
+            if (id <= 0)
+                return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Create report failed" });
+
+            return CreatedAtAction(nameof(GetReportById), new { id = entity.ReportId },
+                new ApiResponse<object> { Status = true, HttpCode = 201, Data = ToDto(entity), Description = "Created" });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[CreateReport] Error: {ex.Message}");
+            return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = $"Internal error: {ex.Message}" });
+        }
+    }
+
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> UpdateReport(int id, [FromBody] UpdateReportRequest model)
+    {
+        if (model == null || string.IsNullOrWhiteSpace(model.Type))
+            return BadRequest(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Invalid request"
+            });
+
+        var existing = await _service.GetReportByIdAsync(id);
+        if (existing == null)
+            return NotFound(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 404,
+                Data = null,
+                Description = "Report not found"
+            });
+
+        existing.Type = model.Type;
+        existing.Description = model.Description;
+        if (!string.IsNullOrWhiteSpace(model.Status))
+            existing.Status = model.Status;
+
+        var ok = await _service.UpdateReportAsync(existing);
+        if (!ok)
+            return StatusCode(500, new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 500,
+                Data = null,
+                Description = "Update failed"
+            });
+
+        return Ok(new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = ToDto(existing),
+            Description = "Update success"
+        });
+    }
+
+
+    /// Cập nhật trạng thái report pending | reviewed | rejected
+
+    [HttpPatch("{id:int}/status")]
+    public async Task<IActionResult> UpdateReportStatus(int id, [FromBody] UpdateReportStatusRequest model)
+    {
+        if (model == null || string.IsNullOrWhiteSpace(model.Status))
+            return BadRequest(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Invalid request"
+            });
+
+        var ok = await _service.UpdateReportStatusAsync(id, model.Status);
+        if (!ok)
+            return BadRequest(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Report not found or invalid status. Allowed: pending, reviewed, rejected"
+            });
+
+        return Ok(new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = null,
+            Description = "Status updated successfully"
+        });
+    }
+
+  
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteReport(int id)
+    {
+        var ok = await _service.DeleteReportAsync(id);
+        if (!ok)
+            return NotFound(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 404,
+                Data = null,
+                Description = "Report not found or delete failed"
+            });
+
+        return Ok(new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = null,
+            Description = "Delete success"
+        });
+    }
+}
+
+
+
+
+    
