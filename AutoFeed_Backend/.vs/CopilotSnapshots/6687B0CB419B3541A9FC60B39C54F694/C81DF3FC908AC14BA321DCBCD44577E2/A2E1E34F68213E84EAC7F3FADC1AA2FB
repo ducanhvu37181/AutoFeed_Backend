@@ -33,14 +33,6 @@ namespace AutoFeed_Backend_Services.Services
         private static FlockResponse MapToResponse(FlockChicken f)
         {
             var ageInMonths = CalculateAgeInMonths(f.DoB);
-            int? barnId = null;
-
-            // Only include barnId if flock is active
-            if (f.IsActive == true && f.ChickenBarns != null && f.ChickenBarns.Count > 0)
-            {
-                barnId = f.ChickenBarns.FirstOrDefault()?.BarnId;
-            }
-
             return new FlockResponse
             {
                 FlockId = f.FlockId,
@@ -52,8 +44,7 @@ namespace AutoFeed_Backend_Services.Services
                 HealthStatus = f.HealthStatus,
                 Note = f.Note,
                 AgeInMonths = ageInMonths,
-                IsActive = f.IsActive,
-                BarnId = barnId
+                IsActive = f.IsActive
             };
         }
 
