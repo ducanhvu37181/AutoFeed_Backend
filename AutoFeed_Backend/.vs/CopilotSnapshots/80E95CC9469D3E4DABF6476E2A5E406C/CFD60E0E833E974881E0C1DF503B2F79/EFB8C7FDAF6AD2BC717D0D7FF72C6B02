@@ -23,10 +23,11 @@ namespace AutoFeed_Backend_Services.Services
             _db = db;
         }
 
-        private static int CalculateAgeInMonths(DateOnly doB)
+        private static int CalculateAgeInMonths(DateOnly? doB)
         {
+            if (!doB.HasValue) return 0;
             var today = DateOnly.FromDateTime(DateTime.Now);
-            var ageInMonths = (today.Year - doB.Year) * 12 + (today.Month - doB.Month);
+            var ageInMonths = (today.Year - doB.Value.Year) * 12 + (today.Month - doB.Value.Month);
             return Math.Max(0, ageInMonths);
         }
 
@@ -68,17 +69,16 @@ namespace AutoFeed_Backend_Services.Services
 
             if (barnId.HasValue)
             {
-                query = query.Where(f => f.ChickenBarns != null && f.ChickenBarns.Any(cb => cb.BarnId == barnId.Value));
+                query = query.Where(f => f.ChickenBarn != null && f.ChickenBarn.BarnId == barnId.Value);
             }
 
             if (!string.IsNullOrWhiteSpace(status))
             {
                 var st = status.Trim();
                 query = query.Where(f =>
-                    f.ChickenBarns != null &&
-                    f.ChickenBarns.Any(cb =>
-                        cb.Status != null &&
-                        cb.Status.Equals(st, StringComparison.OrdinalIgnoreCase)));
+                    f.ChickenBarn != null &&
+                    f.ChickenBarn.Status != null &&
+                    f.ChickenBarn.Status.Equals(st, StringComparison.OrdinalIgnoreCase));
             }
 
             return query.Select(MapToResponse);

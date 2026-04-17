@@ -68,7 +68,7 @@ namespace AutoFeed_Backend_Services.Services
 
             if (barnId.HasValue)
             {
-                query = query.Where(f => f.ChickenBarns != null && f.ChickenBarns.Any(cb => cb.BarnId == barnId.Value));
+                query = query.Where(f => f.ChickenBarns != null && f.ChickenBarns.BarnId == barnId.Value);
             }
 
             if (!string.IsNullOrWhiteSpace(status))
@@ -76,9 +76,8 @@ namespace AutoFeed_Backend_Services.Services
                 var st = status.Trim();
                 query = query.Where(f =>
                     f.ChickenBarns != null &&
-                    f.ChickenBarns.Any(cb =>
-                        cb.Status != null &&
-                        cb.Status.Equals(st, StringComparison.OrdinalIgnoreCase)));
+                    f.ChickenBarn.Status != null &&
+                    f.ChickenBarn.Status.Equals(st, StringComparison.OrdinalIgnoreCase));
             }
 
             return query.Select(MapToResponse);

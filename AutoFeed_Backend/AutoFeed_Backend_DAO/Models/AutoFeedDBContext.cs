@@ -66,12 +66,11 @@ public partial class AutoFeedDBContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer(GetConnectionString("DefaultConnection")).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Barn>(entity =>
         {
-            entity.HasKey(e => e.BarnId).HasName("PK__Barn__C683E3D43A2B0E55");
+            entity.HasKey(e => e.BarnId).HasName("PK__Barn__C683E3D4038F588E");
 
             entity.ToTable("Barn");
 
@@ -101,7 +100,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<BarnIoTDevice>(entity =>
         {
-            entity.HasKey(e => e.BDeviceId).HasName("PK__BarnIoT___9C4A58183B443C07");
+            entity.HasKey(e => e.BDeviceId).HasName("PK__BarnIoT___9C4A581861EFFE80");
 
             entity.ToTable("BarnIoT_Device");
 
@@ -126,17 +125,9 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<ChickenBarn>(entity =>
         {
-            entity.HasKey(e => e.CbarnId).HasName("PK__ChickenB__2D4B3D06C4A3986C");
+            entity.HasKey(e => e.CbarnId).HasName("PK__ChickenB__2D4B3D06E6F66298");
 
             entity.ToTable("ChickenBarn");
-
-            entity.HasIndex(e => e.ChickenLid, "UIX_CBarn_Chicken")
-                .IsUnique()
-                .HasFilter("([chickenLID] IS NOT NULL)");
-
-            entity.HasIndex(e => e.FlockId, "UIX_CBarn_Flock")
-                .IsUnique()
-                .HasFilter("([flockID] IS NOT NULL)");
 
             entity.Property(e => e.CbarnId).HasColumnName("CBarnID");
             entity.Property(e => e.BarnId).HasColumnName("barnID");
@@ -155,18 +146,18 @@ public partial class AutoFeedDBContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_CBarn_Barn");
 
-            entity.HasOne(d => d.ChickenL).WithOne(p => p.ChickenBarn)
-                .HasForeignKey<ChickenBarn>(d => d.ChickenLid)
+            entity.HasOne(d => d.ChickenL).WithMany(p => p.ChickenBarns)
+                .HasForeignKey(d => d.ChickenLid)
                 .HasConstraintName("FK_CBarn_LargeChicken");
 
-            entity.HasOne(d => d.Flock).WithOne(p => p.ChickenBarn)
-                .HasForeignKey<ChickenBarn>(d => d.FlockId)
+            entity.HasOne(d => d.Flock).WithMany(p => p.ChickenBarns)
+                .HasForeignKey(d => d.FlockId)
                 .HasConstraintName("FK_CBarn_Flock");
         });
 
         modelBuilder.Entity<DataIoT>(entity =>
         {
-            entity.HasKey(e => e.DataId).HasName("PK__Data_IoT__923E36853605CC5F");
+            entity.HasKey(e => e.DataId).HasName("PK__Data_IoT__923E368528EA81E0");
 
             entity.ToTable("Data_IoT");
 
@@ -198,17 +189,9 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<FeedingRule>(entity =>
         {
-            entity.HasKey(e => e.RuleId).HasName("PK__FeedingR__121C064132361DE4");
+            entity.HasKey(e => e.RuleId).HasName("PK__FeedingR__121C0641FF4C6E0F");
 
             entity.ToTable("FeedingRule");
-
-            entity.HasIndex(e => e.ChickenLid, "UIX_FRule_Chicken")
-                .IsUnique()
-                .HasFilter("([chickenLID] IS NOT NULL)");
-
-            entity.HasIndex(e => e.FlockId, "UIX_FRule_Flock")
-                .IsUnique()
-                .HasFilter("([flockID] IS NOT NULL)");
 
             entity.Property(e => e.RuleId).HasColumnName("ruleID");
             entity.Property(e => e.ChickenLid).HasColumnName("chickenLID");
@@ -225,18 +208,18 @@ public partial class AutoFeedDBContext : DbContext
                 .HasColumnName("status");
             entity.Property(e => e.Times).HasColumnName("times");
 
-            entity.HasOne(d => d.ChickenL).WithOne(p => p.FeedingRule)
-                .HasForeignKey<FeedingRule>(d => d.ChickenLid)
+            entity.HasOne(d => d.ChickenL).WithMany(p => p.FeedingRules)
+                .HasForeignKey(d => d.ChickenLid)
                 .HasConstraintName("FK_Rule_LargeChicken");
 
-            entity.HasOne(d => d.Flock).WithOne(p => p.FeedingRule)
-                .HasForeignKey<FeedingRule>(d => d.FlockId)
+            entity.HasOne(d => d.Flock).WithMany(p => p.FeedingRules)
+                .HasForeignKey(d => d.FlockId)
                 .HasConstraintName("FK_Rule_Flock");
         });
 
         modelBuilder.Entity<FeedingRuleDetail>(entity =>
         {
-            entity.HasKey(e => e.FeedRuleDetailId).HasName("PK__FeedingR__26A980CA63194414");
+            entity.HasKey(e => e.FeedRuleDetailId).HasName("PK__FeedingR__26A980CA24EBA165");
 
             entity.ToTable("FeedingRuleDetail");
 
@@ -268,7 +251,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<FlockChicken>(entity =>
         {
-            entity.HasKey(e => e.FlockId).HasName("PK__FlockChi__6D32C9F195F9897E");
+            entity.HasKey(e => e.FlockId).HasName("PK__FlockChi__6D32C9F18F48DBB3");
 
             entity.ToTable("FlockChicken");
 
@@ -294,7 +277,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<Food>(entity =>
         {
-            entity.HasKey(e => e.FoodId).HasName("PK__Food__77EAEA192B45D580");
+            entity.HasKey(e => e.FoodId).HasName("PK__Food__77EAEA19947EB03F");
 
             entity.ToTable("Food");
 
@@ -312,7 +295,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<Inventory>(entity =>
         {
-            entity.HasKey(e => e.InventId).HasName("PK__Inventor__3805E39F04F60468");
+            entity.HasKey(e => e.InventId).HasName("PK__Inventor__3805E39FD2C8BA72");
 
             entity.ToTable("Inventory");
 
@@ -332,7 +315,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<IoTDevice>(entity =>
         {
-            entity.HasKey(e => e.DeviceId).HasName("PK__IoT_Devi__84BE14B705EEA855");
+            entity.HasKey(e => e.DeviceId).HasName("PK__IoT_Devi__84BE14B722AC1FFB");
 
             entity.ToTable("IoT_Device");
 
@@ -351,7 +334,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<LargeChicken>(entity =>
         {
-            entity.HasKey(e => e.ChickenLid).HasName("PK__LargeChi__6DE57F4BAEDD8DC1");
+            entity.HasKey(e => e.ChickenLid).HasName("PK__LargeChi__6DE57F4B69D0FF76");
 
             entity.ToTable("LargeChicken");
 
@@ -382,7 +365,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<Report>(entity =>
         {
-            entity.HasKey(e => e.ReportId).HasName("PK__Report__1C9B4ECD3B8AF3B2");
+            entity.HasKey(e => e.ReportId).HasName("PK__Report__1C9B4ECD59C2A9B5");
 
             entity.ToTable("Report");
 
@@ -413,7 +396,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<Request>(entity =>
         {
-            entity.HasKey(e => e.RequestId).HasName("PK__Request__E3C5DE51644C236A");
+            entity.HasKey(e => e.RequestId).HasName("PK__Request__E3C5DE51AE5AC9D8");
 
             entity.ToTable("Request");
 
@@ -444,7 +427,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__Role__CD98460A5F89754F");
+            entity.HasKey(e => e.RoleId).HasName("PK__Role__CD98460A961EF008");
 
             entity.ToTable("Role");
 
@@ -457,7 +440,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<Schedule>(entity =>
         {
-            entity.HasKey(e => e.SchedId).HasName("PK__Schedule__F378328EE113DF15");
+            entity.HasKey(e => e.SchedId).HasName("PK__Schedule__F378328E4B6E0BF6");
 
             entity.ToTable("Schedule");
 
@@ -503,7 +486,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<Task>(entity =>
         {
-            entity.HasKey(e => e.TaskId).HasName("PK__Task__DD5D55A2EBCB8166");
+            entity.HasKey(e => e.TaskId).HasName("PK__Task__DD5D55A2B01F2B41");
 
             entity.ToTable("Task");
 
@@ -524,13 +507,13 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__User__CB9A1CDFBBCF591F");
+            entity.HasKey(e => e.UserId).HasName("PK__User__CB9A1CDFCF0CCE39");
 
             entity.ToTable("User");
 
-            entity.HasIndex(e => e.Email, "UQ__User__AB6E6164E3795F53").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__User__AB6E6164CF4C9ED2").IsUnique();
 
-            entity.HasIndex(e => e.Username, "UQ__User__F3DBC572AAD74E04").IsUnique();
+            entity.HasIndex(e => e.Username, "UQ__User__F3DBC5725D5689FE").IsUnique();
 
             entity.Property(e => e.UserId).HasColumnName("userID");
             entity.Property(e => e.AvatarUrl).HasColumnName("avatarURL");

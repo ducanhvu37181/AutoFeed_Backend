@@ -14,7 +14,7 @@ public class FlockRepository : GenericRepository<FlockChicken>
     public async Task<List<FlockChicken>> GetAllWithBarnAsync()
     {
         return await _context.FlockChickens
-            .Include(f => f.ChickenBarns)
+            .Include(f => f.ChickenBarn)
                 .ThenInclude(cb => cb.Barn)
             .ToListAsync();
     }
