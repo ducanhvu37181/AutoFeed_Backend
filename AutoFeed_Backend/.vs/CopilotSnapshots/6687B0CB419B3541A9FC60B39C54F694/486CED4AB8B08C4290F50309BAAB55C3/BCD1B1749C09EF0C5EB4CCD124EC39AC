@@ -40,11 +40,9 @@ namespace AutoFeed_Backend_Services.Services
                 Quantity = f.Quantity,
                 Weight = f.Weight,
                 DoB = f.DoB,
-                TransferDate = f.TransferDate,
                 HealthStatus = f.HealthStatus,
                 Note = f.Note,
-                AgeInMonths = ageInMonths,
-                IsActive = f.IsActive
+                AgeInMonths = ageInMonths
             };
         }
 
