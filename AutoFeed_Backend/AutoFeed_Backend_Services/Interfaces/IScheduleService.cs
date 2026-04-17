@@ -8,7 +8,7 @@ namespace AutoFeed_Backend_Services.Interfaces;
 
 public interface IScheduleService
 {
-    Task<int> CreateScheduleAsync(ScheduleModel schedule);
+    Task<int> CreateMultipleScheduleAsync(ScheduleModel schedule);
     Task<ScheduleModel?> GetScheduleByIdAsync(int id);
     Task<List<ScheduleModel>> GetAllSchedulesAsync();
     Task<bool> UpdateScheduleAsync(ScheduleModel schedule);
@@ -45,5 +45,5 @@ public interface IScheduleService
     Task<List<ScheduleResponse>> GetSchedulesByUserAndDateAsync(int userId, System.DateTime date);
 
     // Best-effort batch create: try to create each schedule, return per-item results
-    Task<List<(int? SchedId, bool Success, string Message)>> CreateSchedulesAsync(IEnumerable<ScheduleModel> schedules);
+    Task<List<(int? SchedId, bool Success, string Message)>> CreateSingleScheduleAsync(IEnumerable<ScheduleModel> schedules);
 }

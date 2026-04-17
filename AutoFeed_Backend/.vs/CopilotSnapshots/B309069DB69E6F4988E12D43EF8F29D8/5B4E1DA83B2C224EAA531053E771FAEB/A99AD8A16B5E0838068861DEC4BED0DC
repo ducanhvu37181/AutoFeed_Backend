@@ -1,0 +1,11 @@
+﻿namespace AutoFeed_Backend_Services.Models.Responses
+{
+    public class DeviceDetailResponse
+    {
+        public int DeviceID { get; set; }
+        public string DeviceName { get; set; } = null!;
+        public string AssignedTo { get; set; } = null!;
+        public string Status { get; set; } = null!;
+        public string Description { get; set; } = null!;
+    }
+}

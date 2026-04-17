@@ -12,4 +12,5 @@ public class LargeChickenResponse
     public string Note { get; set; }
     public string? Url { get; set; }
     public bool? IsActive { get; set; }
+    public int? BarnId { get; set; }
 }

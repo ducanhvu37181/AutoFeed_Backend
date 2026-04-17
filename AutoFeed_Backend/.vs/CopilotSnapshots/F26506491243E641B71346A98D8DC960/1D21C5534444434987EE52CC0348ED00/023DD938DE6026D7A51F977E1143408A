@@ -1,0 +1,251 @@
+﻿using AutoFeed_Backend_Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using TaskModel = AutoFeed_Backend_DAO.Models.Task;
+using AutoFeed_Backend.Models.Requests;
+using AutoFeed_Backend.Models.Requests.Task;
+using AutoFeed_Backend.Models.Responses;
+using System.Linq;
+using System.Collections.Generic;
+
+namespace AutoFeed_Backend.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class TaskController : ControllerBase
+{
+    private readonly ITaskService _service;
+
+    public TaskController(ITaskService service)
+    {
+        _service = service;
+    }
+
+    private TaskResponse ToDto(TaskModel t) => new TaskResponse
+    {
+        TaskId = t.TaskId,
+        Title = t.Title,
+        Description = t.Description,
+        Status = t.Status
+    };
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var items = await _service.GetAllTasksAsync();
+        var dto = items.Select(ToDto).ToList();
+        var response = new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = dto,
+            Description = "Success"
+        };
+        return Ok(response);
+    }
+
+    [HttpGet("active")]
+    public async Task<IActionResult> GetActive()
+    {
+        var items = await _service.GetActiveTasksAsync();
+        var dto = items.Select(ToDto).ToList();
+        var response = new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = dto,
+            Description = "Success"
+        };
+        return Ok(response);
+    }
+
+    [HttpGet("inactive")]
+    public async Task<IActionResult> GetInactive()
+    {
+        var items = await _service.GetInactiveTasksAsync();
+        var dto = items.Select(ToDto).ToList();
+        var response = new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = dto,
+            Description = "Success"
+        };
+        return Ok(response);
+    }
+
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] string q)
+    {
+        var items = await _service.SearchTasksAsync(q);
+        var dto = items.Select(ToDto).ToList();
+        var response = new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = dto,
+            Description = "Success"
+        };
+        return Ok(response);
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> Get(int id)
+    {
+        var item = await _service.GetTaskByIdAsync(id);
+        if (item == null)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 404,
+                Data = null,
+                Description = "Not Found"
+            };
+            return NotFound(error);
+        }
+        var response = new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = ToDto(item),
+            Description = "Success"
+        };
+        return Ok(response);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateTaskRequest model)
+    {
+        if (model == null || string.IsNullOrWhiteSpace(model.Title))
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Invalid request"
+            };
+            return BadRequest(error);
+        }
+
+        var task = new TaskModel
+        {
+            Title = model.Title,
+            Description = model.Description,
+            Status = true,
+            StartTime = model.StartTime,
+            EndTime = model.EndTime
+        };
+
+        var id = await _service.CreateTaskAsync(task);
+        if (id <= 0)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 500,
+                Data = null,
+                Description = "Create failed"
+            };
+            return StatusCode(500, error);
+        }
+
+        var response = new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 201,
+            Data = ToDto(task),
+            Description = "Created"
+        };
+        return CreatedAtAction(nameof(Get), new { id = task.TaskId }, response);
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateTaskRequest model)
+    {
+        if (model == null || string.IsNullOrWhiteSpace(model.Title))
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Invalid request"
+            };
+            return BadRequest(error);
+        }
+
+        var existing = await _service.GetTaskByIdAsync(id);
+        if (existing == null)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 404,
+                Data = null,
+                Description = "Not Found"
+            };
+            return NotFound(error);
+        }
+
+        existing.Title = model.Title;
+        existing.Description = model.Description;
+        existing.StartTime = model.StartTime;
+        existing.EndTime = model.EndTime;
+        // Update status if provided
+        if (model.Status.HasValue)
+        {
+            existing.Status = model.Status.Value;
+        }
+
+        var ok = await _service.UpdateTaskAsync(existing);
+        if (!ok)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 500,
+                Data = null,
+                Description = "Update failed"
+            };
+            return StatusCode(500, error);
+        }
+
+        var updated = ToDto(existing);
+        var successResponse = new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = updated,
+            Description = "Update success"
+        };
+        return Ok(successResponse);
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var ok = await _service.DeleteTaskAsync(id);
+        if (!ok)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 404,
+                Data = null,
+                Description = "Not Found or Delete failed"
+            };
+            return NotFound(error);
+        }
+
+        var success = new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = null,
+            Description = "Delete success"
+        };
+        return Ok(success);
+    }
+}

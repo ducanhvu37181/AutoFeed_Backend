@@ -27,6 +27,10 @@ public class TaskController : ControllerBase
         Title = t.Title,
         Description = t.Description,
         Status = t.Status
+        ,
+        // Format TimeOnly to HH:mm:ss for API clients
+        StartTime = t.StartTime.ToString("HH:mm:ss"),
+        EndTime = t.EndTime.ToString("HH:mm:ss")
     };
 
     [HttpGet]
@@ -129,13 +133,23 @@ public class TaskController : ControllerBase
             return BadRequest(error);
         }
 
+        // Parse incoming time strings into TimeOnly. Accept formats like "HH:mm" or "HH:mm:ss" or ISO datetime.
+        TimeOnly ParseTime(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return default;
+            if (TimeOnly.TryParse(s, out var t)) return t;
+            if (DateTime.TryParse(s, out var dt)) return TimeOnly.FromDateTime(dt);
+            // fallback to default
+            return default;
+        }
+
         var task = new TaskModel
         {
             Title = model.Title,
             Description = model.Description,
             Status = true,
-            StartTime = model.StartTime,
-            EndTime = model.EndTime
+            StartTime = ParseTime(model.StartTime),
+            EndTime = ParseTime(model.EndTime)
         };
 
         var id = await _service.CreateTaskAsync(task);

@@ -1,0 +1,21 @@
+﻿using AutoFeed_Backend_DAO.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace AutoFeed_Backend_Services.Interfaces;
+
+public interface IBarnService
+{
+    Task<IEnumerable<Barn>> GetAllAsync();
+    Task<Barn?> GetByIdAsync(int id);
+    Task<List<Barn>> GetAvailableAsync();
+    Task<bool> CreateBarnAsync(Barn barn);
+    Task<bool> UpdateBarnAsync(Barn barn);
+    Task<bool> DeleteBarnAsync(int id);
+    // Update only temperature and humidity for a barn
+    Task<bool> UpdateBarnMetricsAsync(int barnId, decimal temperature, decimal humidity);
+    // Update food amount for a barn
+    Task<bool> UpdateFoodAmountAsync(int barnId, decimal foodAmount);
+    // Update water amount for a barn
+    Task<bool> UpdateWaterAmountAsync(int barnId, int waterAmount);
+}

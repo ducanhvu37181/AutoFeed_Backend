@@ -20,6 +20,7 @@ builder.Services.AddControllers()
     .AddJsonOptions(o =>
     {
         o.JsonSerializerOptions.Converters.Add(new AutoFeed_Backend.Json.FlexibleDateOnlyJsonConverter());
+        o.JsonSerializerOptions.Converters.Add(new AutoFeed_Backend.Json.FlexibleTimeOnlyJsonConverter());
     });
 builder.Services.AddServiceProvider();
 builder.Services.AddScoped<AutoFeed_Backend_Repositories.UnitOfWork.IUnitOfWork, AutoFeed_Backend_Repositories.UnitOfWork.UnitOfWork>();
@@ -67,7 +68,7 @@ try
     using (var scope = app.Services.CreateScope())
     {
         var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
-        //await userService.MigratePasswordsAsync();
+        await userService.MigratePasswordsAsync();
     }
 }
 catch (Exception ex)

@@ -1,0 +1,69 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using ScheduleModel = AutoFeed_Backend_DAO.Models.Schedule;
+using AutoFeed_Backend_Services.Models.Responses;
+using System;
+
+namespace AutoFeed_Backend_Services.Interfaces;
+
+public interface IScheduleService
+{
+    /// <summary>
+    /// Creates a single schedule with basic validation only (no conflict checking).
+    /// Use this for simple schedule creation when you don't need conflict detection.
+    /// Returns: schedule ID on success, 0 on validation/creation failure
+    /// </summary>
+    Task<int> CreateScheduleAsync(ScheduleModel schedule);
+
+    /// <summary>
+    /// Creates a single schedule with comprehensive conflict detection.
+    /// Checks for:
+    /// 1) same cbarn + same task cannot have multiple schedules at the same date
+    /// 2) one user can only have one task at the same time (no overlapping task times)
+    /// 3) one user cannot be assigned schedules for 2 cbarnId at the same time
+    /// Returns: schedule ID (>0) on success, 0 on validation failure, -1 on conflict
+    /// </summary>
+    Task<int> CreateScheduleWithConflictCheckAsync(ScheduleModel schedule);
+
+    Task<ScheduleModel?> GetScheduleByIdAsync(int id);
+    Task<List<ScheduleModel>> GetAllSchedulesAsync();
+    Task<bool> UpdateScheduleAsync(ScheduleModel schedule);
+    Task<bool> DeleteScheduleAsync(int id);
+
+    Task<List<ScheduleModel>> GetInProgressScheduleAsync();
+    Task<List<ScheduleModel>> GetCompletedScheduleAsync();
+    Task<List<ScheduleModel>> GetPendingScheduleAsync();
+    Task<List<ScheduleModel>> SearchSchedulesAsync(string query);
+
+    // helper to resolve username by user id
+    Task<string> GetUserNameByIdAsync(int userId);
+
+    Task<List<ScheduleModel>> GetSchedulesByUserAsync(int userId);
+
+    // higher-level mapping helpers
+    Task<Dictionary<int, int>> GetBarnMapForSchedulesAsync(IEnumerable<int> cbarnIds);
+    Task<Dictionary<int, string>> GetTaskTitleMapAsync(IEnumerable<int> taskIds);
+    Task<Dictionary<int, string>> GetUserNameMapAsync(IEnumerable<int> userIds);
+
+    // Return DTOs ready for API consumption (mapping done in service)
+    Task<List<ScheduleResponse>> GetAllScheduleResponsesAsync();
+    Task<List<ScheduleResponse>> GetInProgressScheduleResponsesAsync();
+    Task<List<ScheduleResponse>> GetCompletedScheduleResponsesAsync();
+    Task<List<ScheduleResponse>> SearchScheduleResponsesAsync(string query);
+    Task<ScheduleResponse?> GetScheduleResponseByIdAsync(int id);
+    Task<List<ScheduleResponse>> GetSchedulesByUserResponsesAsync(int userId);
+
+    Task<bool> UpdateScheduleStatusAsync(int id, string status);
+
+    // Check whether a schedule for the same barn and task conflicts with existing schedules in the given date range
+    Task<bool> HasConflictAsync(int cbarnId, int taskId, DateOnly startDate, DateOnly? endDate);
+
+    Task<List<ScheduleResponse>> GetSchedulesByUserAndDateAsync(int userId, System.DateTime date);
+
+    /// <summary>
+    /// Batch creation with comprehensive conflict detection for each schedule.
+    /// Checks conflicts against database and previously created schedules in the same batch.
+    /// Returns per-item results including success/failure status and messages.
+    /// </summary>
+    Task<List<(int? SchedId, bool Success, string Message)>> CreateSchedulesAsync(IEnumerable<ScheduleModel> schedules);
+}

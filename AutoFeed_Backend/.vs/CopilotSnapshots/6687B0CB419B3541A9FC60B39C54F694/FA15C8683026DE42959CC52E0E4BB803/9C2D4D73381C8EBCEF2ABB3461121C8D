@@ -1,0 +1,35 @@
+﻿using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Repositories.BasicRepo;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace AutoFeed_Backend_Repositories.Repositories;
+
+public class FlockRepository : GenericRepository<FlockChicken>
+{
+    public FlockRepository() : base() { }
+    public FlockRepository(AutoFeedDBContext context) : base(context) { }
+
+    public override async Task<List<FlockChicken>> GetAllAsync()
+    {
+        return await _context.FlockChickens
+            .Include(f => f.ChickenBarns)
+            .ToListAsync();
+    }
+
+    public new async Task<FlockChicken?> GetByIdAsync(int id)
+    {
+        return await _context.FlockChickens
+            .Include(f => f.ChickenBarns)
+            .FirstOrDefaultAsync(x => x.FlockId == id);
+    }
+
+    public async Task<List<FlockChicken>> GetAllWithBarnAsync()
+    {
+        return await _context.FlockChickens
+            .Include(f => f.ChickenBarns)
+                .ThenInclude(cb => cb.Barn)
+            .ToListAsync();
+    }
+}

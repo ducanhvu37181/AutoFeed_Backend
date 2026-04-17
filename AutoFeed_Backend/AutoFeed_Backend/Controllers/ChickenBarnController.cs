@@ -162,9 +162,27 @@ public class ChickenBarnController : ControllerBase
     [HttpPut("{id:int}/export")]
     public async Task<IActionResult> Export(int id)
     {
+        var existing = await _service.GetByIdAsync(id);
+        if (existing == null) return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
+
         var ok = await _service.ExportAsync(id);
         if (!ok) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Export failed" });
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Chicken Exported" });
+
+        // Retrieve updated entity to return full details
+        var updated = await _service.GetByIdAsync(id);
+        var dto = new AutoFeed_Backend.Models.Responses.ChickenBarnResponse
+        {
+            CbarnId = updated.CbarnId,
+            BarnId = updated.BarnId,
+            ChickenLid = updated.ChickenLid,
+            FlockId = updated.FlockId,
+            StartDate = updated.StartDate,
+            ExportDate = updated.ExportDate,
+            Note = updated.Note,
+            Status = updated.Status,
+            AvatarUrl = updated.ChickenL != null ? updated.ChickenL.Url : null
+        };
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Successfully exported" });
     }
 
     [HttpDelete("{id:int}")]
@@ -192,5 +210,18 @@ public class ChickenBarnController : ControllerBase
             AvatarUrl = i.ChickenL != null ? i.ChickenL.Url : null
         }).ToList();
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
+    }
+
+    [HttpGet("detail")]
+    public async Task<IActionResult> GetChickenBarnDetail([FromQuery] int? barnId, [FromQuery] string? barnType)
+    {
+        if (barnId == null && string.IsNullOrEmpty(barnType))
+        {
+            var allDetails = await _service.GetChickenBarnDetailAsync(null, null);
+            return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = allDetails, Description = "Success" });
+        }
+
+        var items = await _service.GetChickenBarnDetailAsync(barnId, barnType);
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = items, Description = "Success" });
     }
 }

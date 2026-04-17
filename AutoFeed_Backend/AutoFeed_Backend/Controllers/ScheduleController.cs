@@ -143,7 +143,7 @@ public class ScheduleController : ControllerBase
             EndDate = model.EndDate
         };
 
-        var id = await _service.CreateScheduleAsync(schedule);
+        var id = await _service.CreateMultipleScheduleAsync(schedule);
         if (id == -1)
         {
             return StatusCode(409, new ApiResponse<object>
@@ -230,7 +230,7 @@ public class ScheduleController : ControllerBase
             });
         }
 
-        var results = await _service.CreateSchedulesAsync(schedules);
+        var results = await _service.CreateSingleScheduleAsync(schedules);
 
         var responseItems = new List<object>();
         for (int i = 0; i < results.Count; i++)

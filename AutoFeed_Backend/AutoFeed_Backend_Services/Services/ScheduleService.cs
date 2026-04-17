@@ -16,7 +16,7 @@ public class ScheduleService : IScheduleService
         _unitOfWork = new UnitOfWork();
     }
 
-    public async Task<List<(int? SchedId, bool Success, string Message)>> CreateSchedulesAsync(IEnumerable<ScheduleModel> schedules)
+    public async Task<List<(int? SchedId, bool Success, string Message)>> CreateSingleScheduleAsync(IEnumerable<ScheduleModel> schedules)
     {
         var results = new List<(int? SchedId, bool Success, string Message)>();
         if (schedules == null) return results;
@@ -154,7 +154,7 @@ public class ScheduleService : IScheduleService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<int> CreateScheduleAsync(ScheduleModel schedule)
+    public async Task<int> CreateMultipleScheduleAsync(ScheduleModel schedule)
     {
         // Check for conflicts:
         // 1) same cbarn + same task cannot have multiple schedules at the same date

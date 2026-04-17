@@ -1,0 +1,131 @@
+﻿using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Repositories.UnitOfWork;
+using AutoFeed_Backend_Services.Interfaces;
+using AutoFeed_Backend_Services.Models.Requests;  
+using AutoFeed_Backend_Services.Models.Responses; 
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace AutoFeed_Backend_Services.Services
+{
+    public class IoTDeviceService : IIoTDeviceService
+    {
+        private readonly IUnitOfWork _unitOfWork;
+
+        public IoTDeviceService(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        // --- HÀM MỚI THÊM ---
+        public async Task<DeviceDetailResponse?> GetDeviceByIdAsync(int deviceId)
+        {
+            var devices = await _unitOfWork.IoTDevices.GetDevicesWithBarnAsync("", "", "");
+            var d = devices.FirstOrDefault(x => x.DeviceId == deviceId);
+
+            if (d == null) return null;
+
+            return new DeviceDetailResponse
+            {
+                DeviceID = d.DeviceId,
+                DeviceName = d.Name,
+                Description = d.Description ?? "",
+                AssignedTo = d.BarnIoTDevices.OrderByDescending(b => b.InstallationDate)
+                                .FirstOrDefault()?.Barn?.Type ?? "Unassigned",
+                Status = d.Status == true ? "Online" : "Offline"
+            };
+        }
+
+        public async Task<IEnumerable<object>> GetAllDevicesAsync(string search, string type, string status)
+        {
+            var devices = await _unitOfWork.IoTDevices.GetDevicesWithBarnAsync(search, type, status);
+
+            return devices.Select(d => new {
+                DeviceID = d.DeviceId,
+                DeviceName = d.Name,
+                Description = d.Description,
+                AssignedTo = d.BarnIoTDevices.OrderByDescending(b => b.InstallationDate)
+                             .FirstOrDefault()?.Barn?.Type ?? "Unassigned",
+                Status = d.Status == true ? "Online" : "Offline"
+            });
+        }
+
+        public async Task<bool> RegisterDeviceAsync(string name, string description)
+        {
+            var device = new IoTDevice
+            {
+                Name = name,
+                Description = description,
+                Status = true // Mặc định Online
+            };
+
+            await _unitOfWork.IoTDevices.CreateAsync(device);
+            await _unitOfWork.SaveChangesWithTransactionAsync();
+            return true;
+        }
+
+        public async Task<bool> UpdateDeviceAsync(int id, string name, string description, bool status)
+        {
+            var device = await _unitOfWork.IoTDevices.GetByIdAsync(id);
+            if (device == null) return false;
+
+            device.Name = name;
+            device.Description = description;
+            device.Status = status;
+
+            await _unitOfWork.IoTDevices.UpdateAsync(device);
+            await _unitOfWork.SaveChangesWithTransactionAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteDeviceAsync(int id)
+        {
+            var device = await _unitOfWork.IoTDevices.GetByIdAsync(id);
+            if (device == null) return false;
+
+            await _unitOfWork.IoTDevices.RemoveAsync(device);
+            await _unitOfWork.SaveChangesWithTransactionAsync();
+            return true;
+        }
+
+        public async Task<bool> ReassignDeviceAsync(int deviceId, int barnId)
+        {
+            await _unitOfWork.IoTDevices.ReassignDeviceAsync(deviceId, barnId);
+            await _unitOfWork.SaveChangesWithTransactionAsync();
+            return true;
+        }
+
+        // Get devices by barn id
+        public async Task<IEnumerable<object>> GetDevicesByBarnIdAsync(int barnId)
+        {
+            var assignments = await _unitOfWork.IoTDevices.GetDevicesAssignedToBarnAsync(barnId);
+
+            return assignments.Select(a => new
+            {
+                deviceId = a.Device?.DeviceId ?? 0,
+                deviceName = a.Device?.Name ?? "Unknown",
+                description = a.Device?.Description ?? "",
+                installationDate = a.InstallationDate,
+                status = a.Device?.Status == true ? "Online" : "Offline"
+            });
+        }
+
+        public async Task<object?> GetBarnByDeviceIdAsync(int deviceId)
+        {
+            var barn = await _unitOfWork.GetBarnByDeviceIdAsync(deviceId);
+            if (barn == null) return null;
+
+            return new
+            {
+                barn.BarnId,
+                barn.Type,
+                barn.Temperature,
+                barn.Humidity,
+                barn.FoodAmount,
+                barn.WaterAmount,
+                barn.CreateDate
+            };
+        }
+    }
+}

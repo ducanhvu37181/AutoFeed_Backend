@@ -23,9 +23,9 @@ public partial class LargeChicken
 
     public bool? IsActive { get; set; }
 
-    public virtual ChickenBarn ChickenBarn { get; set; }
+    public virtual ICollection<ChickenBarn> ChickenBarns { get; set; } = new List<ChickenBarn>();
 
-    public virtual FeedingRule FeedingRule { get; set; }
+    public virtual ICollection<FeedingRule> FeedingRules { get; set; } = new List<FeedingRule>();
 
     public virtual FlockChicken Flock { get; set; }
 }
