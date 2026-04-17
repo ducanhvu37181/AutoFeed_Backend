@@ -159,17 +159,16 @@ public class ChickenBarnController : ControllerBase
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Update success" });
     }
 
-    [HttpPut("{id:int}/export")]
-    public async Task<IActionResult> Export(int id)
+    [HttpPut("export")]
+    public async Task<IActionResult> Export([FromBody] ExportChickenBarnRequest model)
     {
-        var existing = await _service.GetByIdAsync(id);
-        if (existing == null) return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
+        if (model == null || model.LargeChickenId <= 0)
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid LargeChickenId" });
 
-        var ok = await _service.ExportAsync(id);
-        if (!ok) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Export failed" });
+        var updated = await _service.ExportAsync(model.LargeChickenId);
+        if (updated == null) 
+            return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Export failed" });
 
-        // Retrieve updated entity to return full details
-        var updated = await _service.GetByIdAsync(id);
         var dto = new AutoFeed_Backend.Models.Responses.ChickenBarnResponse
         {
             CbarnId = updated.CbarnId,

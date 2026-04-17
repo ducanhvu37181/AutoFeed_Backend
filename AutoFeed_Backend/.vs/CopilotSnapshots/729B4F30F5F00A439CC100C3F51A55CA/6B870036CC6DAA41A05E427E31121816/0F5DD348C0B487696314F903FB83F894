@@ -1,0 +1,165 @@
+﻿using AutoFeed_Backend_Services.Interfaces;
+using AutoFeed_Backend_Repositories.UnitOfWork;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using ChickenBarnModel = AutoFeed_Backend_DAO.Models.ChickenBarn;
+
+namespace AutoFeed_Backend_Services.Services;
+
+public class ChickenBarnService : IChickenBarnService
+{
+    private readonly IUnitOfWork _unitOfWork;
+
+    public ChickenBarnService()
+    {
+        _unitOfWork = new UnitOfWork();
+    }
+
+    public ChickenBarnService(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<int> CreateAsync(ChickenBarnModel entity)
+    {
+        _unitOfWork.ChickenBarns.PrepareCreate(entity);
+        await _unitOfWork.SaveChangesWithTransactionAsync();
+        return entity.CbarnId;  // Return the actual ID, not the row count
+    }
+
+    public async Task<ChickenBarnModel?> GetByIdAsync(int id)
+    {
+        return await _unitOfWork.ChickenBarns.GetByIdAsync(id);
+    }
+
+    public async Task<List<ChickenBarnModel>> GetAllAsync()
+    {
+        return await _unitOfWork.ChickenBarns.GetAllAsync();
+    }
+
+    public async Task<List<ChickenBarnModel>> GetActiveAsync()
+    {
+        return await _unitOfWork.ChickenBarns.GetActiveAsync();
+    }
+
+    public async Task<List<ChickenBarnModel>> GetExportedAsync()
+    {
+        return await _unitOfWork.ChickenBarns.GetExportedAsync();
+    }
+
+    public async Task<bool> UpdateAsync(ChickenBarnModel entity)
+    {
+        try
+        {
+            _unitOfWork.ChickenBarns.PrepareUpdate(entity);
+            var r = await _unitOfWork.SaveChangesWithTransactionAsync();
+            return r > 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var entity = await _unitOfWork.ChickenBarns.GetByIdAsync(id);
+        if (entity == null) return false;
+        entity.Status = "inactive";
+        _unitOfWork.ChickenBarns.PrepareUpdate(entity);
+        var r = await _unitOfWork.SaveChangesWithTransactionAsync();
+        return r > 0;
+    }
+
+
+    public async Task<ChickenBarnModel?> ExportAsync(int largeChickenId)
+    {
+        UnitOfWork freshUnitOfWork = null;
+        try
+        {
+            // 1. Validate the large chicken exists and is active (without tracking to avoid conflicts)
+            var lcExists = await _unitOfWork.LargeChickens.GetByIdAsync(largeChickenId);
+            if (lcExists == null || !lcExists.IsActive.HasValue || !lcExists.IsActive.Value) return null;
+
+            // 2. Validate the chicken barn exists (without tracking)
+            var cbExists = await _unitOfWork.ChickenBarns.GetByIdAsNoTrackingAsync(
+                (await _unitOfWork.ChickenBarns.GetByLargeChickenIdAsync(largeChickenId))?.CbarnId ?? 0);
+            if (cbExists == null) return null;
+
+            var cbarnId = cbExists.CbarnId;
+            var largeChickenIdFromBarn = cbExists.ChickenLid ?? 0;
+
+            // Create a fresh UnitOfWork to avoid tracking conflicts with related entities
+            freshUnitOfWork = new UnitOfWork();
+
+            // 3. Load entities with the fresh context
+            var lc = await freshUnitOfWork.LargeChickens.GetByIdAsync(largeChickenId);
+            var cb = await freshUnitOfWork.ChickenBarns.GetByIdAsync(cbarnId);
+
+            // Mark chicken barn as exported with export date
+            cb.Status = "export";
+            cb.ExportDate = DateOnly.FromDateTime(DateTime.Now);
+            freshUnitOfWork.ChickenBarns.PrepareUpdate(cb);
+
+            // 4. Mark the active large chicken as inactive
+            lc.IsActive = false;
+            freshUnitOfWork.LargeChickens.PrepareUpdate(lc);
+
+            // 5. Disable feeding rules associated with this large chicken
+            var rules = await freshUnitOfWork.FeedingRules.GetByChickenIdAsync(lc.ChickenLid);
+            foreach (var r in rules)
+            {
+                r.Status = "disabled";
+                freshUnitOfWork.FeedingRules.PrepareUpdate(r);
+
+                // disable each detail (they are tracked because we included them in the query)
+                foreach (var d in r.FeedingRuleDetails)
+                {
+                    d.Status = false;
+                }
+            }
+
+            // 6. Disable schedules related to this chicken barn
+            var schedules = await freshUnitOfWork.Schedules.GetByChickenBarnIdAsync(cb.CbarnId);
+            foreach (var s in schedules)
+            {
+                s.Status = "disabled";
+                freshUnitOfWork.Schedules.PrepareUpdate(s);
+            }
+
+            // Commit changes
+            var res = await freshUnitOfWork.SaveChangesWithTransactionAsync();
+            if (res <= 0) return null;
+
+            // Reload the entity without tracking to avoid conflicts
+            var updated = await freshUnitOfWork.ChickenBarns.GetByIdAsNoTrackingAsync(cbarnId);
+            return updated;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"ExportAsync failed for largeChickenId={largeChickenId}: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            if (ex.InnerException != null)
+            {
+                System.Diagnostics.Debug.WriteLine($"Inner exception: {ex.InnerException.Message}");
+            }
+            return null;
+        }
+    }
+
+    public async Task<ChickenBarnModel?> GetByLargeChickenIdAsync(int largeChickenId)
+    {
+        return await _unitOfWork.ChickenBarns.GetByLargeChickenIdAsync(largeChickenId);
+    }
+
+
+    public async Task<List<ChickenBarnModel>> SearchAsync(int? barnId, int? flockId, int? chickenLid, bool includeInactive = false)
+    {
+        return await _unitOfWork.ChickenBarns.SearchAsync(barnId, flockId, chickenLid, includeInactive);
+    }
+
+    public async Task<List<dynamic>> GetChickenBarnDetailAsync(int? barnId, string? barnType)
+    {
+        return await _unitOfWork.ChickenBarns.GetChickenBarnDetailAsync(barnId, barnType);
+    }
+}
