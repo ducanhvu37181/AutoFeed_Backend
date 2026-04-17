@@ -1,0 +1,240 @@
+﻿using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Services.Interfaces;
+using AutoFeed_Backend.Models.Requests;
+using AutoFeed_Backend.Models.Requests.LargeChicken;
+using AutoFeed_Backend.Models.Responses;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
+using System;
+using AutoFeed_Backend.Helpers;
+
+namespace AutoFeed_Backend.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class LargeChickenController : ControllerBase
+{
+    private readonly ILargeChickenService _service;
+
+    public LargeChickenController(ILargeChickenService service)
+    {
+        _service = service;
+    }
+
+    private static int? CalculateAgeInMonths(DateOnly? dateOfBirth)
+    {
+        if (dateOfBirth == null) return null;
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var age = (today.Year - dateOfBirth.Value.Year) * 12 + (today.Month - dateOfBirth.Value.Month);
+        return age >= 0 ? age : null;
+    }
+
+    [HttpPost("{id:int}/avatar")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UpdateAvatar(int id, IFormFile file, [FromServices] IConfiguration config)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid file" });
+
+        var existing = await _service.GetByIdAsync(id);
+        if (existing == null)
+            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
+
+        var bucket = config.GetValue<string>("Firebase:Bucket");
+        var saPath = config.GetValue<string>("Firebase:ServiceAccountPath");
+        if (string.IsNullOrWhiteSpace(bucket) || string.IsNullOrWhiteSpace(saPath))
+            return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Firebase not configured" });
+
+        try
+        {
+            var url = await FirebaseStorageHelper.UploadFileAndGetSignedUrlAsync(file, bucket, saPath, TimeSpan.FromDays(365));
+            existing.Url = url;
+            var ok = await _service.UpdateAsync(existing);
+            if (!ok) return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Update failed" });
+
+            return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = new { Url = url }, Description = "Avatar updated" });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = ex.Message });
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var items = await _service.GetAllAsync();
+        var dto = items.Select(i => new AutoFeed_Backend.Models.Responses.LargeChickenResponse
+        {
+            ChickenLid = i.ChickenLid,
+            FlockId = i.FlockId,
+            Name = i.Name,
+            Weight = i.Weight,
+            HealthStatus = i.HealthStatus,
+            Note = i.Note,
+            Url = i.Url,
+            IsActive = i.IsActive,
+            BarnId = i.IsActive == true && i.ChickenBarns != null && i.ChickenBarns.Count > 0 ? i.ChickenBarns.FirstOrDefault()?.BarnId : null,
+            AgeInMonths = CalculateAgeInMonths(i.Flock?.DoB)
+        }).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
+    }
+
+    [HttpGet("active")]
+    public async Task<IActionResult> GetActive()
+    {
+        var items = await _service.GetActiveAsync();
+        var dto = items.Select(i => new AutoFeed_Backend.Models.Responses.LargeChickenResponse
+        {
+            ChickenLid = i.ChickenLid,
+            FlockId = i.FlockId,
+            Name = i.Name,
+            Weight = i.Weight,
+            HealthStatus = i.HealthStatus,
+            Note = i.Note,
+            Url = i.Url,
+            IsActive = i.IsActive,
+            BarnId = i.ChickenBarns != null && i.ChickenBarns.Count > 0 ? i.ChickenBarns.FirstOrDefault()?.BarnId : null,
+            AgeInMonths = CalculateAgeInMonths(i.Flock?.DoB)
+        }).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
+    }
+
+    [HttpGet("inactive")]
+    public async Task<IActionResult> GetInactive()
+    {
+        var items = await _service.GetInactiveAsync();
+        var dto = items.Select(i => new AutoFeed_Backend.Models.Responses.LargeChickenResponse
+        {
+            ChickenLid = i.ChickenLid,
+            FlockId = i.FlockId,
+            Name = i.Name,
+            Weight = i.Weight,
+            HealthStatus = i.HealthStatus,
+            Note = i.Note,
+            Url = i.Url,
+            IsActive = i.IsActive
+        }).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> Get(int id)
+    {
+        var item = await _service.GetByIdAsync(id);
+        if (item == null)
+            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
+        var dto = new AutoFeed_Backend.Models.Responses.LargeChickenResponse
+        {
+            ChickenLid = item.ChickenLid,
+            FlockId = item.FlockId,
+            Name = item.Name,
+            Weight = item.Weight,
+            HealthStatus = item.HealthStatus,
+            Note = item.Note,
+            Url = item.Url,
+            IsActive = item.IsActive,
+            BarnId = item.IsActive == true && item.ChickenBarns != null && item.ChickenBarns.Count > 0 ? item.ChickenBarns.FirstOrDefault()?.BarnId : null
+        };
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
+    }
+
+    // GET api/largechicken/search?name=xxx&healthStatus=yyy&flockId=1&includeInactive=false
+    [HttpGet("search")]
+    public async Task<IActionResult> Search(
+        [FromQuery] string? name,
+        [FromQuery] string? healthStatus,
+        [FromQuery] int? flockId,
+        [FromQuery] bool includeInactive = false)
+    {
+        var items = await _service.SearchAsync(name, healthStatus, flockId, includeInactive);
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = items, Description = "Success" });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateLargeChickenRequest model)
+    {
+        if (model == null || string.IsNullOrWhiteSpace(model.Name))
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
+
+        var entity = new LargeChicken
+        {
+            FlockId = model.FlockId, // Assigning FlockId
+            Name = model.Name, // Assigning Name
+            Weight = model.Weight, // Assigning Weight
+            HealthStatus = model.HealthStatus, // Assigning HealthStatus
+            Note = model.Note, // Assigning Note
+            Url = model.Url
+        };
+
+        var result = await _service.CreateAsync(entity);
+        if (result <= 0)
+            return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Create failed" });
+
+        var dto = new AutoFeed_Backend.Models.Responses.LargeChickenResponse
+        {
+            ChickenLid = entity.ChickenLid,
+            FlockId = entity.FlockId,
+            Name = entity.Name,
+            Weight = entity.Weight,
+            HealthStatus = entity.HealthStatus,
+            Note = entity.Note,
+            Url = entity.Url,
+            IsActive = entity.IsActive,
+            BarnId = entity.IsActive == true && entity.ChickenBarns != null && entity.ChickenBarns.Count > 0 ? entity.ChickenBarns.FirstOrDefault()?.BarnId : null
+        };
+
+        return CreatedAtAction(nameof(Get), new { id = entity.ChickenLid },
+            new ApiResponse<object> { Status = true, HttpCode = 201, Data = dto, Description = "Created" });
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateLargeChickenRequest model)
+    {
+        if (model == null)
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
+
+        var existing = await _service.GetByIdAsync(id);
+        if (existing == null)
+            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found" });
+
+        existing.FlockId = model.FlockId;
+        existing.Name = model.Name;
+        existing.Weight = model.Weight;
+        existing.HealthStatus = model.HealthStatus;
+        existing.Note = model.Note;
+        existing.IsActive = existing.IsActive;
+
+        var ok = await _service.UpdateAsync(existing);
+        if (!ok)
+            return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Update failed" });
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = new { id = existing.ChickenLid }, Description = "Update success" });
+    }
+
+    // Soft delete
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var ok = await _service.DeleteAsync(id);
+        if (!ok)
+            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found or Delete failed" });
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Delete success" });
+    }
+
+    // Restore
+    [HttpPatch("{id:int}/restore")]
+    public async Task<IActionResult> Restore(int id)
+    {
+        var ok = await _service.RestoreAsync(id);
+        if (!ok)
+            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Not Found or Restore failed" });
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Restore success" });
+    }
+}
