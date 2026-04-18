@@ -103,4 +103,28 @@ public class ChickenBarnRepository : GenericRepository<ChickenBarn>
 
         return result.Cast<dynamic>().ToList();
     }
+
+    public async System.Threading.Tasks.Task<ChickenBarn?> ChangeStatusToExportAsync(int cbarnId)
+    {
+        try
+        {
+            var cbarn = await _context.Set<ChickenBarn>().FindAsync(cbarnId);
+            if (cbarn == null) return null;
+
+            cbarn.Status = "export";
+            cbarn.ExportDate = DateOnly.FromDateTime(DateTime.Now);
+
+            PrepareUpdate(cbarn);
+            await SaveAsync();
+
+            // Refresh from database to get latest values
+            await RefreshAsync(cbarn);
+
+            return cbarn;
+        }
+        catch
+        {
+            return null;
+        }
+    }
 }

@@ -84,68 +84,46 @@ public class ChickenBarnService : IChickenBarnService
             var lc = await _unitOfWork.LargeChickens.GetByIdAsync(largeChickenId);
             if (lc == null || !lc.IsActive.HasValue || !lc.IsActive.Value) return null;
 
-            // 2. Find the chicken barn for this large chicken
-            var cb = await _unitOfWork.ChickenBarns.GetByLargeChickenIdAsync(largeChickenId);
-            if (cb == null) return null;
+            // 2. Find the ACTIVE chicken barn for this large chicken
+            var allCbarns = await _unitOfWork.ChickenBarns.GetAllAsync();
+            var activeCbarn = allCbarns.FirstOrDefault(cb => cb.ChickenLid == largeChickenId && cb.Status != null && cb.Status.ToLower() == "active");
+            if (activeCbarn == null) return null;
 
-            var cbarnId = cb.CbarnId;
+            var cbarnId = activeCbarn.CbarnId;
 
-            // Now create a fresh context for all modifications to avoid tracking conflicts
-            var freshContext = new AutoFeedDBContext();
+            // 3. Update the large chicken - mark as inactive
+            lc.IsActive = false;
+            _unitOfWork.LargeChickens.PrepareUpdate(lc);
+            await _unitOfWork.SaveChangesWithTransactionAsync();
 
-            try
+            // 4. Update the ACTIVE chicken barn - mark as exported
+            var exportedCbarn = await _unitOfWork.ChickenBarns.ChangeStatusToExportAsync(cbarnId);
+            if (exportedCbarn == null) return null;
+
+            // 5. Update feeding rules for this large chicken - disable them
+            var allFeedingRules = await _unitOfWork.FeedingRules.GetAllAsync();
+            var relevantRules = allFeedingRules.Where(r => r.ChickenLid == largeChickenId).ToList();
+            foreach (var rule in relevantRules)
             {
-                // 3. Update the large chicken - mark as inactive
-                var largeChicken = await freshContext.LargeChickens.FindAsync(largeChickenId);
-                if (largeChicken != null)
-                {
-                    largeChicken.IsActive = false;
-                    freshContext.LargeChickens.Update(largeChicken);
-                }
-
-                // 4. Update feeding rules for this large chicken - disable them
-                var feedingRules = await freshContext.FeedingRules
-                    .Where(r => r.ChickenLid == largeChickenId)
-                    .ToListAsync();
-                foreach (var rule in feedingRules)
-                {
-                    rule.Status = "disabled";
-                    freshContext.FeedingRules.Update(rule);
-                }
-
-                // 5. Update schedules for this chicken barn - disable them
-                var schedules = await freshContext.Schedules
-                    .Where(s => s.CbarnId == cbarnId)
-                    .ToListAsync();
-                foreach (var schedule in schedules)
-                {
-                    schedule.Status = "disabled";
-                    freshContext.Schedules.Update(schedule);
-                }
-
-                // 6. Update the chicken barn - mark as exported
-                var chickenBarn = await freshContext.ChickenBarns.FindAsync(cbarnId);
-                if (chickenBarn != null)
-                {
-                    chickenBarn.Status = "export";
-                    chickenBarn.ExportDate = DateOnly.FromDateTime(DateTime.Now);
-                    freshContext.ChickenBarns.Update(chickenBarn);
-                }
-
-                // Save all changes
-                await freshContext.SaveChangesAsync();
-
-                // Get the final result without tracking
-                var result = await freshContext.ChickenBarns
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.CbarnId == cbarnId);
-
-                return result;
+                rule.Status = "disabled";
+                _unitOfWork.FeedingRules.PrepareUpdate(rule);
             }
-            finally
+            if (relevantRules.Count > 0)
+                await _unitOfWork.SaveChangesWithTransactionAsync();
+
+            // 6. Update schedules for the active chicken barn - disable them
+            var allSchedules = await _unitOfWork.Schedules.GetAllAsync();
+            var relevantSchedules = allSchedules.Where(s => s.CbarnId == cbarnId).ToList();
+            foreach (var schedule in relevantSchedules)
             {
-                await freshContext.DisposeAsync();
+                schedule.Status = "disabled";
+                _unitOfWork.Schedules.PrepareUpdate(schedule);
             }
+            if (relevantSchedules.Count > 0)
+                await _unitOfWork.SaveChangesWithTransactionAsync();
+
+            // Return the exported chicken barn
+            return exportedCbarn;
         }
         catch (Exception ex)
         {

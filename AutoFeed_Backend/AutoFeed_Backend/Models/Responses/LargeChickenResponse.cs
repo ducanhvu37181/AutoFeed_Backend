@@ -14,4 +14,6 @@ public class LargeChickenResponse
     public bool? IsActive { get; set; }
     public int? BarnId { get; set; }
     public int? AgeInMonths { get; set; }
+    public string? FlockName { get; set; }
+    public DateOnly? ExportDate { get; set; }
 }

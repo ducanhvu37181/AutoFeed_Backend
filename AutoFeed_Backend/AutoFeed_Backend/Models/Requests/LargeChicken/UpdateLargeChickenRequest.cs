@@ -2,7 +2,6 @@ namespace AutoFeed_Backend.Models.Requests.LargeChicken;
 
 public class UpdateLargeChickenRequest
 {
-    public int FlockId { get; set; }
     public string Name { get; set; }
     public decimal Weight { get; set; }
     public string HealthStatus { get; set; }
