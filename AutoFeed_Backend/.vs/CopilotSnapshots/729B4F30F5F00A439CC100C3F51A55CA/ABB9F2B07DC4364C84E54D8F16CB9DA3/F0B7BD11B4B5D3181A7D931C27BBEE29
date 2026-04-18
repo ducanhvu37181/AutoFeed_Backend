@@ -1,0 +1,555 @@
+﻿using AutoFeed_Backend.Models.Requests.Flock;
+using AutoFeed_Backend.Models.Responses;
+using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Services.Interfaces;
+using AutoFeed_Backend_Services.Models.Responses;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace AutoFeed_Backend.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class FlockController : ControllerBase
+{
+    private readonly IFlockService _flockService;
+    private readonly ILargeChickenService _largeChickenService;
+    private readonly IChickenBarnService _chickenBarnService;
+    private readonly IBarnService _barnService;
+
+    public FlockController(IFlockService flockService, ILargeChickenService largeChickenService, IChickenBarnService chickenBarnService, IBarnService barnService)
+    {
+        _flockService = flockService;
+        _largeChickenService = largeChickenService;
+        _chickenBarnService = chickenBarnService;
+        _barnService = barnService;
+    }
+
+    [HttpGet("dashboard")]
+    public async Task<IActionResult> GetDashboard([FromQuery] string? searchTerm, [FromQuery] int? barnId, [FromQuery] string? status)
+    {
+        var data = await _flockService.GetFlocksDashboardAsync(searchTerm, barnId, status);
+        return Ok(new { Success = true, Data = data });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var data = await _flockService.GetAllFlocksAsync();
+        return Ok(new { Success = true, Data = data });
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetDetail(int id)
+    {
+        var data = await _flockService.GetFlockByIdAsync(id);
+        return data != null ? Ok(new { Success = true, Data = data }) : NotFound();
+    }
+
+    [HttpGet("assignable")]
+    public async Task<IActionResult> GetAssignable()
+    {
+        var data = await _flockService.GetAssignableFlocksAsync();
+        return Ok(new { Success = true, Data = data, Description = "Flocks that can be assigned to large barn (age >= 3 months)" });
+    }
+
+    [HttpGet("unassignable")]
+    public async Task<IActionResult> GetUnassignable()
+    {
+        var data = await _flockService.GetUnassignableFlocksAsync();
+        return Ok(new { Success = true, Data = data, Description = "Flocks that cannot be assigned to large barn (age < 3 months)" });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] FlockCreateRequest model)
+    {
+        if (model == null)
+            return BadRequest(new { Success = false, Message = "Invalid request" });
+
+        var createResponse = await _flockService.CreateFlockAsync(model);
+        if (createResponse == null)
+            return BadRequest(new { Success = false, Message = "Create failed - no available barn to assign flock" });
+
+        // Retrieve the created flock to return full details
+        var createdFlock = await _flockService.GetFlockByIdAsync(createResponse.FlockId);
+        if (createdFlock == null)
+            return StatusCode(500, new { Success = false, Message = "Flock created but could not retrieve details" });
+
+        return Ok(new 
+        { 
+            Success = true, 
+            FlockId = createResponse.FlockId,
+            AssignedBarnId = createResponse.AssignedBarnId,
+            AssignedBarnName = createResponse.AssignedBarnName,
+            AssignmentStatus = createResponse.AssignmentStatus,
+            Data = createdFlock, 
+            Message = "Created and assigned to barn"
+        });
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> UpdateById(int id, [FromBody] FlockUpdateRequest model)
+    {
+        if (model == null)
+            return BadRequest(new { Success = false, Message = "Invalid request" });
+
+        model.FlockID = id;
+        var res = await _flockService.UpdateFlockAsync(model);
+        if (!res)
+            return NotFound(new { Success = false, Message = "Flock not found or update failed" });
+
+        // Retrieve the updated flock to return full details
+        var updatedFlock = await _flockService.GetFlockByIdAsync(id);
+        if (updatedFlock == null)
+            return StatusCode(500, new { Success = false, Message = "Flock updated but could not retrieve details" });
+
+        return Ok(new { Success = true, FlockId = id, Data = updatedFlock, Message = "Updated" });
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> Update([FromBody] FlockUpdateRequest model)
+    {
+        if (model == null)
+            return BadRequest(new { Success = false, Message = "Invalid request" });
+
+        var res = await _flockService.UpdateFlockAsync(model);
+        if (!res)
+            return NotFound(new { Success = false, Message = "Flock not found or update failed" });
+
+        // Retrieve the updated flock to return full details
+        var updatedFlock = await _flockService.GetFlockByIdAsync(model.FlockID);
+        if (updatedFlock == null)
+            return StatusCode(500, new { Success = false, Message = "Flock updated but could not retrieve details" });
+
+        return Ok(new { Success = true, FlockId = model.FlockID, Data = updatedFlock, Message = "Updated" });
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var (success, error) = await _flockService.DeleteFlockAsync(id);
+        if (success)
+            return Ok(new { Success = true, Message = "Deleted" });
+        if (error == "Flock not found")
+            return NotFound(new { Success = false, Message = error });
+        return Conflict(new { Success = false, Message = error });
+    }
+
+    [HttpPost("assign-flock-to-largeBarn")]
+    public async Task<IActionResult> AssignIds([FromBody] AsssignToLargeChickRequest model)
+    {
+        if (model == null || model.BarnIds == null || model.BarnIds.Count == 0)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Invalid request - at least one barn ID is required"
+            };
+            return BadRequest(error);
+        }
+
+        // Check flock exists and has available quantity
+        var flock = await _flockService.GetFlockByIdAsync(model.FlockId);
+        if (flock == null)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 404,
+                Data = null,
+                Description = "Flock not found"
+            };
+            return NotFound(error);
+        }
+
+        if (flock.Quantity <= 0)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Cannot assign - flock quantity is zero"
+            };
+            return BadRequest(error);
+        }
+
+        // Check if number of barns exceeds flock quantity
+        if (model.BarnIds.Count > flock.Quantity)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = $"Cannot assign - number of barns ({model.BarnIds.Count}) exceeds flock quantity ({flock.Quantity})"
+            };
+            return BadRequest(error);
+        }
+
+        // Check if flock is old enough to assign (age >= 3 months)
+        if (flock.AgeInMonths < 3)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = $"Cannot assign - flock is too young. Flock age is {flock.AgeInMonths} months. Minimum required age is 3 months."
+            };
+            return BadRequest(error);
+        }
+
+        // Validate all barns are large chicken barns before creating any records
+        var barnValidationErrors = new List<string>();
+        foreach (var barnId in model.BarnIds)
+        {
+            var barn = await _barnService.GetByIdAsync(barnId);
+            if (barn == null)
+            {
+                barnValidationErrors.Add($"Barn with ID {barnId} not found");
+            }
+            else if (barn.Type != "LargeChickenBarn" && barn.Type != "Large Chicken Barn" && barn.Type != "LargeChicken")
+            {
+                barnValidationErrors.Add($"Barn {barnId} (Type: {barn.Type}) is not a large chicken barn");
+            }
+        }
+
+        if (barnValidationErrors.Count > 0)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = string.Join("; ", barnValidationErrors)
+            };
+            return BadRequest(error);
+        }
+
+        // Check if any barn has already been assigned (has active chicken barn assignments)
+        var barnAssignmentErrors = new List<string>();
+        foreach (var barnId in model.BarnIds)
+        {
+            var existingAssignments = await _chickenBarnService.SearchAsync(barnId: barnId, flockId: null, chickenLid: null, includeInactive: false);
+            if (existingAssignments != null && existingAssignments.Count > 0)
+            {
+                barnAssignmentErrors.Add($"Barn {barnId} is already assigned - cannot reassign");
+            }
+        }
+
+        if (barnAssignmentErrors.Count > 0)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Cannot assign - " + string.Join("; ", barnAssignmentErrors)
+            };
+            return BadRequest(error);
+        }
+
+        // Mark existing ChickenBarn records for this flock as exported
+        var existingFlockAssignments = await _chickenBarnService.SearchAsync(barnId: null, flockId: model.FlockId, chickenLid: null, includeInactive: false);
+        if (existingFlockAssignments != null && existingFlockAssignments.Count > 0)
+        {
+            foreach (var cBarn in existingFlockAssignments)
+            {
+                cBarn.Status = "export";
+                cBarn.ExportDate = DateOnly.FromDateTime(DateTime.Now);
+                await _chickenBarnService.UpdateAsync(cBarn);
+            }
+        }
+
+        // Create individual LargeChicken records for each barn and assign
+        var assignmentResults = new List<object>();
+        var rollbackRequired = false;
+        var createdLargeChickens = new List<object>();
+
+        foreach (var barnId in model.BarnIds)
+        {
+            // Create one LargeChicken record per barn from the flock
+            var largeChickenName = $"LChickenFromFlock{model.FlockId}_Barn{barnId}";
+            var largeChicken = new LargeChicken
+            {
+                FlockId = model.FlockId,
+                Name = largeChickenName,
+                Weight = 0,
+                HealthStatus = "Healthy",
+                Note = model.Note,
+                IsActive = true
+            };
+
+            var chickenLid = await _largeChickenService.CreateAsync(largeChicken);
+            if (chickenLid <= 0)
+            {
+                rollbackRequired = true;
+                assignmentResults.Add(new { BarnId = barnId, Success = false, Message = "Failed to create LargeChicken" });
+                continue;
+            }
+
+            // Assign this LargeChicken to the barn
+            // Note: Do NOT set FlockId here - it's tracked through LargeChicken.FlockId
+            // The unique constraint UIX_CBarn_Flock prevents multiple ChickenBarn records with same FlockId
+            var chickenBarn = new ChickenBarn
+            {
+                BarnId = barnId,
+                ChickenLid = chickenLid,
+                StartDate = DateOnly.FromDateTime(DateTime.Now),
+                Note = model.Note,
+                Status = "active"
+            };
+
+            var cBarnId = await _chickenBarnService.CreateAsync(chickenBarn);
+            if (cBarnId == 0)
+            {
+                rollbackRequired = true;
+                assignmentResults.Add(new { BarnId = barnId, ChickenLid = chickenLid, ChickenName = largeChickenName, Success = false, Message = "Failed to create barn assignment" });
+            }
+            else
+            {
+                createdLargeChickens.Add(new { ChickenLid = chickenLid, ChickenName = largeChickenName });
+                assignmentResults.Add(new { BarnId = barnId, ChickenLid = chickenLid, ChickenName = largeChickenName, CBarnId = cBarnId, Success = true });
+            }
+        }
+
+        // If any assignment failed, return error
+        if (rollbackRequired)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 500,
+                Data = new { SuccessfulAssignments = assignmentResults },
+                Description = "Failed to assign to all barns - some assignments failed"
+            };
+            return StatusCode(500, error);
+        }
+
+        // Update flock: reduce quantity by number of assignments and make inactive if all assigned
+        var newQuantity = Math.Max(0, flock.Quantity - model.BarnIds.Count);
+        var updateReq = new FlockUpdateRequest
+        {
+            FlockID = flock.FlockId,
+            Name = flock.Name ?? string.Empty,
+            Quantity = newQuantity,
+            Weight = flock.Weight,
+            HealthStatus = flock.HealthStatus ?? "Healthy",
+            Note = flock.Note,
+            IsActive = newQuantity > 0
+        };
+
+        var updRes = await _flockService.UpdateFlockAsync(updateReq);
+        if (!updRes)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 500,
+                Data = new { CreatedLargeChickens = createdLargeChickens, AssignedBarns = assignmentResults },
+                Description = "Assigned to barns but failed to update flock quantity and status"
+            };
+            return StatusCode(500, error);
+        }
+
+        // Update flock's TransferDate to today
+        var updateTransferDateReq = new FlockUpdateRequest
+        {
+            FlockID = flock.FlockId,
+            Name = flock.Name ?? string.Empty,
+            Quantity = newQuantity,
+            Weight = flock.Weight,
+            HealthStatus = flock.HealthStatus ?? "Healthy",
+            Note = flock.Note,
+            IsActive = newQuantity > 0,
+            TransferDate = DateOnly.FromDateTime(DateTime.Now)
+        };
+
+        await _flockService.UpdateFlockAsync(updateTransferDateReq);
+
+        var flockUpdateResult = new
+        {
+            FlockId = model.FlockId,
+            CreatedLargeChickens = createdLargeChickens,
+            TotalQuantityAssigned = model.BarnIds.Count,
+            AssignedBarns = assignmentResults,
+            FlockQuantityAfterAssignment = newQuantity,
+            FlockIsActive = newQuantity > 0
+        };
+
+        var success = new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = flockUpdateResult,
+            Description = "Successfully assigned flock to all barns"
+        };
+        return Ok(success);
+    }
+
+    [HttpPost("assign-flock-to-flockBarn")]
+    public async Task<IActionResult> AssignToFlockBarn([FromBody] AssignToFlockBarnRequest model)
+    {
+        if (model == null || model.BarnId <= 0)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Invalid request - barn ID is required"
+            };
+            return BadRequest(error);
+        }
+
+        // Check flock exists and has available quantity
+        var flock = await _flockService.GetFlockByIdAsync(model.FlockId);
+        if (flock == null)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 404,
+                Data = null,
+                Description = "Flock not found"
+            };
+            return NotFound(error);
+        }
+
+        if (flock.Quantity <= 0)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Cannot assign - flock quantity is zero"
+            };
+            return BadRequest(error);
+        }
+
+        // Validate barn exists and is a flock barn (NOT large chicken barn)
+        var barn = await _barnService.GetByIdAsync(model.BarnId);
+        if (barn == null)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 404,
+                Data = null,
+                Description = $"Barn with ID {model.BarnId} not found"
+            };
+            return NotFound(error);
+        }
+
+        if (barn.Type == "LargeChickenBarn" || barn.Type == "Large Chicken Barn" || barn.Type == "LargeChicken")
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = $"Barn {model.BarnId} is a large chicken barn - cannot assign flock to large chicken barn"
+            };
+            return BadRequest(error);
+        }
+
+        if (barn.Type != "FlockBarn" && barn.Type != "Flock Barn" && barn.Type != "Flock")
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = $"Barn {model.BarnId} (Type: {barn.Type}) is not a valid flock barn type"
+            };
+            return BadRequest(error);
+        }
+
+        // Check if barn has already been assigned (has active chicken barn assignments)
+        var existingAssignments = await _chickenBarnService.SearchAsync(barnId: model.BarnId, flockId: null, chickenLid: null, includeInactive: false);
+        if (existingAssignments != null && existingAssignments.Count > 0)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = $"Barn {model.BarnId} is already assigned - cannot reassign"
+            };
+            return BadRequest(error);
+        }
+
+        // Assign flock to barn (one ChickenBarn record, linking flock directly)
+        var chickenBarn = new ChickenBarn
+        {
+            BarnId = model.BarnId,
+            ChickenLid = null,  // No large chicken - assigning flock directly
+            StartDate = DateOnly.FromDateTime(DateTime.Now),
+            Note = model.Note,
+            Status = "active",
+            FlockId = model.FlockId
+        };
+
+        var result = await _chickenBarnService.CreateAsync(chickenBarn);
+        if (result == 0)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 500,
+                Data = null,
+                Description = "Failed to assign - could not create barn assignment"
+            };
+            return StatusCode(500, error);
+        }
+
+        // Update flock: reduce quantity to 0 and make inactive
+        var updateReq = new FlockUpdateRequest
+        {
+            FlockID = flock.FlockId,
+            Name = flock.Name ?? string.Empty,
+            Quantity = 0,
+            Weight = flock.Weight,
+            HealthStatus = flock.HealthStatus ?? "Healthy",
+            Note = flock.Note,
+            IsActive = false
+        };
+
+        var updRes = await _flockService.UpdateFlockAsync(updateReq);
+        if (!updRes)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 500,
+                Data = new { CBarnId = result },
+                Description = "Assigned to barn but failed to update flock quantity and status"
+            };
+            return StatusCode(500, error);
+        }
+
+        var flockUpdateResult = new
+        {
+            FlockId = model.FlockId,
+            FlockName = flock.Name,
+            BarnId = model.BarnId,
+            CBarnId = result,
+            FlockQuantityAfterAssignment = 0,
+            FlockIsActive = false
+        };
+
+        var success = new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = flockUpdateResult,
+            Description = "Successfully assigned flock to barn"
+        };
+        return Ok(success);
+    }
+}

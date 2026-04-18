@@ -87,6 +87,9 @@ public class ChickenBarnService : IChickenBarnService
             // 2. Find the chicken barn for this large chicken
             var cb = await _unitOfWork.ChickenBarns.GetByLargeChickenIdAsync(largeChickenId);
             if (cb == null) return null;
+            cb.Status = "export"; // Mark as export
+            _unitOfWork.ChickenBarns.PrepareUpdate(cb);
+            await _unitOfWork.SaveChangesWithTransactionAsync();
 
             var cbarnId = cb.CbarnId;
 
@@ -105,13 +108,22 @@ public class ChickenBarnService : IChickenBarnService
 
                 // 4. Update feeding rules for this large chicken - disable them
                 var feedingRules = await freshContext.FeedingRules
+                    .Include(r => r.FeedingRuleDetails)
                     .Where(r => r.ChickenLid == largeChickenId)
                     .ToListAsync();
                 foreach (var rule in feedingRules)
                 {
                     rule.Status = "disabled";
                     freshContext.FeedingRules.Update(rule);
+
+                    // Disable all feeding rule details for this rule
+                    foreach (var detail in rule.FeedingRuleDetails)
+                    {
+                        detail.Status = false;
+                        freshContext.FeedingRuleDetails.Update(detail);
+                    }
                 }
+                                
 
                 // 5. Update schedules for this chicken barn - disable them
                 var schedules = await freshContext.Schedules
@@ -127,19 +139,23 @@ public class ChickenBarnService : IChickenBarnService
                 var chickenBarn = await freshContext.ChickenBarns.FindAsync(cbarnId);
                 if (chickenBarn != null)
                 {
+                    System.Diagnostics.Debug.WriteLine($"[EXPORT] Before: CBarnId={chickenBarn.CbarnId}, Status={chickenBarn.Status}");
                     chickenBarn.Status = "export";
                     chickenBarn.ExportDate = DateOnly.FromDateTime(DateTime.Now);
                     freshContext.ChickenBarns.Update(chickenBarn);
+                    System.Diagnostics.Debug.WriteLine($"[EXPORT] After marking: CBarnId={chickenBarn.CbarnId}, Status={chickenBarn.Status}");
                 }
 
                 // Save all changes
-                await freshContext.SaveChangesAsync();
+                var rowsAffected = await freshContext.SaveChangesAsync();
+                System.Diagnostics.Debug.WriteLine($"[EXPORT] SaveChangesAsync returned: {rowsAffected} rows affected");
 
-                // Get the final result without tracking
+                // Get the final result without tracking - force reload from DB
                 var result = await freshContext.ChickenBarns
                     .AsNoTracking()
                     .FirstOrDefaultAsync(x => x.CbarnId == cbarnId);
 
+                System.Diagnostics.Debug.WriteLine($"[EXPORT] Final result: CBarnId={result?.CbarnId}, Status={result?.Status}, ExportDate={result?.ExportDate}");
                 return result;
             }
             finally
