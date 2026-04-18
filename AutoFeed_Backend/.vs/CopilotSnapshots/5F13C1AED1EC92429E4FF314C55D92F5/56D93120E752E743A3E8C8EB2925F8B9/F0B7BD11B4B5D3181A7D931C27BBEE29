@@ -484,19 +484,6 @@ public class FlockController : ControllerBase
             return BadRequest(error);
         }
 
-        // Check if barn is a sick barn - cannot assign flock to sick barn
-        if (barn.Type == "FlockSickBarn" || barn.Type == "Flock Sick Barn" || barn.Type == "FlockSick")
-        {
-            var error = new ApiResponse<object>
-            {
-                Status = false,
-                HttpCode = 400,
-                Data = null,
-                Description = $"Barn {model.BarnId} is a flock sick barn - cannot assign flock to sick barn"
-            };
-            return BadRequest(error);
-        }
-
         // Check if barn has already been assigned (has active chicken barn assignments)
         var existingAssignments = await _chickenBarnService.SearchAsync(barnId: model.BarnId, flockId: null, chickenLid: null, includeInactive: false);
         if (existingAssignments != null && existingAssignments.Count > 0)
