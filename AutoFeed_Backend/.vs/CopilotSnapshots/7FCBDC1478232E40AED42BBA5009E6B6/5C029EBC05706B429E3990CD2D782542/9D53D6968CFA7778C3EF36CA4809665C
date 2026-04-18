@@ -1,4 +1,4 @@
-using AutoFeed_Backend_Services.Interfaces;
+﻿using AutoFeed_Backend_Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using ScheduleModel = AutoFeed_Backend_DAO.Models.Schedule;
@@ -140,7 +140,7 @@ public class ScheduleController : ControllerBase
             Priority = model.Priority,
             Status = model.Status ?? "pending",
             StartDate = model.StartDate,
-            EndDate = model.EndDate ?? model.StartDate
+            EndDate = model.EndDate
         };
 
         var id = await _service.CreateMultipleScheduleAsync(schedule);
