@@ -579,4 +579,21 @@ public class FlockController : ControllerBase
         };
         return Ok(success);
     }
+
+    [HttpPut("{id:int}/transfer-barn")]
+    public async Task<IActionResult> TransferFlockToBarn(int id, [FromBody] TransferFlockBarnRequest model)
+    {
+        if (model == null || model.NewBarnId <= 0)
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request - newBarnId is required" });
+
+        var flock = await _flockService.GetFlockByIdAsync(id);
+        if (flock == null)
+            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Flock not found" });
+
+        var updated = await _flockService.TransferFlockToBarnAsync(id, model.NewBarnId);
+        if (updated == null)
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Transfer failed" });
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = updated, Description = "Successfully transferred flock to barn" });
+    }
 }
