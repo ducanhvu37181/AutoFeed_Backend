@@ -105,23 +105,36 @@ namespace AutoFeed_Backend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var result = await _foodService.DeleteFoodAsync(id);
-            if (result)
-                return Ok(new ApiResponse<object>
-                {
-                    Status = true,
-                    HttpCode = 200,
-                    Data = null,
-                    Description = "Food item deleted successfully!"
-                });
-
-            return NotFound(new ApiResponse<object>
+            try
             {
-                Status = false,
-                HttpCode = 404,
-                Data = null,
-                Description = "Food item not found!"
-            });
+                var result = await _foodService.DeleteFoodAsync(id);
+                if (result)
+                    return Ok(new ApiResponse<object>
+                    {
+                        Status = true,
+                        HttpCode = 200,
+                        Data = null,
+                        Description = "Food item deleted successfully!"
+                    });
+
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "Delete failed"
+                });
+            }
+            catch
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "Delete failed"
+                });
+            }
         }
     }
 }
