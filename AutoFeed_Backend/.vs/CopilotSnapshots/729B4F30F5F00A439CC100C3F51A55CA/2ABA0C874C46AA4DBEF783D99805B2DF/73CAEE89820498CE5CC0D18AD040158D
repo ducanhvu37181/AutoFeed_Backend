@@ -1,4 +1,4 @@
-using AutoFeed_Backend_Services.Interfaces;
+﻿using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Repositories.UnitOfWork;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -108,20 +108,12 @@ public class ChickenBarnService : IChickenBarnService
 
                 // 4. Update feeding rules for this large chicken - disable them
                 var feedingRules = await freshContext.FeedingRules
-                    .Include(r => r.FeedingRuleDetails)
                     .Where(r => r.ChickenLid == largeChickenId)
                     .ToListAsync();
                 foreach (var rule in feedingRules)
                 {
                     rule.Status = "disabled";
                     freshContext.FeedingRules.Update(rule);
-
-                    // Disable all feeding rule details for this rule
-                    foreach (var detail in rule.FeedingRuleDetails)
-                    {
-                        detail.Status = false;
-                        freshContext.FeedingRuleDetails.Update(detail);
-                    }
                 }
                                 
 

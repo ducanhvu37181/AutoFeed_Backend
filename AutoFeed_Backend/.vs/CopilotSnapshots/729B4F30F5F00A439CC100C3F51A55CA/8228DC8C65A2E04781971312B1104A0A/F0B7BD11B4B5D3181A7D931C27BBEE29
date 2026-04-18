@@ -61,20 +61,6 @@ public class FlockController : ControllerBase
         return Ok(new { Success = true, Data = data, Description = "Flocks that cannot be assigned to large barn (age < 3 months)" });
     }
 
-    [HttpGet("active")]
-    public async Task<IActionResult> GetActive()
-    {
-        var data = await _flockService.GetActiveFlocksAsync();
-        return Ok(new { Success = true, Data = data, Description = "Active flocks (IsActive == true)" });
-    }
-
-    [HttpGet("inactive")]
-    public async Task<IActionResult> GetInactive()
-    {
-        var data = await _flockService.GetInactiveFlocksAsync();
-        return Ok(new { Success = true, Data = data, Description = "Inactive flocks (IsActive != true)" });
-    }
-
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] FlockCreateRequest model)
     {

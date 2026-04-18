@@ -128,30 +128,6 @@ namespace AutoFeed_Backend_Services.Services
                 .ToList();
         }
 
-        // 2.7 Get active flocks (IsActive == true)
-        public async Task<IEnumerable<FlockResponse>> GetActiveFlocksAsync()
-        {
-            var flocks = await _unitOfWork.Flocks.GetAllAsync();
-            if (flocks == null) return Enumerable.Empty<FlockResponse>();
-
-            return flocks
-                .Where(f => f.IsActive == true)
-                .Select(MapToResponse)
-                .ToList();
-        }
-
-        // 2.8 Get inactive flocks (IsActive != true)
-        public async Task<IEnumerable<FlockResponse>> GetInactiveFlocksAsync()
-        {
-            var flocks = await _unitOfWork.Flocks.GetAllAsync();
-            if (flocks == null) return Enumerable.Empty<FlockResponse>();
-
-            return flocks
-                .Where(f => f.IsActive != true)
-                .Select(MapToResponse)
-                .ToList();
-        }
-
         // 3. Create new flock
         public async Task<CreateFlockResponse?> CreateFlockAsync(FlockCreateRequest req)
         {

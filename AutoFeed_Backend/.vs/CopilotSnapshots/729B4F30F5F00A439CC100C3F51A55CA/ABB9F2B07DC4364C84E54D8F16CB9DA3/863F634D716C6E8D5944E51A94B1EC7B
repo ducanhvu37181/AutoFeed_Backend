@@ -12,9 +12,9 @@ namespace AutoFeed_Backend_Services.Interfaces
         Task<IEnumerable<FlockResponse>> GetFlocksDashboardAsync(string? searchTerm, int? barnId, string? status);
         Task<FlockResponse?> GetFlockByIdAsync(int id);
         /// <summary>Get active flocks (IsActive == true).</summary>
-        Task<IEnumerable<FlockResponse>> GetActiveFlocksAsync();
+        Task<IEnumerable<FlockResponse>> GetActiveFlocks Async();
         /// <summary>Get inactive flocks (IsActive != true).</summary>
-        Task<IEnumerable<FlockResponse>> GetInactiveFlocksAsync();
+        Task<IEnumerable<FlockResponse>> GetInactiveFlocks Async();
         /// <summary>Get flocks that can be assigned to large barn (age >= 3 months).</summary>
         Task<IEnumerable<FlockResponse>> GetAssignableFlocksAsync();
         /// <summary>Get flocks that cannot be assigned to large barn (age < 3 months).</summary>
