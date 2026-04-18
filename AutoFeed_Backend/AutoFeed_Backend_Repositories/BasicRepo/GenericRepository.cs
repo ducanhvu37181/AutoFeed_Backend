@@ -166,13 +166,79 @@ namespace AutoFeed_Backend_Repositories.BasicRepo
 
         public void PrepareUpdate(T entity)
         {
-            var tracker = _context.Attach(entity);
-            tracker.State = EntityState.Modified;
+            // Check if this entity is already tracked in the context
+            var existingEntry = _context.ChangeTracker.Entries<T>()
+                .FirstOrDefault(e => e.Entity == entity || 
+                    (e.State != EntityState.Detached && HasSameKeyValues(e.Entity, entity)));
+
+            if (existingEntry != null)
+            {
+                // Entity is already tracked, just mark it as modified
+                existingEntry.State = EntityState.Modified;
+            }
+            else
+            {
+                // Entity is not tracked, attach it and mark as modified
+                var tracker = _context.Attach(entity);
+                tracker.State = EntityState.Modified;
+            }
+        }
+
+        private bool HasSameKeyValues(T entity1, T entity2)
+        {
+            try
+            {
+                var keyProperties = _context.Model.FindEntityType(typeof(T))
+                    ?.FindPrimaryKey()
+                    ?.Properties;
+
+                if (keyProperties == null) return false;
+
+                foreach (var keyProp in keyProperties)
+                {
+                    var prop = typeof(T).GetProperty(keyProp.Name);
+                    if (prop == null) return false;
+
+                    var val1 = prop.GetValue(entity1);
+                    var val2 = prop.GetValue(entity2);
+
+                    if (!object.Equals(val1, val2))
+                        return false;
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public void PrepareRemove(T entity)
         {
             _context.Remove(entity);
+        }
+
+        public async System.Threading.Tasks.Task RefreshAsync(T entity)
+        {
+            // Reload entity from database to get latest database values
+            try
+            {
+                var keyValues = _context.Model.FindEntityType(typeof(T))
+                    ?.FindPrimaryKey()
+                    ?.Properties
+                    ?.Select(p => p.PropertyInfo.GetValue(entity))
+                    .ToArray();
+
+                if (keyValues != null && keyValues.Length > 0)
+                {
+                    await _context.Entry(entity).ReloadAsync();
+                }
+            }
+            catch
+            {
+                // If refresh fails, continue - entity may still be usable
+            }
         }
 
         public int Save()
