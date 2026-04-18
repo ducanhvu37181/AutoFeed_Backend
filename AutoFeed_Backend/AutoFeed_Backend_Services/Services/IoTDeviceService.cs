@@ -96,9 +96,17 @@ namespace AutoFeed_Backend_Services.Services
 
         public async Task<bool> ReassignDeviceAsync(int deviceId, int barnId)
         {
-            await _unitOfWork.IoTDevices.ReassignDeviceAsync(deviceId, barnId);
-            await _unitOfWork.SaveChangesWithTransactionAsync();
-            return true;
+            try
+            {
+                await _unitOfWork.IoTDevices.ReassignDeviceAsync(deviceId, barnId);
+                await _unitOfWork.SaveChangesWithTransactionAsync();
+                return true;
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Return false to indicate assignment failed due to duplicate device name
+                return false;
+            }
         }
 
         // Get devices by barn id

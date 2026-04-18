@@ -29,6 +29,20 @@ public class IoTDeviceRepository : GenericRepository<IoTDevice>
 
     public async System.Threading.Tasks.Task ReassignDeviceAsync(int deviceId, int newBarnId)
     {
+        // Get the device being assigned
+        var device = await _context.IoTDevices.FindAsync(deviceId);
+        if (device == null)
+            throw new InvalidOperationException($"Device with ID {deviceId} not found");
+
+        // Check if another device with the same name is already assigned to this barn
+        var existingAssignment = await _context.BarnIoTDevices
+            .Include(b => b.Device)
+            .Where(b => b.BarnId == newBarnId && b.Device.Name == device.Name && b.DeviceId != deviceId)
+            .FirstOrDefaultAsync();
+
+        if (existingAssignment != null)
+            throw new InvalidOperationException($"A device with the name '{device.Name}' is already assigned to this barn");
+
         var oldAssignments = _context.BarnIoTDevices.Where(b => b.DeviceId == deviceId);
         _context.BarnIoTDevices.RemoveRange(oldAssignments);
 
