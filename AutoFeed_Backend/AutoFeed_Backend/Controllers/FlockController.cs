@@ -580,20 +580,16 @@ public class FlockController : ControllerBase
         return Ok(success);
     }
 
-    [HttpPut("{id:int}/transfer-barn")]
-    public async Task<IActionResult> TransferFlockToBarn(int id, [FromBody] TransferFlockBarnRequest model)
+    [HttpPut("transfer-quantity-to-flock")]
+    public async Task<IActionResult> TransferQuantityToFlock([FromBody] TransferQuantityToFlockRequest model)
     {
-        if (model == null || model.NewBarnId <= 0)
-            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request - newBarnId is required" });
+        if (model == null || model.SourceFlockId <= 0 || model.TargetFlockId <= 0)
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
 
-        var flock = await _flockService.GetFlockByIdAsync(id);
-        if (flock == null)
-            return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Flock not found" });
-
-        var updated = await _flockService.TransferFlockToBarnAsync(id, model.NewBarnId);
-        if (updated == null)
+        var result = await _flockService.TransferQuantityToFlockAsync(model.SourceFlockId, model.TargetFlockId);
+        if (!result)
             return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Transfer failed" });
 
-        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = updated, Description = "Successfully transferred flock to barn" });
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Successfully transferred 1 quantity from source flock to target flock" });
     }
 }

@@ -73,6 +73,15 @@ public class ChickenBarnRepository : GenericRepository<ChickenBarn>
             .FirstOrDefaultAsync(x => x.CbarnId == id);
     }
 
+    public async Task<List<ChickenBarn>> GetAllWithBarnAsync()
+    {
+        return await _context.Set<ChickenBarn>()
+            .Include(cb => cb.Barn)
+            .Include(cb => cb.Flock)
+            .Include(cb => cb.ChickenL)
+            .ToListAsync();
+    }
+
     public async Task<List<dynamic>> GetChickenBarnDetailAsync(int? barnId, string? barnType)
     {
         var query = _context.Set<ChickenBarn>()

@@ -362,15 +362,15 @@ namespace AutoFeed_Backend_Services.Services
             }
         }
 
-        public async Task<FlockResponse?> TransferFlockToBarnAsync(int flockId, int newBarnId)
+        public async Task<bool> TransferQuantityToFlockAsync(int sourceFlockId, int targetFlockId)
         {
             try
             {
-                return await _unitOfWork.Flocks.TransferFlockToBarnAsync(flockId, newBarnId) is FlockChicken flock ? MapToResponse(flock) : null;
+                return await _unitOfWork.Flocks.TransferQuantityToFlockAsync(sourceFlockId, targetFlockId);
             }
             catch
             {
-                return null;
+                return false;
             }
         }
     }
