@@ -1,4 +1,4 @@
-using AutoFeed_Backend_Services.Interfaces;
+﻿using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Repositories.UnitOfWork;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -87,9 +87,6 @@ public class ChickenBarnService : IChickenBarnService
             // 2. Find the chicken barn for this large chicken
             var cb = await _unitOfWork.ChickenBarns.GetByLargeChickenIdAsync(largeChickenId);
             if (cb == null) return null;
-            cb.Status = "export"; // Mark as export
-            _unitOfWork.ChickenBarns.PrepareUpdate(cb);
-            await _unitOfWork.SaveChangesWithTransactionAsync();
 
             var cbarnId = cb.CbarnId;
 
@@ -130,23 +127,19 @@ public class ChickenBarnService : IChickenBarnService
                 var chickenBarn = await freshContext.ChickenBarns.FindAsync(cbarnId);
                 if (chickenBarn != null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[EXPORT] Before: CBarnId={chickenBarn.CbarnId}, Status={chickenBarn.Status}");
                     chickenBarn.Status = "export";
                     chickenBarn.ExportDate = DateOnly.FromDateTime(DateTime.Now);
                     freshContext.ChickenBarns.Update(chickenBarn);
-                    System.Diagnostics.Debug.WriteLine($"[EXPORT] After marking: CBarnId={chickenBarn.CbarnId}, Status={chickenBarn.Status}");
                 }
 
                 // Save all changes
-                var rowsAffected = await freshContext.SaveChangesAsync();
-                System.Diagnostics.Debug.WriteLine($"[EXPORT] SaveChangesAsync returned: {rowsAffected} rows affected");
+                await freshContext.SaveChangesAsync();
 
                 // Get the final result without tracking - force reload from DB
                 var result = await freshContext.ChickenBarns
                     .AsNoTracking()
                     .FirstOrDefaultAsync(x => x.CbarnId == cbarnId);
 
-                System.Diagnostics.Debug.WriteLine($"[EXPORT] Final result: CBarnId={result?.CbarnId}, Status={result?.Status}, ExportDate={result?.ExportDate}");
                 return result;
             }
             finally

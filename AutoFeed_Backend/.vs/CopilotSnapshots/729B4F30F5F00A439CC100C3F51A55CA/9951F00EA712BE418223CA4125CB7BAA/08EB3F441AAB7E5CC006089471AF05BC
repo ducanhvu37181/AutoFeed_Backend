@@ -1,4 +1,4 @@
-using AutoFeed_Backend_Services.Interfaces;
+﻿using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Repositories.UnitOfWork;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -84,7 +84,10 @@ public class ChickenBarnService : IChickenBarnService
             var lc = await _unitOfWork.LargeChickens.GetByIdAsync(largeChickenId);
             if (lc == null || !lc.IsActive.HasValue || !lc.IsActive.Value) return null;
 
-            // 2. Find the chicken barn for this large chicken
+            // 2. Find ALL chicken barns for this large chicken
+            var lc = await _unitOfWork.LargeChickens.GetByIdAsync(largeChickenId);
+            if (lc == null || !lc.IsActive.HasValue || !lc.IsActive.Value) return null;
+
             var cb = await _unitOfWork.ChickenBarns.GetByLargeChickenIdAsync(largeChickenId);
             if (cb == null) return null;
             cb.Status = "export"; // Mark as export
