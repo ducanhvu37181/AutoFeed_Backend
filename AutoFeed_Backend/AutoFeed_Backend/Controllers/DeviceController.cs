@@ -170,6 +170,39 @@ namespace AutoFeed_Backend.Controllers
             });
         }
 
+        // 5b. Gỡ thiết bị khỏi chuồng
+        [HttpPut("{id}/unassign-barn")]
+        public async Task<IActionResult> UnassignFromBarn(int id)
+        {
+            var device = await _deviceService.GetDeviceByIdAsync(id);
+            if (device == null)
+                return NotFound(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 404,
+                    Data = null,
+                    Description = "Device not found."
+                });
+
+            var success = await _deviceService.UnassignDeviceAsync(id);
+            if (success)
+                return Ok(new ApiResponse<object>
+                {
+                    Status = true,
+                    HttpCode = 200,
+                    Data = null,
+                    Description = $"Device {id} unassigned successfully!"
+                });
+
+            return BadRequest(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Unassignment failed."
+            });
+        }
+
         // 6. Xóa thiết bị
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
