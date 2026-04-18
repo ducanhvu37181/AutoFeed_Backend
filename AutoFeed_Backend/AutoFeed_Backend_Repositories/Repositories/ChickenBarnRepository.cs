@@ -95,8 +95,8 @@ public class ChickenBarnRepository : GenericRepository<ChickenBarn>
             ChickenName = cb.ChickenL != null ? cb.ChickenL.Name : null,
             FlockName = cb.Flock != null ? cb.Flock.Name : null,
             Status = cb.Status,
-            StartDate = (cb.Status != null && cb.Status.ToLower() == "active") ? (DateOnly?)cb.StartDate : null,
-            ExportDate = (cb.ChickenL != null && cb.Status == "export") ? cb.ExportDate : null,
+            StartDate = cb.StartDate,
+            ExportDate = cb.ExportDate,
             TransferDate = cb.Flock != null ? (DateOnly?)cb.Flock.TransferDate : null,
             AvatarUrl = cb.ChickenL != null ? cb.ChickenL.Url : null
         }).ToListAsync();

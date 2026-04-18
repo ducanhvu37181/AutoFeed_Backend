@@ -141,6 +141,16 @@ namespace AutoFeed_Backend.Controllers
         [HttpPut("{id}/assign-barn")]
         public async Task<IActionResult> AssignToBarn(int id, [FromBody] DeviceAssignRequest request)
         {
+            var device = await _deviceService.GetDeviceByIdAsync(id);
+            if (device == null)
+                return NotFound(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 404,
+                    Data = null,
+                    Description = "Device not found."
+                });
+
             var success = await _deviceService.ReassignDeviceAsync(id, request.BarnID);
             if (success)
                 return Ok(new ApiResponse<object>
@@ -156,7 +166,7 @@ namespace AutoFeed_Backend.Controllers
                 Status = false,
                 HttpCode = 400,
                 Data = null,
-                Description = "Assignment failed."
+                Description = $"Assignment failed. A device with the name '{device.DeviceName}' is already assigned to this barn."
             });
         }
 
