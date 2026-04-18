@@ -1,0 +1,155 @@
+﻿using AutoFeed_Backend_Services.Interfaces;
+using AutoFeed_Backend_Repositories.UnitOfWork;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using AutoFeed_Backend_DAO.Models;
+using ChickenBarnModel = AutoFeed_Backend_DAO.Models.ChickenBarn;
+
+namespace AutoFeed_Backend_Services.Services;
+
+public class ChickenBarnService : IChickenBarnService
+{
+    private readonly IUnitOfWork _unitOfWork;
+
+    public ChickenBarnService()
+    {
+        _unitOfWork = new UnitOfWork();
+    }
+
+    public ChickenBarnService(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<int> CreateAsync(ChickenBarnModel entity)
+    {
+        _unitOfWork.ChickenBarns.PrepareCreate(entity);
+        await _unitOfWork.SaveChangesWithTransactionAsync();
+        return entity.CbarnId;  // Return the actual ID, not the row count
+    }
+
+    public async Task<ChickenBarnModel?> GetByIdAsync(int id)
+    {
+        return await _unitOfWork.ChickenBarns.GetByIdAsync(id);
+    }
+
+    public async Task<List<ChickenBarnModel>> GetAllAsync()
+    {
+        return await _unitOfWork.ChickenBarns.GetAllAsync();
+    }
+
+    public async Task<List<ChickenBarnModel>> GetActiveAsync()
+    {
+        return await _unitOfWork.ChickenBarns.GetActiveAsync();
+    }
+
+    public async Task<List<ChickenBarnModel>> GetExportedAsync()
+    {
+        return await _unitOfWork.ChickenBarns.GetExportedAsync();
+    }
+
+    public async Task<bool> UpdateAsync(ChickenBarnModel entity)
+    {
+        try
+        {
+            _unitOfWork.ChickenBarns.PrepareUpdate(entity);
+            var r = await _unitOfWork.SaveChangesWithTransactionAsync();
+            return r > 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var entity = await _unitOfWork.ChickenBarns.GetByIdAsync(id);
+        if (entity == null) return false;
+        entity.Status = "inactive";
+        _unitOfWork.ChickenBarns.PrepareUpdate(entity);
+        var r = await _unitOfWork.SaveChangesWithTransactionAsync();
+        return r > 0;
+    }
+
+
+    public async Task<ChickenBarnModel?> ExportAsync(int largeChickenId)
+    {
+        try
+        {
+            // 1. Validate that the large chicken exists and is active
+            var lc = await _unitOfWork.LargeChickens.GetByIdAsync(largeChickenId);
+            if (lc == null || !lc.IsActive.HasValue || !lc.IsActive.Value) return null;
+
+            // 2. Find the ACTIVE chicken barn for this large chicken
+            var allCbarns = await _unitOfWork.ChickenBarns.GetAllAsync();
+            var activeCbarn = allCbarns.FirstOrDefault(cb => cb.ChickenLid == largeChickenId && cb.Status != null && cb.Status.ToLower() == "active");
+            if (activeCbarn == null) return null;
+
+            var cbarnId = activeCbarn.CbarnId;
+
+            // 3. Update the large chicken - mark as inactive
+            lc.IsActive = false;
+            _unitOfWork.LargeChickens.PrepareUpdate(lc);
+
+            // 4. Update the ACTIVE chicken barn - mark as exported
+            activeCbarn.Status = "export";
+            activeCbarn.ExportDate = DateOnly.FromDateTime(DateTime.Now);
+            _unitOfWork.ChickenBarns.PrepareUpdate(activeCbarn);
+
+            // 5. Update feeding rules for this large chicken - disable them
+            var allFeedingRules = await _unitOfWork.FeedingRules.GetAllAsync();
+            var relevantRules = allFeedingRules.Where(r => r.ChickenLid == largeChickenId).ToList();
+            foreach (var rule in relevantRules)
+            {
+                rule.Status = "disabled";
+                _unitOfWork.FeedingRules.PrepareUpdate(rule);
+            }
+
+            // 6. Update schedules for the active chicken barn - disable them
+            var allSchedules = await _unitOfWork.Schedules.GetAllAsync();
+            var relevantSchedules = allSchedules.Where(s => s.CbarnId == cbarnId).ToList();
+            foreach (var schedule in relevantSchedules)
+            {
+                schedule.Status = "disabled";
+                _unitOfWork.Schedules.PrepareUpdate(schedule);
+            }
+
+            // Save all changes together
+            await _unitOfWork.SaveChangesWithTransactionAsync();
+
+            // Return the exported chicken barn
+            var result = await _unitOfWork.ChickenBarns.GetByIdAsync(cbarnId);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"ExportAsync failed for largeChickenId={largeChickenId}: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            if (ex.InnerException != null)
+            {
+                System.Diagnostics.Debug.WriteLine($"Inner exception: {ex.InnerException.Message}");
+            }
+            return null;
+        }
+    }
+
+    public async Task<ChickenBarnModel?> GetByLargeChickenIdAsync(int largeChickenId)
+    {
+        return await _unitOfWork.ChickenBarns.GetByLargeChickenIdAsync(largeChickenId);
+    }
+
+
+    public async Task<List<ChickenBarnModel>> SearchAsync(int? barnId, int? flockId, int? chickenLid, bool includeInactive = false)
+    {
+        return await _unitOfWork.ChickenBarns.SearchAsync(barnId, flockId, chickenLid, includeInactive);
+    }
+
+    public async Task<List<dynamic>> GetChickenBarnDetailAsync(int? barnId, string? barnType)
+    {
+        return await _unitOfWork.ChickenBarns.GetChickenBarnDetailAsync(barnId, barnType);
+    }
+}
