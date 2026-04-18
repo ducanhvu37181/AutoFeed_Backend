@@ -129,8 +129,7 @@ public class LargeChickenController : ControllerBase
             Url = i.Url,
             IsActive = i.IsActive,
             AgeInMonths = CalculateAgeInMonths(i.Flock?.DoB),
-            FlockName = i.Flock?.Name,
-            ExportDate = GetExportDate(i)
+            FlockName = i.Flock?.Name
         }).ToList();
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }

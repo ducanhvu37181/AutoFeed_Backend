@@ -21,7 +21,7 @@ public class AuthController : ControllerBase
         {
             message = "Thành công!",
             token = token,
-            user = new { user.UserId, user.Username, user.FullName, user.RoleId, user.Status }
+            user = new { user.UserId, user.Username, user.FullName, user.RoleId }
         });
     }
 }

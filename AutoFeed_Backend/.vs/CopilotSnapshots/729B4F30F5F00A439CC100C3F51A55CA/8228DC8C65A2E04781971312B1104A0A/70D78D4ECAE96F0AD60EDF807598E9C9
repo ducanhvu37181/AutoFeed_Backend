@@ -129,8 +129,7 @@ public class LargeChickenController : ControllerBase
             Url = i.Url,
             IsActive = i.IsActive,
             AgeInMonths = CalculateAgeInMonths(i.Flock?.DoB),
-            FlockName = i.Flock?.Name,
-            ExportDate = GetExportDate(i)
+            FlockName = i.Flock?.Name
         }).ToList();
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
@@ -153,8 +152,7 @@ public class LargeChickenController : ControllerBase
             IsActive = item.IsActive,
             BarnId = item.IsActive == true && item.ChickenBarns != null && item.ChickenBarns.Count > 0 ? item.ChickenBarns.FirstOrDefault()?.BarnId : null,
             AgeInMonths = CalculateAgeInMonths(item.Flock?.DoB),
-            FlockName = item.Flock?.Name,
-            ExportDate = GetExportDate(item)
+            FlockName = item.Flock?.Name
         };
 
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
