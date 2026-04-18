@@ -2,6 +2,10 @@ using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Repositories.UnitOfWork;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using AutoFeed_Backend_DAO.Models;
 using ChickenBarnModel = AutoFeed_Backend_DAO.Models.ChickenBarn;
 
 namespace AutoFeed_Backend_Services.Services;
@@ -71,61 +75,95 @@ public class ChickenBarnService : IChickenBarnService
         return r > 0;
     }
 
-    public async Task<bool> ExportAsync(int id)
+
+    public async Task<ChickenBarnModel?> ExportAsync(int largeChickenId)
     {
         try
         {
-            // 1. Load chicken barn with related large chicken, feeding rules and schedules
-            var cb = await _unitOfWork.ChickenBarns.GetByIdAsync(id);
-            if (cb == null) return false;
+            // 1. Validate that the large chicken exists and is active
+            var lc = await _unitOfWork.LargeChickens.GetByIdAsync(largeChickenId);
+            if (lc == null || !lc.IsActive.HasValue || !lc.IsActive.Value) return null;
 
-            // Mark chicken barn as exported with export date
-            cb.Status = "export";
-            cb.ExportDate = DateOnly.FromDateTime(DateTime.Now);
-            _unitOfWork.ChickenBarns.PrepareUpdate(cb);
+            // 2. Find the chicken barn for this large chicken
+            var cb = await _unitOfWork.ChickenBarns.GetByLargeChickenIdAsync(largeChickenId);
+            if (cb == null) return null;
 
-            // 2. If there is a LargeChicken assigned, mark it inactive
-            if (cb.ChickenLid.HasValue)
+            var cbarnId = cb.CbarnId;
+
+            // Now create a fresh context for all modifications to avoid tracking conflicts
+            var freshContext = new AutoFeedDBContext();
+
+            try
             {
-                var lc = await _unitOfWork.LargeChickens.GetByIdAsync(cb.ChickenLid.Value);
-                if (lc != null)
+                // 3. Update the large chicken - mark as inactive
+                var largeChicken = await freshContext.LargeChickens.FindAsync(largeChickenId);
+                if (largeChicken != null)
                 {
-                    lc.IsActive = false;
-                    _unitOfWork.LargeChickens.PrepareUpdate(lc);
-
-                    // 3. Disable feeding rules associated with this large chicken
-                    var rules = await _unitOfWork.FeedingRules.GetByChickenIdAsync(lc.ChickenLid);
-                    foreach (var r in rules)
-                    {
-                        r.Status = "disabled";
-                        _unitOfWork.FeedingRules.PrepareUpdate(r);
-
-                        // disable each detail (they are tracked because we included them in the query)
-                        foreach (var d in r.FeedingRuleDetails)
-                        {
-                            d.Status = false;
-                        }
-                    }
+                    largeChicken.IsActive = false;
+                    freshContext.LargeChickens.Update(largeChicken);
                 }
-            }
 
-            // 4. Disable schedules related to this chicken barn
-            var schedules = await _unitOfWork.Schedules.GetByChickenBarnIdAsync(cb.CbarnId);
-            foreach (var s in schedules)
+                // 4. Update feeding rules for this large chicken - disable them
+                var feedingRules = await freshContext.FeedingRules
+                    .Where(r => r.ChickenLid == largeChickenId)
+                    .ToListAsync();
+                foreach (var rule in feedingRules)
+                {
+                    rule.Status = "disabled";
+                    freshContext.FeedingRules.Update(rule);
+                }
+
+                // 5. Update schedules for this chicken barn - disable them
+                var schedules = await freshContext.Schedules
+                    .Where(s => s.CbarnId == cbarnId)
+                    .ToListAsync();
+                foreach (var schedule in schedules)
+                {
+                    schedule.Status = "disabled";
+                    freshContext.Schedules.Update(schedule);
+                }
+
+                // 6. Update the chicken barn - mark as exported
+                var chickenBarn = await freshContext.ChickenBarns.FindAsync(cbarnId);
+                if (chickenBarn != null)
+                {
+                    chickenBarn.Status = "export";
+                    chickenBarn.ExportDate = DateOnly.FromDateTime(DateTime.Now);
+                    freshContext.ChickenBarns.Update(chickenBarn);
+                }
+
+                // Save all changes
+                await freshContext.SaveChangesAsync();
+
+                // Get the final result without tracking
+                var result = await freshContext.ChickenBarns
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.CbarnId == cbarnId);
+
+                return result;
+            }
+            finally
             {
-                s.Status = "disabled";
-                _unitOfWork.Schedules.PrepareUpdate(s);
+                await freshContext.DisposeAsync();
             }
-
-            // Commit changes
-            var res = await _unitOfWork.SaveChangesWithTransactionAsync();
-            return res > 0;
         }
-        catch
+        catch (Exception ex)
         {
-            return false;
+            System.Diagnostics.Debug.WriteLine($"ExportAsync failed for largeChickenId={largeChickenId}: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            if (ex.InnerException != null)
+            {
+                System.Diagnostics.Debug.WriteLine($"Inner exception: {ex.InnerException.Message}");
+            }
+            return null;
         }
     }
+
+    public async Task<ChickenBarnModel?> GetByLargeChickenIdAsync(int largeChickenId)
+    {
+        return await _unitOfWork.ChickenBarns.GetByLargeChickenIdAsync(largeChickenId);
+    }
+
 
     public async Task<List<ChickenBarnModel>> SearchAsync(int? barnId, int? flockId, int? chickenLid, bool includeInactive = false)
     {

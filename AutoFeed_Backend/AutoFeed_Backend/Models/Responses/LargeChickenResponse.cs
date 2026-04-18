@@ -13,4 +13,5 @@ public class LargeChickenResponse
     public string? Url { get; set; }
     public bool? IsActive { get; set; }
     public int? BarnId { get; set; }
+    public int? AgeInMonths { get; set; }
 }
