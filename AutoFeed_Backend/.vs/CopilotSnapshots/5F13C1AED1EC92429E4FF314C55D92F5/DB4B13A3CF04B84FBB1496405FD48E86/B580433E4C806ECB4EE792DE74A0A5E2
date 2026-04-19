@@ -97,34 +97,6 @@ public class InventoryService : IInventoryService
         return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
     }
 
-    // Cập nhật số lượng và ngày hết hạn của inventory theo ID
-    public async Task<Inventory?> UpdateInventoryAsync(int inventId, int quantity, DateOnly? expiredDate)
-    {
-        var today = DateOnly.FromDateTime(DateTime.Today);
-
-        var inventory = await _unitOfWork.Inventories.FirstOrDefaultAsync(x => x.InventId == inventId);
-        if (inventory == null)
-            return null;
-
-        if (quantity < 0)
-            throw new Exception("Quantity cannot be negative");
-
-        if (expiredDate.HasValue && expiredDate.Value <= today)
-            throw new Exception("Expired date must be in the future");
-
-        if (expiredDate.HasValue && expiredDate.Value > today.AddYears(2))
-            throw new Exception("Expired date too far in future");
-
-        inventory.Quantity = quantity;
-        if (expiredDate.HasValue)
-            inventory.ExpiredDate = expiredDate.Value;
-
-        _unitOfWork.Inventories.PrepareUpdate(inventory);
-        var result = await _unitOfWork.SaveChangesWithTransactionAsync();
-
-        return result > 0 ? inventory : null;
-    }
-
     //Xuất kho: farmer lấy food từ inventory để cho vào máy cho ăn tự động
     //public async Task<bool> ConsumeInventoryAsync(int foodId, int quantity)
     //{

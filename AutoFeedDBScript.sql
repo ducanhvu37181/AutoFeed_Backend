@@ -42,7 +42,7 @@ CREATE TABLE [dbo].[Barn] (
     [waterAmount] INT NOT NULL,
     [foodAmount] DECIMAL(18, 2) NOT NULL,
     [createDate] DATETIME DEFAULT GETDATE(),
-    CONSTRAINT [CK_Barn_Type] CHECK ([type] IN ('Flock Barn', 'Flock Sick Barn', 'Large Chicken Barn'))
+    CONSTRAINT [CK_Barn_Type] CHECK ([type] IN ('Flock Barn', 'Large Chicken Barn'))
 );
 
 CREATE TABLE [dbo].[IoT_Device] (
@@ -111,6 +111,17 @@ CREATE TABLE [dbo].[Data_IoT] (
     CONSTRAINT [FK_DataIoT_Device] FOREIGN KEY([deviceID]) REFERENCES [dbo].[IoT_Device] ([deviceID])
 );
 
+CREATE TABLE [dbo].[ErrorIoT] (
+    [errorID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    [deviceID] INT NOT NULL,
+    [barnID] INT NOT NULL,
+    [errorMessage] NVARCHAR(MAX) NOT NULL,
+    [severity] NVARCHAR(20) NOT NULL, 
+    [recordDate] DATETIME DEFAULT GETDATE(),
+    CONSTRAINT [FK_ErrorIoT_Device] FOREIGN KEY([deviceID]) REFERENCES [dbo].[IoT_Device] ([deviceID]),
+    CONSTRAINT [FK_ErrorIoT_Barn] FOREIGN KEY([barnID]) REFERENCES [dbo].[Barn] ([barnID])
+);
+
 CREATE TABLE [dbo].[LargeChicken] (
     [chickenLID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [flockID] INT NOT NULL,
@@ -147,6 +158,9 @@ CREATE TABLE [dbo].[ChickenBarn] (
     CONSTRAINT [FK_CBarn_LargeChicken] FOREIGN KEY([chickenLID]) REFERENCES [dbo].[LargeChicken] ([chickenLID]),
     CONSTRAINT [CK_ChickenBarn_Status] CHECK ([status] IN ('active', 'export'))
 );
+
+CREATE UNIQUE NONCLUSTERED INDEX UIX_CBarn_Flock ON ChickenBarn(flockID) WHERE flockID IS NOT NULL AND status = 'active';
+CREATE UNIQUE NONCLUSTERED INDEX UIX_CBarn_Chicken ON ChickenBarn(chickenLID) WHERE chickenLID IS NOT NULL AND status = 'active';
 
 CREATE TABLE [dbo].[FeedingRule] (
     [ruleID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
@@ -187,7 +201,8 @@ CREATE TABLE [dbo].[Report] (
     [url] NVARCHAR(MAX) NULL,                   
     [createDate] DATETIME DEFAULT GETDATE(),
     CONSTRAINT [FK_Report_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID]),
-    CONSTRAINT [CK_Report_Status] CHECK ([status] IN ('pending', 'reviewed', 'rejected'))
+    CONSTRAINT [CK_Report_Status] CHECK ([status] IN ('pending', 'reviewed', 'rejected')),
+    CONSTRAINT [CK_Report_Type] CHECK ([type] IN ('Feed', 'Maintenance', 'Medical', 'Inventory', 'Schedule', 'Others'))
 );
 
 CREATE TABLE [dbo].[Request] (
@@ -199,7 +214,8 @@ CREATE TABLE [dbo].[Request] (
     [url] NVARCHAR(MAX) NULL,                   
     [createdAt] DATETIME DEFAULT GETDATE(),
     CONSTRAINT [FK_Request_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID]),
-    CONSTRAINT [CK_Request_Status] CHECK ([status] IN ('pending', 'approved', 'rejected'))
+    CONSTRAINT [CK_Request_Status] CHECK ([status] IN ('pending', 'approved', 'rejected')),
+    CONSTRAINT [CK_Request_Type] CHECK ([type] IN ('Feed', 'Maintenance', 'Medical', 'Inventory', 'Schedule', 'Others'))
 );
 
 CREATE TABLE [dbo].[Schedule] (
@@ -223,120 +239,104 @@ CREATE TABLE [dbo].[Schedule] (
 GO
 
 -- ======================================================
--- 3. DATA INSERTION
+-- 3. SEQUENTIAL DATA INSERTION
 -- ======================================================
 
--- Phase 1: Base Tables
+-- 1. Roles
 INSERT INTO [Role] (description) VALUES ('Manager'), ('TechFarmer'), ('Farmer');
 
+-- 2. Foods
 INSERT INTO [Food] (name, type, note) VALUES 
-('Growth Pellet', 'Processed', 'Standard mix'), ('Organic Corn', 'Grain', 'Energy base'), 
-('Soy Protein', 'Protein', 'Mass gain'), ('Mineral Block', 'Supplement', 'Bone health'), 
-('Vitamin Mix', 'Additive', 'Immunity');
+('Growth Pellet', 'Processed', 'N/A'), ('Organic Corn', 'Grain', 'N/A'), ('Soy Protein', 'Protein', 'N/A'), ('Mineral Block', 'Supplement', 'N/A'), ('Vitamin Mix', 'Additive', 'N/A');
 
+-- 3. Barns (20 total: 1-15 Large, 16-20 Flock)
 INSERT INTO [Barn] (temperature, humidity, type, area, waterAmount, foodAmount) VALUES 
--- 15 Large Chicken Barns (Barn 1-15)
-(24, 55, 'Large Chicken Barn', 100, 80, 40.0), (24, 55, 'Large Chicken Barn', 100, 75, 40.0),
-(23, 58, 'Large Chicken Barn', 100, 85, 40.0), (24, 55, 'Large Chicken Barn', 100, 70, 40.0),
-(25, 54, 'Large Chicken Barn', 100, 90, 40.0), (24, 57, 'Large Chicken Barn', 100, 88, 40.0),
-(24, 55, 'Large Chicken Barn', 100, 82, 40.0), (23, 59, 'Large Chicken Barn', 100, 79, 40.0),
-(24, 56, 'Large Chicken Barn', 100, 81, 40.0), (24, 55, 'Large Chicken Barn', 100, 83, 40.0),
-(25, 54, 'Large Chicken Barn', 100, 90, 40.0), (24, 57, 'Large Chicken Barn', 100, 88, 40.0),
-(24, 55, 'Large Chicken Barn', 100, 82, 40.0), (23, 59, 'Large Chicken Barn', 100, 79, 40.0),
-(24, 56, 'Large Chicken Barn', 100, 81, 40.0),
--- 4 Flock Barns (Barn 16-19)
-(26, 60, 'Flock Barn', 300, 85, 150.0), (26, 61, 'Flock Barn', 300, 90, 150.0),
-(25, 60, 'Flock Barn', 300, 75, 150.0), (27, 62, 'Flock Barn', 300, 80, 150.0),
--- 1 Sick Barn (Barn 20)
-(22, 70, 'Flock Sick Barn', 150, 20, 75.0);
+(24.5, 55.0, 'Large Chicken Barn', 100, 80, 40.0), (24.0, 56.0, 'Large Chicken Barn', 100, 75, 40.0), (23.5, 58.0, 'Large Chicken Barn', 100, 85, 40.0), (24.2, 55.0, 'Large Chicken Barn', 100, 70, 40.0), (25.1, 54.0, 'Large Chicken Barn', 100, 90, 40.0), 
+(24.8, 57.0, 'Large Chicken Barn', 100, 88, 40.0), (24.0, 55.0, 'Large Chicken Barn', 100, 82, 40.0), (23.9, 59.0, 'Large Chicken Barn', 100, 79, 40.0), (24.3, 56.0, 'Large Chicken Barn', 100, 81, 40.0), (24.5, 55.0, 'Large Chicken Barn', 100, 83, 40.0),
+(25.0, 54.0, 'Large Chicken Barn', 100, 90, 40.0), (24.2, 57.0, 'Large Chicken Barn', 100, 88, 40.0), (24.1, 55.0, 'Large Chicken Barn', 100, 82, 40.0), (23.8, 59.0, 'Large Chicken Barn', 100, 79, 40.0), (24.4, 56.0, 'Large Chicken Barn', 100, 81, 40.0),
+(26.5, 60.0, 'Flock Barn', 300, 85, 150.0), (26.2, 61.0, 'Flock Barn', 300, 90, 150.0), (25.8, 60.0, 'Flock Barn', 300, 75, 150.0), (27.0, 62.0, 'Flock Barn', 300, 80, 150.0), (26.4, 61.0, 'Flock Barn', 300, 82, 150.0);
 
-INSERT INTO [IoT_Device] (name, description, status) VALUES 
-('DHT11', 'Temp/Humid Sensor', 1), ('HX711', 'Weight Sensor', 1), ('V2 sensor', 'Water Sensor', 1);
+-- 4. IoT Devices & Assignment
+INSERT INTO [IoT_Device] (name, description, status) VALUES ('DHT11', 'Temp/Humid Sensor', 1), ('HX711', 'Weight Sensor', 1), ('V2 sensor', 'Water Level Sensor', 1);
+INSERT INTO [BarnIoT_Device] (barnID, deviceID, installationDate) VALUES (1, 1, '2026-04-01'), (1, 2, '2026-04-01'), (1, 3, '2026-04-01');
 
--- Phase 2: FlockChicken (5 Source Old, 5 Active New)
+-- 5. FlockChicken (5 Source Old, 5 Active New)
 INSERT INTO [FlockChicken] (name, quantity, weight, DoB, transferDate, healthStatus, isActive) VALUES 
--- Old Flocks (Age >= 3 Months, exported to Large Chicken stage)
-('Red Rhode Batch A', 0, 0.45, '2025-12-01', '2026-04-01', 'healthy', 0),
-('Leghorn Alpha L3', 0, 0.50, '2025-12-05', '2026-04-01', 'healthy', 0),
-('Australorp Prime', 0, 0.48, '2025-12-10', '2026-04-02', 'healthy', 0),
-('Sussex Legacy L1', 0, 0.52, '2025-12-15', '2026-04-02', 'healthy', 0),
-('Plymouth Rock Mix', 0, 0.47, '2025-12-20', '2026-04-03', 'healthy', 0),
--- New Flocks (Age < 3 Months, currently being raised)
-('Junior Reds 2026', 3, 0.35, '2026-02-15', NULL, 'healthy', 1),
-('Baby Leghorn B2', 3, 0.38, '2026-02-20', NULL, 'healthy', 1),
-('Sussex Isolation', 3, 0.30, '2026-03-01', NULL, 'sick', 1),
-('Starter Australorp', 3, 0.32, '2026-03-05', NULL, 'healthy', 1),
-('Heritage Junior L5', 3, 0.34, '2026-03-10', NULL, 'healthy', 1);
+('Flock_1', 0, 0.45, '2025-12-01', '2026-04-01', 'healthy', 0), ('Flock_2', 0, 0.50, '2025-12-05', '2026-04-01', 'healthy', 0), ('Flock_3', 0, 0.48, '2025-12-10', '2026-04-02', 'healthy', 0), ('Flock_4', 0, 0.52, '2025-12-15', '2026-04-02', 'healthy', 0), ('Flock_5', 0, 0.47, '2025-12-20', '2026-04-03', 'healthy', 0),
+('Flock_6', 3, 0.35, '2026-02-15', NULL, 'healthy', 1), ('Flock_7', 3, 0.38, '2026-02-20', NULL, 'healthy', 1), ('Flock_8', 3, 0.30, '2026-03-01', NULL, 'sick', 1), ('Flock_9', 3, 0.32, '2026-03-05', NULL, 'healthy', 1), ('Flock_10', 3, 0.34, '2026-03-10', NULL, 'healthy', 1);
 
--- Phase 3: Dependent Level 1
+-- 6. LargeChicken (15 birds)
+INSERT INTO [LargeChicken] (flockID, name, weight, healthStatus, url) VALUES 
+(1, 'LChickenFromFlock1_Barn1', 3.5, 'healthy', 'https://tse2.mm.bing.net/th/id/OIP.uMHvXzIat56m-af5peVqGgHaJq?rs=1&pid=ImgDetMain&o=7&rm=3'), (1, 'LChickenFromFlock1_Barn2', 3.4, 'healthy', 'https://anhdephd.vn/wp-content/uploads/2022/05/hinh-nen-ga-choi-dep.jpg'), (1, 'LChickenFromFlock1_Barn3', 3.6, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-duoc-chai-long-ti-mi.jpg'),
+(2, 'LChickenFromFlock2_Barn4', 3.5, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-so-huu-bo-long-mau-do-nau.jpg'), (2, 'LChickenFromFlock2_Barn5', 3.7, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-co-cua.jpg'), (2, 'LChickenFromFlock2_Barn6', 3.8, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-xong-tran.jpg'),
+(3, 'LChickenFromFlock3_Barn7', 3.5, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-chuyen-nghiep.jpg'), (3, 'LChickenFromFlock3_Barn8', 3.9, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-dung-manh.jpg'), (3, 'LChickenFromFlock3_Barn9', 3.4, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-hien-ngang.jpg'),
+(4, 'LChickenFromFlock4_Barn10', 3.5, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-khi-dung-duoi-anh-nang-gat.jpg'), (4, 'LChickenFromFlock4_Barn11', 3.6, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-long-trang.jpg'), (4, 'LChickenFromFlock4_Barn12', 3.7, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-sieu-chien.jpg'),
+(5, 'LChickenFromFlock5_Barn13', 3.8, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-vung-hoang-da.jpg'), (5, 'LChickenFromFlock5_Barn14', 3.5, 'healthy', 'https://img1.kienthucvui.vn/uploads/2021/01/15/anh-ga-troi-tren-nen-co-xanh_011040616.jpg'), (5, 'LChickenFromFlock5_Barn15', 3.9, 'healthy', 'https://img1.kienthucvui.vn/uploads/2021/01/15/anh-giong-ga-choi-noi-tieng-tai-viet-nam_011040771.jpg');
+
+-- 7. Task (No Feeding)
+INSERT INTO [Task] (title, description, startTime, endTime) VALUES 
+('Sanitation','Deep floor sweeping and disinfection','08:00','09:30'), 
+('Medical Check','Routine health inspection by Tech/Vet','10:00','11:30'), 
+('Inventory','Restock feed bags and check expiry dates','14:00','15:30'), 
+('IoT Calibration','Sensor check and battery replacement','16:00','17:00'), 
+('Hydration Check','Verify water pressure and clean nozzles','09:30','10:30');
+
+-- 8. Users
 INSERT INTO [User] (roleID, email, password, fullName, phone, username, avatarURL) VALUES 
 (1, 'manager@farm.com', 'p1', 'Alice Johnson', '0912345671', 'alice_mgr', 'https://tse1.mm.bing.net/th/id/OIP.p9bNjr0mX-spDgSi1S5hrgHaLH?rs=1&pid=ImgDetMain&o=7&rm=3'),
-(2, 'tech@farm.com', 'p2', 'Bob Smith', '0912345672', 'bob_tech', 'https://haycafe.vn/wp-content/uploads/2022/03/Hinh-anh-chan-dung-nam-dep.jpg'),
-(3, 'farmer@farm.com', 'p3', 'Charlie Brown', '0912345673', 'charlie_f', 'https://tse1.mm.bing.net/th/id/OIP.s_OjVf-2_ScyG9UniAlm6wHaLH?w=1024&h=1536&rs=1&pid=ImgDetMain&o=7&rm=3');
+(2, 'techfarmer@farm.com', 'p2', 'Bob Smith', '0912345672', 'bob_tech', 'https://haycafe.vn/wp-content/uploads/2022/03/Hinh-anh-chan-dung-nam-dep.jpg'),
+(3, 'farmer1@farm.com', 'p3', 'Charlie Brown', '0912345673', 'charlie_f', 'https://tse1.mm.bing.net/th/id/OIP.s_OjVf-2_ScyG9UniAlm6wHaLH?w=1024&h=1536&rs=1&pid=ImgDetMain&o=7&rm=3'),
+(3, 'farmer2@farm.com', 'p4', 'Frank Green', '0912345674', 'frank_f', 'https://haycafe.vn/wp-content/uploads/2022/03/Hinh-anh-chan-dung-nam-dep.jpg'),
+(3, 'farmer3@farm.com', 'p5', 'Grace Hopper', '0912345675', 'grace_f', 'https://leasy.github.io/images/busi.png'),
+(3, 'farmer4@farm.com', 'p6', 'Henry Ford', '0912345676', 'henry_f', 'https://www.microsoft.com/en-us/research/wp-content/uploads/2023/03/Hoang-photo-1024x1024.jpg'),
+(3, 'farmer5@farm.com', 'p7', 'Ivy League', '0912345677', 'ivy_f', 'https://tse1.mm.bing.net/th/id/OIP.p9bNjr0mX-spDgSi1S5hrgHaLH?rs=1&pid=ImgDetMain&o=7&rm=3'),
+(3, 'farmer6@farm.com', 'p8', 'Jack Sparrow', '0912345678', 'jack_f', 'https://haycafe.vn/wp-content/uploads/2022/03/Hinh-anh-chan-dung-nam-dep.jpg');
 
-INSERT INTO [BarnIoT_Device] (barnID, deviceID, installationDate) VALUES (1, 1, '2026-04-02'), (1, 2, '2026-04-02'), (1, 3, '2026-04-03');
-
--- LargeChicken (15 birds from Flocks 1-5)
-INSERT INTO [LargeChicken] (flockID, name, weight, healthStatus, url) VALUES 
--- From Flock 1 (Red Rhode)
-(1, 'Iron Talon', 3.5, 'healthy', 'https://tse2.mm.bing.net/th/id/OIP.uMHvXzIat56m-af5peVqGgHaJq?rs=1&pid=ImgDetMain&o=7&rm=3'),
-(1, 'Ruby Crest', 3.4, 'healthy', 'https://anhdephd.vn/wp-content/uploads/2022/05/hinh-nen-ga-choi-dep.jpg'),
-(1, 'Midnight Shadow', 3.6, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-duoc-chai-long-ti-mi.jpg'),
--- From Flock 2 (Leghorn)
-(2, 'Golden Spur', 3.5, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-so-huu-bo-long-mau-do-nau.jpg'),
-(2, 'Thunder Wing', 3.7, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-co-cua.jpg'),
-(2, 'Flame Feather', 3.8, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-xong-tran.jpg'),
--- From Flock 3 (Australorp)
-(3, 'Stone Beak', 3.5, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-chuyen-nghiep.jpg'),
-(3, 'Silver Claw', 3.9, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-dung-manh.jpg'),
-(3, 'Storm Eye', 3.4, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-hien-ngang.jpg'),
--- From Flock 4 (Sussex)
-(4, 'Titan', 3.5, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-khi-dung-duoi-anh-nang-gat.jpg'),
-(4, 'Raptor', 3.6, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-long-trang.jpg'),
-(4, 'Phoenix', 3.7, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-sieu-chien.jpg'),
--- From Flock 5 (Plymouth)
-(5, 'Blizzard', 3.8, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-vung-hoang-da.jpg'),
-(5, 'Ghost', 3.5, 'healthy', 'https://img1.kienthucvui.vn/uploads/2021/01/15/anh-ga-troi-tren-nen-co-xanh_011040616.jpg'),
-(5, 'Vanguard', 3.9, 'healthy', 'https://img1.kienthucvui.vn/uploads/2021/01/15/anh-giong-ga-choi-noi-tieng-tai-viet-nam_011040771.jpg');
-
-INSERT INTO [Task] (title, description, startTime, endTime) VALUES 
-('Feeding','Standard breakfast','07:00','08:00'), ('Sanitation','Floor cleaning','09:00','10:30'), 
-('Medical','Vet health check','13:00','14:30'), ('IOT Maint','Sensor calibration','16:00','17:00'), 
-('Hydration','Check water pressure','10:00','11:00');
-
--- Phase 4: ChickenBarn Assignments
--- Exported Flocks (ID 1-5)
+-- 9. ChickenBarn Assignments
 INSERT INTO [ChickenBarn] (barnID, flockID, chickenLID, startDate, exportDate, status) VALUES 
-(16, 1, NULL, '2025-12-15', '2026-04-01', 'export'),
-(17, 2, NULL, '2025-12-20', '2026-04-01', 'export'),
-(18, 3, NULL, '2025-12-25', '2026-04-02', 'export'),
-(19, 4, NULL, '2025-12-30', '2026-04-02', 'export'),
-(16, 5, NULL, '2026-01-05', '2026-04-03', 'export');
-
--- Active 15 LargeChickens (Barn 1-15)
+(16, 1, NULL, '2025-12-15', '2026-04-01', 'export'), (17, 2, NULL, '2025-12-20', '2026-04-01', 'export'), (18, 3, NULL, '2025-12-25', '2026-04-02', 'export'), (19, 4, NULL, '2025-12-30', '2026-04-02', 'export'), (20, 5, NULL, '2026-01-05', '2026-04-03', 'export');
 INSERT INTO [ChickenBarn] (barnID, chickenLID, startDate, status) VALUES 
-(1, 1, '2026-04-01', 'active'), (2, 2, '2026-04-01', 'active'), (3, 3, '2026-04-01', 'active'),
-(4, 4, '2026-04-01', 'active'), (5, 5, '2026-04-01', 'active'), (6, 6, '2026-04-01', 'active'),
-(7, 7, '2026-04-02', 'active'), (8, 8, '2026-04-02', 'active'), (9, 9, '2026-04-02', 'active'),
-(10, 10, '2026-04-02', 'active'), (11, 11, '2026-04-02', 'active'), (12, 12, '2026-04-02', 'active'),
-(13, 13, '2026-04-03', 'active'), (14, 14, '2026-04-03', 'active'), (15, 15, '2026-04-03', 'active');
-
--- Active 5 Young Flocks (Barn 16-19, Sick Barn 20)
+(1, 1, '2026-04-01', 'active'), (2, 2, '2026-04-01', 'active'), (3, 3, '2026-04-01', 'active'), (4, 4, '2026-04-01', 'active'), (5, 5, '2026-04-01', 'active'),
+(6, 6, '2026-04-01', 'active'), (7, 7, '2026-04-02', 'active'), (8, 8, '2026-04-02', 'active'), (9, 9, '2026-04-02', 'active'), (10, 10, '2026-04-02', 'active'),
+(11, 11, '2026-04-02', 'active'), (12, 12, '2026-04-02', 'active'), (13, 13, '2026-04-03', 'active'), (14, 14, '2026-04-03', 'active'), (15, 15, '2026-04-03', 'active');
 INSERT INTO [ChickenBarn] (barnID, flockID, startDate, status) VALUES 
-(16, 6, '2026-04-10', 'active'), (17, 7, '2026-04-12', 'active'),
-(20, 8, '2026-04-14', 'active'), (18, 9, '2026-04-15', 'active'),
-(19, 10, '2026-04-16', 'active');
+(16, 6, '2026-04-10', 'active'), (17, 7, '2026-04-12', 'active'), (20, 8, '2026-04-14', 'active'), (18, 9, '2026-04-15', 'active'), (19, 10, '2026-04-16', 'active');
 
--- Phase 5: Other operational data
-INSERT INTO [Inventory] (foodID, quantity, weightPerBag, expiredDate) VALUES (1,50,20,'2027-01-01'), (2,50,20,'2027-01-01'), (3,50,20,'2027-01-01');
-INSERT INTO [FeedingRule] (flockID, chickenLID, startDate, endDate, times, description) VALUES (6, NULL, '2026-04-10', '2026-05-10', 3, 'Young Reds growth'), (NULL, 1, '2026-04-01', '2026-05-01', 2, 'Iron Talon heavy diet');
-INSERT INTO [FeedingRuleDetail] (ruleID, foodID, feedHour, feedMinute, amount, description) VALUES (1, 1, 7, 0, 5.0, 'Morning'), (2, 3, 8, 30, 10.0, 'Rich Breakfast');
-INSERT INTO [Report] (userID, type, description, status, url, createDate) VALUES (3, 'Vet', 'Flock Sussex health audit', 'reviewed', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2Ff0439f90-8361-492d-b366-b21c5f6d8581.pdf?alt=media&token=e6f7c2b6-1687-413c-b50e-e4fcb9818ae0', '2026-04-17');
-INSERT INTO [Request] (userID, type, description, status, createdAt) VALUES (3, 'Food', 'Soy protein restock', 'approved', '2026-04-16');
+-- 10. FeedingRules (3 rules, 3 details each)
+INSERT INTO [FeedingRule] (flockID, chickenLID, startDate, endDate, times, description) VALUES 
+(6, NULL, '2026-04-10', '2026-05-10', 3, 'Growth diet for Flock 6'), 
+(NULL, 1, '2026-04-01', '2026-05-01', 3, 'High protein for Champion 01'),
+(7, NULL, '2026-04-12', '2026-05-12', 3, 'Maintenance for Flock 7');
 
+INSERT INTO [FeedingRuleDetail] (ruleID, foodID, feedHour, feedMinute, amount, description) VALUES 
+(1, 1, 7, 0, 5.0, 'Breakfast'), (1, 1, 12, 0, 4.0, 'Noon cycle'), (1, 1, 18, 0, 5.0, 'Evening cycle'),
+(2, 3, 8, 30, 10.0, 'Morning Heavy'), (2, 3, 13, 0, 8.5, 'Mid-day Lite'), (2, 3, 19, 0, 10.0, 'Night Boost'),
+(3, 2, 7, 30, 7.5, 'Protein 1'), (3, 2, 12, 30, 6.0, 'Protein 2'), (3, 2, 18, 30, 7.5, 'Protein 3');
+
+-- 11. Report (Min 5)
+INSERT INTO [Report] (userID, type, description, status, url, createDate) VALUES 
+(3, 'Medical', 'Flock_8 respiratory checkup - all stable', 'reviewed', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2Ff0439f90-8361-492d-b366-b21c5f6d8581.pdf?alt=media&token=e6f7c2b6-1687-413c-b50e-e4fcb9818ae0', '2026-04-17'),
+(2, 'Maintenance', 'Barn 1 gateway signal log - calibrated', 'pending', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2Ff0439f90-8361-492d-b366-b21c5f6d8581.pdf?alt=media&token=e6f7c2b6-1687-413c-b50e-e4fcb9818ae0', '2026-04-17'),
+(4, 'Feed', 'Corn storage humidity audit report', 'reviewed', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2Ff0439f90-8361-492d-b366-b21c5f6d8581.pdf?alt=media&token=e6f7c2b6-1687-413c-b50e-e4fcb9818ae0', '2026-04-18'),
+(5, 'Inventory', 'Weekly stock audit Q1 summary', 'pending', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2Ff0439f90-8361-492d-b366-b21c5f6d8581.pdf?alt=media&token=e6f7c2b6-1687-413c-b50e-e4fcb9818ae0', '2026-04-18'),
+(6, 'Others', 'Security fence inspection result Barn 19', 'rejected', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2Ff0439f90-8361-492d-b366-b21c5f6d8581.pdf?alt=media&token=e6f7c2b6-1687-413c-b50e-e4fcb9818ae0', '2026-04-19');
+
+-- 12. Request (Min 5)
+INSERT INTO [Request] (userID, type, description, status, createdAt) VALUES 
+(3, 'Feed', 'Request for 20 bags of Soy Protein mix', 'approved', '2026-04-15'),
+(4, 'Maintenance', 'Urgent fix for water leakage in Barn 17', 'pending', '2026-04-16'),
+(5, 'Medical', 'Order 100 doses of Bird Flu vaccines', 'approved', '2026-04-17'),
+(6, 'Schedule', 'Request shift swap for the upcoming weekend', 'rejected', '2026-04-18'),
+(7, 'Others', 'Purchase order for 10 new cleaning kits', 'pending', '2026-04-19');
+
+-- 13. Schedule (Referring to non-feeding tasks)
 INSERT INTO [Schedule] (userID, taskID, CBarnID, description, note, priority, status, startDate, endDate, createdDate) VALUES 
-(3, 1, 6, 'Feed Iron Talon', 'Morning cycle', 'high', 'completed', '2026-04-17', '2026-04-17', '2026-04-15'),
-(3, 2, 21, 'Sanitize Barn 16', 'Sector A', 'medium', 'pending', '2026-04-17', '2026-04-17', '2026-04-16');
-GO
+(3, 1, 6, 'Monthly floor sanitation', 'Use disinfectant', 'high', 'completed', '2026-04-19', '2026-04-19', '2026-04-18'),
+(4, 2, 21, 'Full medical checkup', 'Focus on respiratory', 'medium', 'pending', '2026-04-19', '2026-04-19', '2026-04-18'),
+(5, 5, 23, 'Clean water nozzles', 'Barn 20 only', 'high', 'in progress', '2026-04-19', '2026-04-19', '2026-04-18'),
+(2, 4, 1, 'Recalibrate HX711 sensor', 'Barn 1 weight check', 'medium', 'pending', '2026-04-19', '2026-04-19', '2026-04-18'),
+(8, 3, 25, 'Restock Growth Pellet bins', 'Fill to 80%', 'low', 'pending', '2026-04-19', '2026-04-19', '2026-04-18');
 
--- NOTE: [Data_IoT] is empty to receive real-time device data.
+-- 14. Inventory
+INSERT INTO [Inventory] (foodID, quantity, weightPerBag, expiredDate) VALUES (1,100,20,'2027-01-01'), (2,100,20,'2027-01-01'), (3,100,20,'2027-01-01');
+GO

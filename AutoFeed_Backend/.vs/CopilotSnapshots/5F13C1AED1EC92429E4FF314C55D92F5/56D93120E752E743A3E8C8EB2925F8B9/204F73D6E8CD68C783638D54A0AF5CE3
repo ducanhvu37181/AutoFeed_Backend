@@ -17,9 +17,6 @@ public interface IInventoryService
     // Thêm inventory mới (nhập kho)
     Task<bool> AddInventoryAsync(Inventory item);
 
-    // Cập nhật số lượng và ngày hết hạn của inventory theo ID
-    Task<Inventory?> UpdateInventoryAsync(int inventId, int quantity, DateOnly? expiredDate);
-
     //Xuất kho: farmer lấy food từ inventory để cho vào máy cho ăn tự động
     //Task<bool> ConsumeInventoryAsync(int foodId, int quantity);
 

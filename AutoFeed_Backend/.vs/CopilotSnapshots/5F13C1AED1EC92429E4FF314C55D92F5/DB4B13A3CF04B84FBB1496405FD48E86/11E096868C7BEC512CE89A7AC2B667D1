@@ -10,6 +10,7 @@ namespace AutoFeed_Backend.Models.Requests.Flock
         /// <summary>Chỉ ngày (JSON: "2026-01-01") — không cần giờ.</summary>
         public DateOnly DoB { get; set; }
         public DateOnly TransferDate { get; set; }
+        public string HealthStatus { get; set; } = "healthy";
         public string? Note { get; set; }
         public bool IsActive { get; set; } = true; // Default to active when created
     }
