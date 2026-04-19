@@ -8,6 +8,7 @@ namespace AutoFeed_Backend_Services.Interfaces
         Task<bool> UpdateDeviceAsync(int id, string name, string description, bool status);
         Task<bool> DeleteDeviceAsync(int id);
         Task<bool> ReassignDeviceAsync(int deviceId, int barnId);
+        Task<bool> UnassignDeviceAsync(int deviceId);
         Task<DeviceDetailResponse?> GetDeviceByIdAsync(int deviceId);
         Task<IEnumerable<object>> GetDevicesByBarnIdAsync(int barnId);
         Task<object?> GetBarnByDeviceIdAsync(int deviceId);

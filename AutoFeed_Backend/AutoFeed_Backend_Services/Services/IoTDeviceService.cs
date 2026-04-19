@@ -109,6 +109,20 @@ namespace AutoFeed_Backend_Services.Services
             }
         }
 
+        public async Task<bool> UnassignDeviceAsync(int deviceId)
+        {
+            try
+            {
+                await _unitOfWork.IoTDevices.UnassignDeviceAsync(deviceId);
+                await _unitOfWork.SaveChangesWithTransactionAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         // Get devices by barn id
         public async Task<IEnumerable<object>> GetDevicesByBarnIdAsync(int barnId)
         {

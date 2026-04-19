@@ -25,5 +25,6 @@ namespace AutoFeed_Backend_Services.Interfaces
         /// <returns>Success + null error, or failure + message (FK / DB).</returns>
         Task<(bool Success, string? Error)> DeleteFlockAsync(int id);
         Task<bool> UpgradeToLargeChickenAsync(FlockUpgradeRequest request);
+        Task<bool> TransferQuantityToFlockAsync(int sourceFlockId, int targetFlockId);
     }
 }

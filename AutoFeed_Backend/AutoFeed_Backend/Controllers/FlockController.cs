@@ -579,4 +579,17 @@ public class FlockController : ControllerBase
         };
         return Ok(success);
     }
+
+    [HttpPut("transfer-quantity-to-flock")]
+    public async Task<IActionResult> TransferQuantityToFlock([FromBody] TransferQuantityToFlockRequest model)
+    {
+        if (model == null || model.SourceFlockId <= 0 || model.TargetFlockId <= 0)
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
+
+        var result = await _flockService.TransferQuantityToFlockAsync(model.SourceFlockId, model.TargetFlockId);
+        if (!result)
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Transfer failed" });
+
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Successfully transferred 1 quantity from source flock to target flock" });
+    }
 }

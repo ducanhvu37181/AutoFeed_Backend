@@ -361,5 +361,17 @@ namespace AutoFeed_Backend_Services.Services
                 return false;
             }
         }
+
+        public async Task<bool> TransferQuantityToFlockAsync(int sourceFlockId, int targetFlockId)
+        {
+            try
+            {
+                return await _unitOfWork.Flocks.TransferQuantityToFlockAsync(sourceFlockId, targetFlockId);
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }
