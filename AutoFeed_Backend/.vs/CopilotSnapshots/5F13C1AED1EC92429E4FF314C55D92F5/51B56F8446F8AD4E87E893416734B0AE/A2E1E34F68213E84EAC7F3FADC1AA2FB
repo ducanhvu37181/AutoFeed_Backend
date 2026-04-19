@@ -185,7 +185,7 @@ namespace AutoFeed_Backend_Services.Services
                     Weight = req.Weight,
                     DoB = req.DoB,
                     TransferDate = req.TransferDate,
-                    HealthStatus = "Healthy",
+                    HealthStatus = req.HealthStatus ?? "Healthy",
                     Note = req.Note,
                     IsActive = req.IsActive
                 };
@@ -358,18 +358,6 @@ namespace AutoFeed_Backend_Services.Services
             {
                 // Log the error for debugging
                 Console.WriteLine("Error during chicken upgrade: " + ex.Message);
-                return false;
-            }
-        }
-
-        public async Task<bool> TransferQuantityToFlockAsync(int sourceFlockId, int targetFlockId)
-        {
-            try
-            {
-                return await _unitOfWork.Flocks.TransferQuantityToFlockAsync(sourceFlockId, targetFlockId);
-            }
-            catch
-            {
                 return false;
             }
         }

@@ -270,7 +270,7 @@ public class ScheduleService : IScheduleService
     {
         var entity = await _unitOfWork.Schedules.GetByIdAsync(id);
         if (entity == null) return false;
-        entity.Status = "pending"; // soft-delete set to pending or some value representing removed
+        entity.Status = "disabled"; // soft-delete set to disabled
         _unitOfWork.Schedules.PrepareUpdate(entity);
         var r = await _unitOfWork.SaveChangesWithTransactionAsync();
         return r > 0;
