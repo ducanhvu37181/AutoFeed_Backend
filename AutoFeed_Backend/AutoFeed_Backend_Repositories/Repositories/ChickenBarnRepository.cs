@@ -20,6 +20,13 @@ public class ChickenBarnRepository : GenericRepository<ChickenBarn>
             .ToListAsync();
     }
 
+    // Check if a barn has any active ChickenBarn (status = "active")
+    public async Task<bool> IsActiveAsync(int barnId)
+    {
+        return await _context.Set<ChickenBarn>()
+            .AnyAsync(cb => cb.BarnId == barnId && cb.Status != null && cb.Status.ToLower() == "active");
+    }
+
     public async Task<List<ChickenBarn>> GetInactiveAsync()
     {
         return await _context.Set<ChickenBarn>()

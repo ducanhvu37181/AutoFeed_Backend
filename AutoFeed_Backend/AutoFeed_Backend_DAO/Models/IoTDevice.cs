@@ -18,4 +18,6 @@ public partial class IoTDevice
     public virtual ICollection<BarnIoTDevice> BarnIoTDevices { get; set; } = new List<BarnIoTDevice>();
 
     public virtual ICollection<DataIoT> DataIoTs { get; set; } = new List<DataIoT>();
+
+    public virtual ICollection<ErrorIoT> ErrorIoTs { get; set; } = new List<ErrorIoT>();
 }

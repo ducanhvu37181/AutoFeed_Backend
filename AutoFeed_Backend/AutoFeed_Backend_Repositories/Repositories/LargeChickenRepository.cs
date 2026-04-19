@@ -16,7 +16,7 @@ public class LargeChickenRepository : GenericRepository<LargeChicken>
     public new async Task<List<LargeChicken>> GetAllAsync()
     {
         return await _context.Set<LargeChicken>()
-            .Include(lc => lc.ChickenBarns)
+            .Include(lc => lc.ChickenBarn)
             .Include(lc => lc.Flock)
             .ToListAsync();
     }
@@ -24,7 +24,7 @@ public class LargeChickenRepository : GenericRepository<LargeChicken>
     public new async Task<LargeChicken?> GetByIdAsync(int id)
     {
         return await _context.Set<LargeChicken>()
-            .Include(lc => lc.ChickenBarns)
+            .Include(lc => lc.ChickenBarn)
             .Include(lc => lc.Flock)
             .FirstOrDefaultAsync(x => x.ChickenLid == id);
     }
@@ -32,7 +32,7 @@ public class LargeChickenRepository : GenericRepository<LargeChicken>
     public async Task<List<LargeChicken>> GetActiveAsync()
     {
         return await _context.Set<LargeChicken>()
-            .Include(lc => lc.ChickenBarns)
+            .Include(lc => lc.ChickenBarn)
             .Include(lc => lc.Flock)
             .Where(x => x.IsActive == true)
             .ToListAsync();
@@ -41,7 +41,7 @@ public class LargeChickenRepository : GenericRepository<LargeChicken>
     public async Task<List<LargeChicken>> GetInactiveAsync()
     {
         return await _context.Set<LargeChicken>()
-            .Include(lc => lc.ChickenBarns)
+            .Include(lc => lc.ChickenBarn)
             .Include(lc => lc.Flock)
             .Where(x => x.IsActive != true)
             .ToListAsync();
@@ -50,7 +50,7 @@ public class LargeChickenRepository : GenericRepository<LargeChicken>
     public async Task<List<LargeChicken>> SearchAsync(string? name, string? healthStatus, int? flockId, bool includeInactive)
     {
         var query = _context.Set<LargeChicken>()
-            .Include(lc => lc.ChickenBarns)
+            .Include(lc => lc.ChickenBarn)
             .Include(lc => lc.Flock)
             .AsQueryable();
 

@@ -1,0 +1,80 @@
+﻿using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Repositories.UnitOfWork;
+using AutoFeed_Backend_Services.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace AutoFeed_Backend_Services.Services;
+
+public class ErrorIoTService : IErrorIoTService
+{
+    private readonly IUnitOfWork _unitOfWork;
+
+    public ErrorIoTService(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<ErrorIoT> AddErrorIoTAsync(int deviceId, int barnId, string errorMessage, string severity)
+    {
+        // Validate that device exists
+        var device = await _unitOfWork.IoTDevices.GetByIdAsync(deviceId);
+        if (device == null)
+            throw new Exception($"Device with ID {deviceId} not found");
+
+        // Validate that barn exists
+        var barn = await _unitOfWork.Barns.GetByIdAsync(barnId);
+        if (barn == null)
+            throw new Exception($"Barn with ID {barnId} not found");
+
+        var errorIoT = new ErrorIoT
+        {
+            DeviceId = deviceId,
+            BarnId = barnId,
+            ErrorMessage = errorMessage,
+            Severity = severity,
+            RecordDate = DateTime.Now
+        };
+
+        await _unitOfWork.ErrorIoTs.AddAsync(errorIoT);
+        await _unitOfWork.SaveChangesWithTransactionAsync();
+
+        return errorIoT;
+    }
+
+    public async Task<IEnumerable<object>> GetAllErrorIoTAsync()
+    {
+        var errors = await _unitOfWork.ErrorIoTs.GetAllWithDetailsAsync();
+
+        return errors.Select(e => new
+        {
+            ErrorId = e.ErrorId,
+            DeviceId = e.DeviceId,
+            DeviceName = e.Device?.Name,
+            BarnId = e.BarnId,
+            BarnName = e.Barn?.BarnName,
+            ErrorMessage = e.ErrorMessage,
+            Severity = e.Severity,
+            RecordDate = e.RecordDate?.ToString("yyyy-MM-dd HH:mm:ss")
+        });
+    }
+
+    public async Task<IEnumerable<object>> GetErrorIoTByDeviceIdAsync(int deviceId)
+    {
+        var errors = await _unitOfWork.ErrorIoTs.GetByDeviceIdAsync(deviceId);
+
+        return errors.Select(e => new
+        {
+            ErrorId = e.ErrorId,
+            DeviceId = e.DeviceId,
+            DeviceName = e.Device?.Name,
+            BarnId = e.BarnId,
+            BarnName = e.Barn?.BarnName,
+            ErrorMessage = e.ErrorMessage,
+            Severity = e.Severity,
+            RecordDate = e.RecordDate?.ToString("yyyy-MM-dd HH:mm:ss")
+        });
+    }
+}
