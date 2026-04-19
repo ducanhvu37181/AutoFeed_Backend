@@ -1,4 +1,4 @@
-﻿using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_DAO.Models;
 using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend.Models.Requests;
 using AutoFeed_Backend.Models.Requests.LargeChicken;
@@ -34,11 +34,11 @@ public class LargeChickenController : ControllerBase
 
     private static DateOnly? GetExportDate(LargeChicken chicken)
     {
-        if (chicken?.ChickenBarns == null || chicken.ChickenBarns.Count == 0)
+        if (chicken?.ChickenBarn == null)
             return null;
 
-        // Return the export date from the first (or most recent) ChickenBarn record
-        return chicken.ChickenBarns.FirstOrDefault()?.ExportDate;
+        // Return the export date from the ChickenBarn record
+        return chicken.ChickenBarn.ExportDate;
     }
 
     [HttpPost("{id:int}/avatar")]
@@ -86,7 +86,7 @@ public class LargeChickenController : ControllerBase
             Note = i.Note,
             Url = i.Url,
             IsActive = i.IsActive,
-            BarnId = i.IsActive == true && i.ChickenBarns != null && i.ChickenBarns.Count > 0 ? i.ChickenBarns.FirstOrDefault()?.BarnId : null,
+            BarnId = i.IsActive == true && i.ChickenBarn != null ? i.ChickenBarn.BarnId : null,
             AgeInMonths = CalculateAgeInMonths(i.Flock?.DoB),
             FlockName = i.Flock?.Name
         }).ToList();
@@ -107,7 +107,7 @@ public class LargeChickenController : ControllerBase
             Note = i.Note,
             Url = i.Url,
             IsActive = i.IsActive,
-            BarnId = i.ChickenBarns != null && i.ChickenBarns.Count > 0 ? i.ChickenBarns.FirstOrDefault()?.BarnId : null,
+            BarnId = i.ChickenBarn != null ? i.ChickenBarn.BarnId : null,
             AgeInMonths = CalculateAgeInMonths(i.Flock?.DoB),
             FlockName = i.Flock?.Name
         }).ToList();
@@ -151,7 +151,7 @@ public class LargeChickenController : ControllerBase
             Note = item.Note,
             Url = item.Url,
             IsActive = item.IsActive,
-            BarnId = item.IsActive == true && item.ChickenBarns != null && item.ChickenBarns.Count > 0 ? item.ChickenBarns.FirstOrDefault()?.BarnId : null,
+            BarnId = item.IsActive == true && item.ChickenBarn != null ? item.ChickenBarn.BarnId : null,
             AgeInMonths = CalculateAgeInMonths(item.Flock?.DoB),
             FlockName = item.Flock?.Name,
             ExportDate = GetExportDate(item)
@@ -179,7 +179,7 @@ public class LargeChickenController : ControllerBase
             Note = i.Note,
             Url = i.Url,
             IsActive = i.IsActive,
-            BarnId = i.IsActive == true && i.ChickenBarns != null && i.ChickenBarns.Count > 0 ? i.ChickenBarns.FirstOrDefault()?.BarnId : null,
+            BarnId = i.IsActive == true && i.ChickenBarn != null ? i.ChickenBarn.BarnId : null,
             AgeInMonths = CalculateAgeInMonths(i.Flock?.DoB),
             FlockName = i.Flock?.Name
         }).ToList();
@@ -218,7 +218,7 @@ public class LargeChickenController : ControllerBase
             Note = createdEntity.Note,
             Url = createdEntity.Url,
             IsActive = createdEntity.IsActive,
-            BarnId = createdEntity.IsActive == true && createdEntity.ChickenBarns != null && createdEntity.ChickenBarns.Count > 0 ? createdEntity.ChickenBarns.FirstOrDefault()?.BarnId : null,
+            BarnId = createdEntity.IsActive == true && createdEntity.ChickenBarn != null ? createdEntity.ChickenBarn.BarnId : null,
             AgeInMonths = CalculateAgeInMonths(createdEntity.Flock?.DoB),
             FlockName = createdEntity.Flock?.Name
         };
@@ -259,7 +259,7 @@ public class LargeChickenController : ControllerBase
             Note = updatedEntity.Note,
             Url = updatedEntity.Url,
             IsActive = updatedEntity.IsActive,
-            BarnId = updatedEntity.IsActive == true && updatedEntity.ChickenBarns != null && updatedEntity.ChickenBarns.Count > 0 ? updatedEntity.ChickenBarns.FirstOrDefault()?.BarnId : null,
+            BarnId = updatedEntity.IsActive == true && updatedEntity.ChickenBarn != null ? updatedEntity.ChickenBarn.BarnId : null,
             AgeInMonths = CalculateAgeInMonths(updatedEntity.Flock?.DoB),
             FlockName = updatedEntity.Flock?.Name
         };

@@ -106,6 +106,13 @@ public static class ServiceProvider
         return services;
     }
 
+    public static IServiceCollection AddErrorIoTServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IErrorIoTService, ErrorIoTService>();
+        return services;
+    }
+
     public static IServiceCollection AddServiceProvider(this IServiceCollection services)
     {
         services.AddTaskServices();
@@ -122,6 +129,7 @@ public static class ServiceProvider
         services.AddDashboardTechServices();
         services.AddFeedingRuleServices(); 
         services.AddDataIoTServices();
+        services.AddErrorIoTServices();
 
         return services;
     }

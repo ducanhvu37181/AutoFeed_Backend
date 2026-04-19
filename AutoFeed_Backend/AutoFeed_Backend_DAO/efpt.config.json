@@ -35,19 +35,15 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[ErrorIoT]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[FeedingRule]",
          "ObjectType": 0
       },
       {
          "Name": "[dbo].[FeedingRuleDetail]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[FeedingSession]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[FeedingSessionDetail]",
          "ObjectType": 0
       },
       {
@@ -59,15 +55,7 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[FoodStorage]",
-         "ObjectType": 0
-      },
-      {
          "Name": "[dbo].[Inventory]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[InventoryLog]",
          "ObjectType": 0
       },
       {

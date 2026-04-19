@@ -1,0 +1,146 @@
+﻿using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Repositories.BasicRepo;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace AutoFeed_Backend_Repositories.Repositories;
+
+public class ChickenBarnRepository : GenericRepository<ChickenBarn>
+{
+    public ChickenBarnRepository() : base() { }
+
+    public ChickenBarnRepository(AutoFeedDBContext context) : base(context) { }
+
+    public async Task<List<ChickenBarn>> GetActiveAsync()
+    {
+        return await _context.Set<ChickenBarn>()
+            .Where(x => x.Status != null && x.Status.ToLower() == "active")
+            .ToListAsync();
+    }
+
+    // Check if a barn has any active ChickenBarn (status = "active")
+    public async Task<bool> IsActiveAsync(int barnId)
+    {
+        return await _context.Set<ChickenBarn>()
+            .AnyAsync(cb => cb.BarnId == barnId && cb.Status != null && cb.Status.ToLower() == "active");
+    }
+
+    public async Task<List<ChickenBarn>> GetInactiveAsync()
+    {
+        return await _context.Set<ChickenBarn>()
+            .Where(x => x.Status == null || x.Status.ToLower() != "active")
+            .ToListAsync();
+    }
+
+    public async Task<List<ChickenBarn>> GetExportedAsync()
+    {
+        return await _context.Set<ChickenBarn>()
+            .Where(x => x.ExportDate != null)
+            .ToListAsync();
+    }
+
+    public async Task<List<ChickenBarn>> SearchAsync(int? barnId, int? flockId, int? chickenLid, bool includeInactive = false)
+    {
+        var query = _context.Set<ChickenBarn>().AsQueryable();
+
+        if (!includeInactive)
+            query = query.Where(x => x.Status != null && x.Status.ToLower() == "active");
+
+        if (barnId.HasValue)
+            query = query.Where(x => x.BarnId == barnId.Value);
+
+        if (flockId.HasValue)
+            query = query.Where(x => x.FlockId == flockId.Value);
+
+        if (chickenLid.HasValue)
+            query = query.Where(x => x.ChickenLid == chickenLid.Value);
+
+        return await query.ToListAsync();
+    }
+
+    public async Task<List<ChickenBarn>> GetByIdsAsync(IEnumerable<int> ids)
+    {
+        var list = ids?.ToList();
+        if (list == null || list.Count == 0) return new List<ChickenBarn>();
+        return await _context.Set<ChickenBarn>().Where(cb => list.Contains(cb.CbarnId)).ToListAsync();
+    }
+
+    public async Task<ChickenBarn?> GetByLargeChickenIdAsync(int largeChickenId)
+    {
+        return await _context.Set<ChickenBarn>()
+            .FirstOrDefaultAsync(x => x.ChickenLid == largeChickenId);
+    }
+
+    public async Task<ChickenBarn?> GetByIdAsNoTrackingAsync(int id)
+    {
+        return await _context.Set<ChickenBarn>()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.CbarnId == id);
+    }
+
+    public async Task<List<ChickenBarn>> GetAllWithBarnAsync()
+    {
+        return await _context.Set<ChickenBarn>()
+            .Include(cb => cb.Barn)
+            .Include(cb => cb.Flock)
+            .Include(cb => cb.ChickenL)
+            .ToListAsync();
+    }
+
+    public async Task<List<dynamic>> GetChickenBarnDetailAsync(int? barnId, string? barnType)
+    {
+        var query = _context.Set<ChickenBarn>()
+            .Include(cb => cb.Barn)
+            .Include(cb => cb.ChickenL)
+            .Include(cb => cb.Flock)
+            .AsQueryable();
+
+        if (barnId.HasValue)
+            query = query.Where(x => x.BarnId == barnId.Value);
+
+        if (!string.IsNullOrEmpty(barnType))
+            query = query.Where(x => x.Barn.Type.ToLower() == barnType.ToLower());
+
+        var result = await query.Select(cb => new
+        {
+            CbarnId = cb.CbarnId,
+            BarnId = cb.BarnId,
+            BarnType = cb.Barn.Type,
+            ChickenName = cb.ChickenL != null ? cb.ChickenL.Name : null,
+            FlockName = cb.Flock != null ? cb.Flock.Name : null,
+            Status = cb.Status,
+            StartDate = cb.StartDate,
+            ExportDate = cb.ExportDate,
+            TransferDate = cb.Flock != null ? (DateOnly?)cb.Flock.TransferDate : null,
+            AvatarUrl = cb.ChickenL != null ? cb.ChickenL.Url : null
+        }).ToListAsync();
+
+        return result.Cast<dynamic>().ToList();
+    }
+
+    public async System.Threading.Tasks.Task<ChickenBarn?> ChangeStatusToExportAsync(int cbarnId)
+    {
+        try
+        {
+            var cbarn = await _context.Set<ChickenBarn>().FindAsync(cbarnId);
+            if (cbarn == null) return null;
+
+            cbarn.Status = "export";
+            cbarn.ExportDate = DateOnly.FromDateTime(DateTime.Now);
+
+            PrepareUpdate(cbarn);
+            await SaveAsync();
+
+            // Refresh from database to get latest values
+            await RefreshAsync(cbarn);
+
+            return cbarn;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+}

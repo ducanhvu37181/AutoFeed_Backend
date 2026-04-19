@@ -14,21 +14,21 @@ public class FlockRepository : GenericRepository<FlockChicken>
     public new async Task<List<FlockChicken>> GetAllAsync()
     {
         return await _context.FlockChickens
-            .Include(f => f.ChickenBarns)
+            .Include(f => f.ChickenBarn)
             .ToListAsync();
     }
 
     public new async Task<FlockChicken?> GetByIdAsync(int id)
     {
         return await _context.FlockChickens
-            .Include(f => f.ChickenBarns)
+            .Include(f => f.ChickenBarn)
             .FirstOrDefaultAsync(x => x.FlockId == id);
     }
 
     public async Task<List<FlockChicken>> GetAllWithBarnAsync()
     {
         return await _context.FlockChickens
-            .Include(f => f.ChickenBarns)
+            .Include(f => f.ChickenBarn)
                 .ThenInclude(cb => cb.Barn)
             .ToListAsync();
     }

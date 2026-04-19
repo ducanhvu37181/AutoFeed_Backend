@@ -1,0 +1,140 @@
+﻿using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Repositories.Repositories;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
+
+namespace AutoFeed_Backend_Repositories.UnitOfWork;
+
+public class UnitOfWork : IUnitOfWork
+{
+    private readonly AutoFeedDBContext _context;
+    private TaskRepository _taskRepository;
+    private ScheduleRepository _scheduleRepository;
+    private LargeChickenRepository _largeChickenRepository;
+    private UserRepository _userRepository;
+    private FoodRepository _foodRepository;
+    private ChickenBarnRepository _chickenBarnRepository;
+    private IoTDeviceRepository _ioTDeviceRepository;
+    private RequestRepository _requestRepository;
+    private BarnRepository _barnRepository;
+    private FlockRepository _flockRepository;
+    private InventoryRepository _inventoryRepository;
+    private ErrorIoTRepository _errorIoTRepository;
+
+    private ReportRepository _reportRepository;
+    private DataIoTRepository _dataIoTRepository;
+    private FeedingRuleRepository _feedingRuleRepository;
+
+    public UnitOfWork() => _context ??= new AutoFeedDBContext();
+
+    public UnitOfWork(AutoFeedDBContext context)
+    {
+        _context = context;
+    }
+
+    public TaskRepository Tasks
+    {
+        get { return _taskRepository ??= new TaskRepository(_context); }
+    }
+    public ScheduleRepository Schedules
+    {
+        get { return _scheduleRepository ??= new ScheduleRepository(_context); }
+    }
+    public ChickenBarnRepository ChickenBarns
+    {
+        get { return _chickenBarnRepository ??= new ChickenBarnRepository(_context); }
+    }
+    public LargeChickenRepository LargeChickens
+    {
+        get { return _largeChickenRepository ??= new LargeChickenRepository(_context); }
+    }
+    public UserRepository Users
+    {
+        get { return _userRepository ??= new UserRepository(_context); }
+    }
+
+    public FoodRepository Foods
+    {
+        get { return _foodRepository ??= new FoodRepository(_context); }
+    }
+    public RequestRepository Requests
+    {
+        get { return _requestRepository ??= new RequestRepository(_context); }
+    }
+
+    public IoTDeviceRepository IoTDevices
+    {
+        get { return _ioTDeviceRepository ??= new IoTDeviceRepository(_context); }
+    }
+
+    // Expose helper to get barn by device id through IoTDeviceRepository
+    public async System.Threading.Tasks.Task<Barn?> GetBarnByDeviceIdAsync(int deviceId)
+    {
+        return await IoTDevices.GetBarnByDeviceIdAsync(deviceId);
+    }
+
+    public BarnRepository Barns
+    {
+        get { return _barnRepository ??= new BarnRepository(_context); }
+    }
+
+    public FlockRepository Flocks
+    {
+        get { return _flockRepository ??= new FlockRepository(_context); }
+    }
+    public InventoryRepository Inventories 
+    { 
+        get { return _inventoryRepository ??= new InventoryRepository(_context); } 
+    }
+
+    
+    public ReportRepository Reports
+    {
+        get { return _reportRepository ??= new ReportRepository(_context); }
+    }
+    public DataIoTRepository DataIoTs
+    {
+        get { return _dataIoTRepository ??= new DataIoTRepository(_context); }
+    }
+    public FeedingRuleRepository FeedingRules
+    {
+        get { return _feedingRuleRepository ??= new FeedingRuleRepository(_context); }
+    }
+    public int SaveChangesWithTransaction()
+    {
+        int result = 0;
+        using (var dbContextTransaction = _context.Database.BeginTransaction())
+        {
+            try
+            {
+                result = _context.SaveChanges();
+                dbContextTransaction.Commit();
+            }
+            catch (System.Exception)
+            {
+                result = 0;
+                dbContextTransaction.Rollback();
+            }
+        }
+        return result;
+    }
+
+    public async Task<int> SaveChangesWithTransactionAsync()
+    {
+        int result = 0;
+        using (var dbContextTransaction = await _context.Database.BeginTransactionAsync())
+        {
+            try
+            {
+                result = await _context.SaveChangesAsync();
+                await dbContextTransaction.CommitAsync();
+            }
+            catch (System.Exception)
+            {
+                result = 0;
+                await dbContextTransaction.RollbackAsync();
+            }
+        }
+        return result;
+    }
+}

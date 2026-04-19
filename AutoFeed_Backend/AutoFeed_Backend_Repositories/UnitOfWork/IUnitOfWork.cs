@@ -18,7 +18,7 @@ public interface IUnitOfWork
     RequestRepository Requests { get; }
     BarnRepository Barns { get; }
     InventoryRepository Inventories { get; }
-    
+    ErrorIoTRepository ErrorIoTs { get; }
 
     ReportRepository Reports { get; }
     DataIoTRepository DataIoTs { get; }

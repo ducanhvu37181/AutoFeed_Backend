@@ -1,0 +1,33 @@
+﻿using System;
+
+namespace AutoFeed_Backend.Models.Requests.Flock
+{
+    public class FlockCreateRequest
+    {
+        public string Name { get; set; } = null!;
+        public int Quantity { get; set; } // Must be provided in request
+        public decimal Weight { get; set; }
+        /// <summary>Chỉ ngày (JSON: "2026-01-01") — không cần giờ.</summary>
+        public DateOnly DoB { get; set; }
+        public DateOnly TransferDate { get; set; }
+        public string? Note { get; set; }
+        public bool IsActive { get; set; } = true; // Default to active when created
+    }
+
+    public class FlockUpdateRequest
+    {
+        public int FlockID { get; set; }
+        public string Name { get; set; } = null!;
+        public string HealthStatus { get; set; } = null!;
+        public string? Note { get; set; }
+    }
+
+    public class FlockUpgradeRequest
+    {
+        public int FlockID { get; set; }
+        public int BarnID { get; set; }
+        public string ChickenName { get; set; } = null!;
+        public decimal Weight { get; set; }
+        public string? Note { get; set; }
+    }
+}

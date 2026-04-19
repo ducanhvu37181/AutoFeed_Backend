@@ -28,4 +28,6 @@ public partial class Barn
     public virtual ICollection<ChickenBarn> ChickenBarns { get; set; } = new List<ChickenBarn>();
 
     public virtual ICollection<DataIoT> DataIoTs { get; set; } = new List<DataIoT>();
+
+    public virtual ICollection<ErrorIoT> ErrorIoTs { get; set; } = new List<ErrorIoT>();
 }
