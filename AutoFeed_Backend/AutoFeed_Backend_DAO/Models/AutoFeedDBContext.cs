@@ -20,6 +20,8 @@ public partial class AutoFeedDBContext : DbContext
 
     public virtual DbSet<Barn> Barns { get; set; }
 
+    public virtual DbSet<BarnImage> BarnImages { get; set; }
+
     public virtual DbSet<BarnIoTDevice> BarnIoTDevices { get; set; }
 
     public virtual DbSet<ChickenBarn> ChickenBarns { get; set; }
@@ -73,7 +75,7 @@ public partial class AutoFeedDBContext : DbContext
     {
         modelBuilder.Entity<Barn>(entity =>
         {
-            entity.HasKey(e => e.BarnId).HasName("PK__Barn__C683E3D43D3F7C79");
+            entity.HasKey(e => e.BarnId).HasName("PK__Barn__C683E3D450B79226");
 
             entity.ToTable("Barn");
 
@@ -101,9 +103,28 @@ public partial class AutoFeedDBContext : DbContext
             entity.Property(e => e.WaterAmount).HasColumnName("waterAmount");
         });
 
+        modelBuilder.Entity<BarnImage>(entity =>
+        {
+            entity.HasKey(e => e.ImageBarnId).HasName("PK__BarnImag__EA36401D863CE8F6");
+
+            entity.ToTable("BarnImage");
+
+            entity.Property(e => e.ImageBarnId).HasColumnName("imageBarnId");
+            entity.Property(e => e.BarnId).HasColumnName("barnId");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.Url)
+                .IsRequired()
+                .HasColumnName("url");
+
+            entity.HasOne(d => d.Barn).WithMany(p => p.BarnImages)
+                .HasForeignKey(d => d.BarnId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_BarnImage_Barn");
+        });
+
         modelBuilder.Entity<BarnIoTDevice>(entity =>
         {
-            entity.HasKey(e => e.BDeviceId).HasName("PK__BarnIoT___9C4A58189260BABE");
+            entity.HasKey(e => e.BDeviceId).HasName("PK__BarnIoT___9C4A5818C49F9ECC");
 
             entity.ToTable("BarnIoT_Device");
 
@@ -128,7 +149,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<ChickenBarn>(entity =>
         {
-            entity.HasKey(e => e.CbarnId).HasName("PK__ChickenB__2D4B3D063E19141F");
+            entity.HasKey(e => e.CbarnId).HasName("PK__ChickenB__2D4B3D06550517EB");
 
             entity.ToTable("ChickenBarn");
 
@@ -168,7 +189,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<DataIoT>(entity =>
         {
-            entity.HasKey(e => e.DataId).HasName("PK__Data_IoT__923E3685A05A96BE");
+            entity.HasKey(e => e.DataId).HasName("PK__Data_IoT__923E3685818A9ACB");
 
             entity.ToTable("Data_IoT");
 
@@ -200,7 +221,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<ErrorIoT>(entity =>
         {
-            entity.HasKey(e => e.ErrorId).HasName("PK__ErrorIoT__72C6D596C6D6EE56");
+            entity.HasKey(e => e.ErrorId).HasName("PK__ErrorIoT__72C6D596A3604E79");
 
             entity.ToTable("ErrorIoT");
 
@@ -232,7 +253,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<FeedingRule>(entity =>
         {
-            entity.HasKey(e => e.RuleId).HasName("PK__FeedingR__121C06411E14855C");
+            entity.HasKey(e => e.RuleId).HasName("PK__FeedingR__121C064189951ADA");
 
             entity.ToTable("FeedingRule");
 
@@ -262,7 +283,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<FeedingRuleDetail>(entity =>
         {
-            entity.HasKey(e => e.FeedRuleDetailId).HasName("PK__FeedingR__26A980CAC65CA8DA");
+            entity.HasKey(e => e.FeedRuleDetailId).HasName("PK__FeedingR__26A980CAC006492A");
 
             entity.ToTable("FeedingRuleDetail");
 
@@ -294,7 +315,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<FlockChicken>(entity =>
         {
-            entity.HasKey(e => e.FlockId).HasName("PK__FlockChi__6D32C9F15E40DA8F");
+            entity.HasKey(e => e.FlockId).HasName("PK__FlockChi__6D32C9F15CE43F4A");
 
             entity.ToTable("FlockChicken");
 
@@ -320,7 +341,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<Food>(entity =>
         {
-            entity.HasKey(e => e.FoodId).HasName("PK__Food__77EAEA192574C75B");
+            entity.HasKey(e => e.FoodId).HasName("PK__Food__77EAEA197C187CAF");
 
             entity.ToTable("Food");
 
@@ -338,7 +359,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<Inventory>(entity =>
         {
-            entity.HasKey(e => e.InventId).HasName("PK__Inventor__3805E39F06F76B41");
+            entity.HasKey(e => e.InventId).HasName("PK__Inventor__3805E39FC73CB296");
 
             entity.ToTable("Inventory");
 
@@ -358,7 +379,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<IoTDevice>(entity =>
         {
-            entity.HasKey(e => e.DeviceId).HasName("PK__IoT_Devi__84BE14B780A1F666");
+            entity.HasKey(e => e.DeviceId).HasName("PK__IoT_Devi__84BE14B733BFD97E");
 
             entity.ToTable("IoT_Device");
 
@@ -377,7 +398,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<LargeChicken>(entity =>
         {
-            entity.HasKey(e => e.ChickenLid).HasName("PK__LargeChi__6DE57F4B1037F5B2");
+            entity.HasKey(e => e.ChickenLid).HasName("PK__LargeChi__6DE57F4B56CD7219");
 
             entity.ToTable("LargeChicken");
 
@@ -408,7 +429,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<Report>(entity =>
         {
-            entity.HasKey(e => e.ReportId).HasName("PK__Report__1C9B4ECDB8FD5C8F");
+            entity.HasKey(e => e.ReportId).HasName("PK__Report__1C9B4ECD130AF909");
 
             entity.ToTable("Report");
 
@@ -439,7 +460,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<Request>(entity =>
         {
-            entity.HasKey(e => e.RequestId).HasName("PK__Request__E3C5DE517097AEF5");
+            entity.HasKey(e => e.RequestId).HasName("PK__Request__E3C5DE51C0DD2609");
 
             entity.ToTable("Request");
 
@@ -470,7 +491,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__Role__CD98460A23428986");
+            entity.HasKey(e => e.RoleId).HasName("PK__Role__CD98460A64D3BFDB");
 
             entity.ToTable("Role");
 
@@ -483,7 +504,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<Schedule>(entity =>
         {
-            entity.HasKey(e => e.SchedId).HasName("PK__Schedule__F378328EE1435750");
+            entity.HasKey(e => e.SchedId).HasName("PK__Schedule__F378328EFB6184D7");
 
             entity.ToTable("Schedule");
 
@@ -529,7 +550,7 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<Task>(entity =>
         {
-            entity.HasKey(e => e.TaskId).HasName("PK__Task__DD5D55A2B71C9C63");
+            entity.HasKey(e => e.TaskId).HasName("PK__Task__DD5D55A2A36B50C0");
 
             entity.ToTable("Task");
 
@@ -550,13 +571,13 @@ public partial class AutoFeedDBContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__User__CB9A1CDF403EAE24");
+            entity.HasKey(e => e.UserId).HasName("PK__User__CB9A1CDF10FAAC7B");
 
             entity.ToTable("User");
 
-            entity.HasIndex(e => e.Email, "UQ__User__AB6E6164BB405064").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__User__AB6E616413269A10").IsUnique();
 
-            entity.HasIndex(e => e.Username, "UQ__User__F3DBC5721B2E25E2").IsUnique();
+            entity.HasIndex(e => e.Username, "UQ__User__F3DBC572AAF19E2C").IsUnique();
 
             entity.Property(e => e.UserId).HasColumnName("userID");
             entity.Property(e => e.AvatarUrl).HasColumnName("avatarURL");

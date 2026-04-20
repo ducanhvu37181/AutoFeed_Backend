@@ -20,6 +20,7 @@ public class UnitOfWork : IUnitOfWork
     private FlockRepository _flockRepository;
     private InventoryRepository _inventoryRepository;
     private ErrorIoTRepository _errorIoTRepository;
+    private BarnImageRepository _barnImageRepository;
 
     private ReportRepository _reportRepository;
     private DataIoTRepository _dataIoTRepository;
@@ -89,6 +90,10 @@ public class UnitOfWork : IUnitOfWork
     public ErrorIoTRepository ErrorIoTs
     {
         get { return _errorIoTRepository ??= new ErrorIoTRepository(_context); }
+    }
+    public BarnImageRepository BarnImages
+    {
+        get { return _barnImageRepository ??= new BarnImageRepository(_context); }
     }
 
 

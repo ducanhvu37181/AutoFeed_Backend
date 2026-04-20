@@ -113,6 +113,13 @@ public static class ServiceProvider
         return services;
     }
 
+    public static IServiceCollection AddBarnImageServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IBarnImageService, BarnImageService>();
+        return services;
+    }
+
     public static IServiceCollection AddServiceProvider(this IServiceCollection services)
     {
         services.AddTaskServices();
@@ -130,7 +137,7 @@ public static class ServiceProvider
         services.AddFeedingRuleServices(); 
         services.AddDataIoTServices();
         services.AddErrorIoTServices();
-
+        services.AddBarnImageServices();
         return services;
     }
 }

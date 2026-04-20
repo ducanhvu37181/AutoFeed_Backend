@@ -23,6 +23,8 @@ public partial class Barn
 
     public DateTime? CreateDate { get; set; }
 
+    public virtual ICollection<BarnImage> BarnImages { get; set; } = new List<BarnImage>();
+
     public virtual ICollection<BarnIoTDevice> BarnIoTDevices { get; set; } = new List<BarnIoTDevice>();
 
     public virtual ICollection<ChickenBarn> ChickenBarns { get; set; } = new List<ChickenBarn>();

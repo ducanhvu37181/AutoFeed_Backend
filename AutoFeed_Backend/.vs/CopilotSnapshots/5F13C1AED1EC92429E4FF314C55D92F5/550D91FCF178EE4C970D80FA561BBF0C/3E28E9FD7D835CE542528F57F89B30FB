@@ -1,0 +1,172 @@
+﻿using AutoFeed_Backend_DAO.Models;
+using AutoFeed_Backend_Repositories.UnitOfWork;
+using AutoFeed_Backend_Services.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace AutoFeed_Backend_Services.Services;
+
+public class BarnImageService : IBarnImageService
+{
+    private readonly IUnitOfWork _unitOfWork;
+
+    public BarnImageService(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<IEnumerable<object>> GetAllBarnImagesAsync()
+    {
+        var images = await _unitOfWork.BarnImages.GetAllWithDetailsAsync();
+
+        return images.Select(bi => new
+        {
+            ImageBarnId = bi.ImageBarnId,
+            BarnId = bi.BarnId,
+            BarnType = bi.Barn?.Type,
+            Url = bi.Url,
+            Description = bi.Description
+        });
+    }
+
+    public async Task<object> GetBarnImageByIdAsync(int imageBarnId)
+    {
+        var image = await _unitOfWork.BarnImages.GetByImageIdAsync(imageBarnId);
+
+        if (image == null)
+            return null;
+
+        return new
+        {
+            ImageBarnId = image.ImageBarnId,
+            BarnId = image.BarnId,
+            BarnType = image.Barn?.Type,
+            Url = image.Url,
+            Description = image.Description
+        };
+    }
+
+    public async Task<IEnumerable<object>> GetBarnImagesByBarnIdAsync(int barnId)
+    {
+        var images = await _unitOfWork.BarnImages.GetByBarnIdAsync(barnId);
+
+        return images.Select(bi => new
+        {
+            ImageBarnId = bi.ImageBarnId,
+            BarnId = bi.BarnId,
+            BarnType = bi.Barn?.Type,
+            Url = bi.Url,
+            Description = bi.Description
+        });
+    }
+
+    public async Task<BarnImage> AddBarnImageAsync(int barnId, string description)
+    {
+        // Validate that barn exists
+        var barn = await _unitOfWork.Barns.GetByIdAsync(barnId);
+        if (barn == null)
+            throw new Exception($"Barn with ID {barnId} not found");
+
+        var barnImage = new BarnImage
+        {
+            BarnId = barnId,
+            Description = description,
+            Url = string.Empty // Will be updated after Firebase upload
+        };
+
+        await _unitOfWork.BarnImages.CreateAsync(barnImage);
+        await _unitOfWork.SaveChangesWithTransactionAsync();
+
+        return barnImage;
+    }
+
+    // Update barn image URL after Firebase upload
+    public async Task<bool> UpdateBarnImageUrlAsync(int imageBarnId, string url)
+    {
+        try
+        {
+            var image = await _unitOfWork.BarnImages.GetByImageIdAsync(imageBarnId);
+            if (image == null)
+                return false;
+
+            image.Url = url;
+            var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+            return result > 0;
+        }
+        catch (Exception ex)
+        {
+            return false;
+        }
+    }
+
+    // Upload barn image file to Firebase and save to database (combined operation)
+    public async Task<BarnImage> UploadBarnImageAsync(int barnId, IFormFile file, string description, IConfiguration config)
+    {
+        // Validate input parameters
+        if (barnId <= 0)
+            throw new ArgumentException("Invalid barnId", nameof(barnId));
+
+        if (file == null || file.Length == 0)
+            throw new ArgumentException("Invalid file", nameof(file));
+
+        // Validate file size (max 10MB)
+        const long maxFileSize = 10 * 1024 * 1024; // 10 MB
+        if (file.Length > maxFileSize)
+            throw new ArgumentException($"File size exceeds maximum allowed size of {maxFileSize / (1024 * 1024)} MB", nameof(file));
+
+        // Validate file type (only images)
+        var allowedMimeTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/webp", "image/jpg" };
+        if (!allowedMimeTypes.Contains(file.ContentType?.ToLower()))
+            throw new ArgumentException($"Invalid file type. Allowed types: {string.Join(", ", allowedMimeTypes)}", nameof(file));
+
+        // Validate Firebase configuration
+        var bucket = config.GetValue<string>("Firebase:Bucket");
+        var saPath = config.GetValue<string>("Firebase:ServiceAccountPath");
+        if (string.IsNullOrWhiteSpace(bucket) || string.IsNullOrWhiteSpace(saPath))
+            throw new InvalidOperationException("Firebase is not properly configured");
+
+        // Validate barn exists
+        var barn = await _unitOfWork.Barns.GetByIdAsync(barnId);
+        if (barn == null)
+            throw new InvalidOperationException($"Barn with ID {barnId} not found");
+
+        try
+        {
+            // Create barn image record first (with empty URL)
+            var barnImage = new BarnImage
+            {
+                BarnId = barnId,
+                Description = description ?? string.Empty,
+                Url = string.Empty
+            };
+
+            await _unitOfWork.BarnImages.CreateAsync(barnImage);
+            await _unitOfWork.SaveChangesWithTransactionAsync();
+
+            // Upload file to Firebase using the helper
+            var url = await AutoFeed_Backend.Helpers.FirebaseStorageHelper.UploadFileAndGetSignedUrlAsync(
+                file,
+                bucket,
+                saPath,
+                TimeSpan.FromDays(365));
+
+            // Update the barn image with the Firebase URL
+            barnImage.Url = url;
+            var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+
+            if (result <= 0)
+                throw new InvalidOperationException("Failed to save image URL to database");
+
+            return barnImage;
+        }
+        catch (Exception ex)
+        {
+            // Log the exception here if needed
+            throw new InvalidOperationException($"Failed to upload barn image: {ex.Message}", ex);
+        }
+    }
+}
