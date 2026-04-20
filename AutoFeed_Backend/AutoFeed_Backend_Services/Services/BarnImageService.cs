@@ -27,7 +27,8 @@ public class BarnImageService : IBarnImageService
             BarnId = bi.BarnId,
             BarnType = bi.Barn?.Type,
             Url = bi.Url,
-            Description = bi.Description
+            Description = bi.Description,
+            CaptureDate = bi.CaptureDate
         });
     }
 
@@ -44,7 +45,8 @@ public class BarnImageService : IBarnImageService
             BarnId = image.BarnId,
             BarnType = image.Barn?.Type,
             Url = image.Url,
-            Description = image.Description
+            Description = image.Description,
+            CaptureDate = image.CaptureDate
         };
     }
 
@@ -58,7 +60,8 @@ public class BarnImageService : IBarnImageService
             BarnId = bi.BarnId,
             BarnType = bi.Barn?.Type,
             Url = bi.Url,
-            Description = bi.Description
+            Description = bi.Description,
+            CaptureDate = bi.CaptureDate
         });
     }
 
@@ -73,7 +76,8 @@ public class BarnImageService : IBarnImageService
         {
             BarnId = barnId,
             Description = description,
-            Url = string.Empty // Will be updated after Firebase upload
+            Url = string.Empty, // Will be updated after Firebase upload
+            CaptureDate = DateTime.Now
         };
 
         await _unitOfWork.BarnImages.CreateAsync(barnImage);
