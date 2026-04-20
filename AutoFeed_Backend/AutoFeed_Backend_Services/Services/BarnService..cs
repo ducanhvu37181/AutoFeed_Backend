@@ -107,4 +107,9 @@ public class BarnService : IBarnService
         var lastDay = firstDay.AddMonths(1).AddDays(-1);
         return await _unitOfWork.DataIoTs.GetTotalFoodByDateRangeAsync(barnId, firstDay, lastDay);
     }
+
+    public async Task<decimal> GetFoodTodayAsync(int barnId)
+    {
+        return await _unitOfWork.DataIoTs.GetFoodTodayAsync(barnId);
+    }
 }
