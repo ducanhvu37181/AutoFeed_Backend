@@ -42,8 +42,8 @@ public class ReportService : IReportService
                 await _notificationService.CreateNotificationAsync(
                     manager.UserId,
                     "Report",
-                    "Có báo cáo mới",
-                    $"Người dùng {user?.FullName ?? "Unknown"} đã gửi báo cáo mới: {report.Type}",
+                    "New Report",
+                    $"You have a notification from {user?.FullName ?? "Unknown"}",
                     report.ReportId
                 );
             }
