@@ -376,6 +376,7 @@ public partial class AutoFeedDBContext : DbContext
             entity.Property(e => e.WeightPerBag)
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("weightPerBag");
+            entity.Property(e => e.ImportDate).HasColumnName("importDate");
 
             entity.HasOne(d => d.Food).WithMany(p => p.Inventories)
                 .HasForeignKey(d => d.FoodId)

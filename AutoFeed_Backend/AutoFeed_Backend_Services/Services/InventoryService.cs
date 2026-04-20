@@ -63,7 +63,32 @@ public class InventoryService : IInventoryService
         });
     }
 
-    // Nhập kho: tăng quantity sau khi nhập kho thành công 
+    // Lấy danh sách thức ăn đã hết hạn
+    public async Task<IEnumerable<object>> GetExpiredInventoryAsync()
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        var items = await _unitOfWork.Inventories.GetAsync(
+            x => x.ExpiredDate < today,
+            x => x.ExpiredDate,
+            isDescending: false);
+
+        return items.Select(i => new
+        {
+            InventId = i.InventId,
+            FoodId = i.FoodId,
+            FoodName = i.Food?.Name,
+            FoodType = i.Food?.Type,
+            Quantity = i.Quantity,
+            WeightPerBag = i.WeightPerBag,
+            TotalWeight = i.Quantity * i.WeightPerBag,
+            ExpiredDate = i.ExpiredDate.ToString("yyyy-MM-dd"),
+            DaysExpired = today.DayNumber - i.ExpiredDate.DayNumber,
+            ImportDate = i.ImportDate.ToString("yyyy-MM-dd")
+        });
+    }
+
+    // Nhập kho: tăng quantity sau khi nhập kho thành công
     public async Task<bool> AddInventoryAsync(Inventory item)
     {
         var today = DateOnly.FromDateTime(DateTime.Today);
@@ -79,6 +104,10 @@ public class InventoryService : IInventoryService
 
         if (item.Quantity <= 0)
             throw new Exception("Invalid quantity");
+
+        // Set ImportDate to today if not provided
+        if (item.ImportDate == default)
+            item.ImportDate = today;
 
         var existing = await _unitOfWork.Inventories
             .FirstOrDefaultAsync(x => x.FoodId == item.FoodId
