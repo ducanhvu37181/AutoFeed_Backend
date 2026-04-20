@@ -54,14 +54,24 @@ public class IoTDeviceRepository : GenericRepository<IoTDevice>
             Status = true
         };
         _context.BarnIoTDevices.Add(newAssignment);
-        await _context.SaveChangesAsync();
+
+        // Set device status to online when assigned to barn
+        device.Status = true;
+        _context.Update(device);
     }
 
     public async System.Threading.Tasks.Task UnassignDeviceAsync(int deviceId)
     {
+        var device = await _context.IoTDevices.FindAsync(deviceId);
         var assignments = _context.BarnIoTDevices.Where(b => b.DeviceId == deviceId);
         _context.BarnIoTDevices.RemoveRange(assignments);
-        await _context.SaveChangesAsync();
+
+        // Set device status to offline when unassigned from barn
+        if (device != null)
+        {
+            device.Status = false;
+            _context.Update(device);
+        }
     }
 
     // Get devices assigned to a specific barn including device info and installation date
