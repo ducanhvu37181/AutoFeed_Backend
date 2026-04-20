@@ -387,5 +387,29 @@ namespace AutoFeed_Backend_Services.Services
                 return false;
             }
         }
+
+        public async Task<bool> TransferQuantityBackToFlockAsync(int sourceFlockId, int targetFlockId)
+        {
+            try
+            {
+                return await _unitOfWork.Flocks.TransferQuantityBackToFlockAsync(sourceFlockId, targetFlockId);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> TransferQuantityToFlockAndBarnAsync(int sourceFlockId, int targetFlockId, int targetBarnId)
+        {
+            try
+            {
+                return await _unitOfWork.Flocks.TransferQuantityToFlockAndBarnAsync(sourceFlockId, targetFlockId, targetBarnId);
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }
