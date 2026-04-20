@@ -1,0 +1,28 @@
+﻿using AutoFeed_Backend_DAO.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace AutoFeed_Backend_Services.Interfaces;
+
+public interface IBarnImageService
+{
+    // Get all barn images
+    Task<IEnumerable<object>> GetAllBarnImagesAsync();
+
+    // Get barn image by ImageBarnId
+    Task<object> GetBarnImageByIdAsync(int imageBarnId);
+
+    // Get all barn images by BarnId
+    Task<IEnumerable<object>> GetBarnImagesByBarnIdAsync(int barnId);
+
+    // Add barn image (upload to Firebase and save to database)
+    Task<BarnImage> AddBarnImageAsync(int barnId, string description);
+
+    // Update barn image URL after Firebase upload
+    Task<bool> UpdateBarnImageUrlAsync(int imageBarnId, string url);
+
+    // Upload barn image file to Firebase and save to database (combined operation)
+    Task<BarnImage> UploadBarnImageAsync(int barnId, IFormFile file, string description, IConfiguration config);
+}
