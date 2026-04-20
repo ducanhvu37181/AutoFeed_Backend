@@ -15,5 +15,7 @@ public partial class BarnImage
 
     public string Description { get; set; }
 
+    public DateTime? CaptureDate { get; set; }
+
     public virtual Barn Barn { get; set; }
 }

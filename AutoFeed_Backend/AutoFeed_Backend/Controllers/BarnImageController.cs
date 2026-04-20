@@ -92,7 +92,8 @@ public class BarnImageController : ControllerBase
                     ImageBarnId = barnImage.ImageBarnId,
                     BarnId = barnImage.BarnId,
                     Url = url,
-                    Description = barnImage.Description
+                    Description = barnImage.Description,
+                    CaptureDate = barnImage.CaptureDate
                 },
                 Description = "Barn image uploaded successfully"
             });

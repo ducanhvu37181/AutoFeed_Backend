@@ -15,7 +15,11 @@ public partial class Inventory
 
     public decimal WeightPerBag { get; set; }
 
+    public DateOnly ImportDate { get; set; }
+
     public DateOnly ExpiredDate { get; set; }
+
+    public int? DaysExpired { get; set; }
 
     public virtual Food Food { get; set; }
 }
