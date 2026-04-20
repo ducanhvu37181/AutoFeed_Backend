@@ -21,4 +21,6 @@ public interface IBarnService
     Task<bool> UpdateWaterAmountAsync(int barnId, int waterAmount);
     // Get barn status: "empty" if no active ChickenBarn, "used" if has active ChickenBarn
     Task<string> GetBarnStatusAsync(int barnId);
+    Task<decimal> GetFoodWeekAsync(int barnId);
+    Task<decimal> GetFoodMonthAsync(int barnId);
 }

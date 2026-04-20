@@ -56,6 +56,42 @@ public class DataIoTService : IDataIoTService
         return result;
     }
 
+    public async Task<System.Collections.Generic.List<(int BarnId, string DeviceName, decimal Value, string? Description, DateTime RecordDate, int SequenceNumber)>> GetByDescriptionAsync(string description)
+    {
+        var list = await _unitOfWork.DataIoTs.GetByDescriptionAsync(description);
+        var result = new System.Collections.Generic.List<(int, string, decimal, string?, DateTime, int)>();
+        foreach (var d in list)
+        {
+            var name = d.Device?.Name ?? string.Empty;
+            result.Add((d.BarnId, name, d.Value, d.Description, d.RecordDate ?? DateTime.Now, d.SequenceNumber));
+        }
+        return result;
+    }
+
+    public async Task<System.Collections.Generic.List<(int BarnId, string DeviceName, decimal Value, string? Description, DateTime RecordDate, int SequenceNumber)>> GetByDeviceIdAsync(int deviceId)
+    {
+        var list = await _unitOfWork.DataIoTs.GetByDeviceIdAsync(deviceId);
+        var result = new System.Collections.Generic.List<(int, string, decimal, string?, DateTime, int)>();
+        foreach (var d in list)
+        {
+            var name = d.Device?.Name ?? string.Empty;
+            result.Add((d.BarnId, name, d.Value, d.Description, d.RecordDate ?? DateTime.Now, d.SequenceNumber));
+        }
+        return result;
+    }
+
+    public async Task<System.Collections.Generic.List<(int BarnId, string DeviceName, decimal Value, string? Description, DateTime RecordDate, int SequenceNumber)>> GetByBarnIdAsync(int barnId)
+    {
+        var list = await _unitOfWork.DataIoTs.GetByBarnIdAsync(barnId);
+        var result = new System.Collections.Generic.List<(int, string, decimal, string?, DateTime, int)>();
+        foreach (var d in list)
+        {
+            var name = d.Device?.Name ?? string.Empty;
+            result.Add((d.BarnId, name, d.Value, d.Description, d.RecordDate ?? DateTime.Now, d.SequenceNumber));
+        }
+        return result;
+    }
+
     public async Task<int> RemoveByDateAsync(DateTime date)
     {
         return await _unitOfWork.DataIoTs.RemoveByDateAsync(date);

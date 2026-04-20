@@ -384,4 +384,56 @@ INSERT INTO [Inventory] (foodID, quantity, weightPerBag, importDate, expiredDate
 -- 3. SAFE (DaysExpired > 30)
 (1, 200, 20.0, '2026-04-01', '2027-01-01'),  -- Organic Corn (255 days left)
 (3, 150, 25.0, '2026-04-05', '2026-12-30'); -- Growth Pellet (253 days left)
+
+-- 3.12 Data_IoT: "food today" for active barns (excluding Barn 1)
+-- 21 days (2026-04-01 ~ 2026-04-21), 3 measurements/day
+-- Each day resets: meas1 ~3-5, meas2 ~8-12, meas3 >= 15
+DECLARE @BarnID INT, @DeviceID INT, @DayOffset INT, @Meas INT;
+DECLARE @BaseDate DATE = '2026-04-01';
+
+DECLARE @ActiveBarns TABLE (barnID INT);
+INSERT INTO @ActiveBarns VALUES (2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(21),(22),(23),(24),(25);
+
+DECLARE barn_cur CURSOR LOCAL FAST_FORWARD FOR SELECT barnID FROM @ActiveBarns;
+OPEN barn_cur;
+FETCH NEXT FROM barn_cur INTO @BarnID;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    SELECT TOP 1 @DeviceID = bd.deviceID
+    FROM [BarnIoT_Device] bd
+    JOIN [IoT_Device] d ON bd.deviceID = d.deviceID
+    WHERE bd.barnID = @BarnID AND d.name = 'HX711';
+
+    SET @DayOffset = 0;
+    WHILE @DayOffset < 21
+    BEGIN
+        SET @Meas = 1;
+        WHILE @Meas <= 3
+        BEGIN
+            INSERT INTO [Data_IoT] (barnID, deviceID, value, description, recordDate, sequenceNumber)
+            VALUES (
+                @BarnID,
+                @DeviceID,
+                CASE @Meas
+                    WHEN 1 THEN ROUND(3.0 + (RAND(CHECKSUM(NEWID())) * 2), 2)   -- ~3-5
+                    WHEN 2 THEN ROUND(8.0 + (RAND(CHECKSUM(NEWID())) * 4), 2)   -- ~8-12
+                    ELSE        ROUND(15.0 + (RAND(CHECKSUM(NEWID())) * 5), 2)   -- ~15-20
+                END,
+                'food today',
+                DATEADD(HOUR,
+                    CASE @Meas WHEN 1 THEN 8 WHEN 2 THEN 13 ELSE 18 END,
+                    CAST(DATEADD(DAY, @DayOffset, @BaseDate) AS DATETIME)),
+                @Meas  -- sequenceNumber resets per day: 1, 2, 3
+            );
+            SET @Meas = @Meas + 1;
+        END
+        SET @DayOffset = @DayOffset + 1;
+    END
+
+    FETCH NEXT FROM barn_cur INTO @BarnID;
+END
+
+CLOSE barn_cur;
+DEALLOCATE barn_cur;
 GO

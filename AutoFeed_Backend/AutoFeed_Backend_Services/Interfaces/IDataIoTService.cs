@@ -8,5 +8,8 @@ public interface IDataIoTService
     // Adds a data record and returns created info (barnId, deviceName, value, description, recordDate, sequenceNumber)
     Task<(int BarnId, string DeviceName, decimal Value, string? Description, DateTime RecordDate, int SequenceNumber)?> AddDataAsync(int barnId, int deviceId, decimal value, string? description);
     Task<System.Collections.Generic.List<(int BarnId, string DeviceName, decimal Value, string? Description, DateTime RecordDate, int SequenceNumber)>> GetAllAsync();
+    Task<System.Collections.Generic.List<(int BarnId, string DeviceName, decimal Value, string? Description, DateTime RecordDate, int SequenceNumber)>> GetByDescriptionAsync(string description);
+    Task<System.Collections.Generic.List<(int BarnId, string DeviceName, decimal Value, string? Description, DateTime RecordDate, int SequenceNumber)>> GetByDeviceIdAsync(int deviceId);
+    Task<System.Collections.Generic.List<(int BarnId, string DeviceName, decimal Value, string? Description, DateTime RecordDate, int SequenceNumber)>> GetByBarnIdAsync(int barnId);
     Task<int> RemoveByDateAsync(DateTime date);
 }
