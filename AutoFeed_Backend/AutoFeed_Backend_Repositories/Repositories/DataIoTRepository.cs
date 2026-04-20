@@ -37,6 +37,49 @@ public class DataIoTRepository : GenericRepository<DataIoT>
             .ToListAsync();
     }
 
+    public async Task<List<DataIoT>> GetByDescriptionAsync(string description)
+    {
+        return await _context.DataIoTs
+            .Include(d => d.Device)
+            .Where(x => (x.Description ?? string.Empty) == description)
+            .ToListAsync();
+    }
+
+    public async Task<List<DataIoT>> GetByDeviceIdAsync(int deviceId)
+    {
+        return await _context.DataIoTs
+            .Include(d => d.Device)
+            .Where(x => x.DeviceId == deviceId)
+            .ToListAsync();
+    }
+
+    public async Task<List<DataIoT>> GetByBarnIdAsync(int barnId)
+    {
+        return await _context.DataIoTs
+            .Include(d => d.Device)
+            .Where(x => x.BarnId == barnId)
+            .ToListAsync();
+    }
+
+    public async Task<decimal> GetTotalFoodByDateRangeAsync(int barnId, DateTime startDate, DateTime endDate)
+    {
+        var data = await _context.DataIoTs
+            .Where(x => x.BarnId == barnId
+                        && x.Description == "food today"
+                        && x.RecordDate.HasValue
+                        && x.RecordDate.Value.Date >= startDate.Date
+                        && x.RecordDate.Value.Date <= endDate.Date)
+            .ToListAsync();
+
+        if (data.Count == 0) return 0;
+
+        var total = data
+            .GroupBy(x => x.RecordDate!.Value.Date)
+            .Sum(g => g.OrderByDescending(x => x.SequenceNumber).First().Value);
+
+        return total;
+    }
+
     public async Task<int> RemoveByDateAsync(DateTime date)
     {
         var d = date.Date;

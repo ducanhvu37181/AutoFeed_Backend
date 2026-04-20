@@ -60,6 +60,75 @@ public class DataIoTController : ControllerBase
         return Ok(new ApiResponse<System.Collections.Generic.List<AddDataIoTResponse>> { Status = true, HttpCode = 200, Data = resp, Description = "Get all data successfully" });
     }
 
+    [HttpGet("by-description")]
+    public async Task<IActionResult> GetByDescription([FromQuery] string description)
+    {
+        if (string.IsNullOrEmpty(description)) return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Description = "Description is required" });
+
+        var list = await _service.GetByDescriptionAsync(description);
+        var resp = new System.Collections.Generic.List<AddDataIoTResponse>();
+        foreach (var d in list)
+        {
+            resp.Add(new AddDataIoTResponse
+            {
+                BarnId = d.BarnId,
+                DeviceName = d.DeviceName,
+                Value = d.Value,
+                Description = d.Description,
+                RecordDate = d.RecordDate,
+                SequenceNumber = d.SequenceNumber
+            });
+        }
+
+        return Ok(new ApiResponse<System.Collections.Generic.List<AddDataIoTResponse>> { Status = true, HttpCode = 200, Data = resp, Description = "Get data by description successfully" });
+    }
+
+    [HttpGet("by-device/{deviceId}")]
+    public async Task<IActionResult> GetByDeviceId(int deviceId)
+    {
+        if (deviceId <= 0) return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Description = "Invalid deviceId" });
+
+        var list = await _service.GetByDeviceIdAsync(deviceId);
+        var resp = new System.Collections.Generic.List<AddDataIoTResponse>();
+        foreach (var d in list)
+        {
+            resp.Add(new AddDataIoTResponse
+            {
+                BarnId = d.BarnId,
+                DeviceName = d.DeviceName,
+                Value = d.Value,
+                Description = d.Description,
+                RecordDate = d.RecordDate,
+                SequenceNumber = d.SequenceNumber
+            });
+        }
+
+        return Ok(new ApiResponse<System.Collections.Generic.List<AddDataIoTResponse>> { Status = true, HttpCode = 200, Data = resp, Description = "Get data by deviceId successfully" });
+    }
+
+    [HttpGet("by-barn/{barnId}")]
+    public async Task<IActionResult> GetByBarnId(int barnId)
+    {
+        if (barnId <= 0) return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Description = "Invalid barnId" });
+
+        var list = await _service.GetByBarnIdAsync(barnId);
+        var resp = new System.Collections.Generic.List<AddDataIoTResponse>();
+        foreach (var d in list)
+        {
+            resp.Add(new AddDataIoTResponse
+            {
+                BarnId = d.BarnId,
+                DeviceName = d.DeviceName,
+                Value = d.Value,
+                Description = d.Description,
+                RecordDate = d.RecordDate,
+                SequenceNumber = d.SequenceNumber
+            });
+        }
+
+        return Ok(new ApiResponse<System.Collections.Generic.List<AddDataIoTResponse>> { Status = true, HttpCode = 200, Data = resp, Description = "Get data by barnId successfully" });
+    }
+
     [HttpDelete("by-day")]
     public async Task<IActionResult> WipeByDay([FromQuery] DateTime date)
     {
