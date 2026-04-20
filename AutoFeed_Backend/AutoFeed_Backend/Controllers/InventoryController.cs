@@ -63,6 +63,21 @@ public class InventoryController : ControllerBase
         });
     }
 
+    // GET api/Inventory/valid
+    // Lấy danh sách thức ăn còn hạn sử dụng
+    [HttpGet("valid")]
+    public async Task<IActionResult> GetValid()
+    {
+        var data = await _service.GetValidInventoryAsync();
+        return Ok(new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = data,
+            Description = "Success"
+        });
+    }
+
     // POST api/Inventory/add
     // Manager nhập kho: thêm một lô hàng mới vào inventory
     [HttpPost("add")]

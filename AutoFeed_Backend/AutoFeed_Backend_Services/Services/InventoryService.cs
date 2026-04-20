@@ -88,6 +88,31 @@ public class InventoryService : IInventoryService
         });
     }
 
+    // Lấy danh sách thức ăn còn hạn sử dụng
+    public async Task<IEnumerable<object>> GetValidInventoryAsync()
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        var items = await _unitOfWork.Inventories.GetAsync(
+            x => x.ExpiredDate >= today,
+            x => x.ExpiredDate,
+            isDescending: true);
+
+        return items.Select(i => new
+        {
+            InventId = i.InventId,
+            FoodId = i.FoodId,
+            FoodName = i.Food?.Name,
+            FoodType = i.Food?.Type,
+            Quantity = i.Quantity,
+            WeightPerBag = i.WeightPerBag,
+            TotalWeight = i.Quantity * i.WeightPerBag,
+            ExpiredDate = i.ExpiredDate.ToString("yyyy-MM-dd"),
+            DaysRemaining = i.ExpiredDate.DayNumber - today.DayNumber,
+            ImportDate = i.ImportDate.ToString("yyyy-MM-dd")
+        });
+    }
+
     // Nhập kho: tăng quantity sau khi nhập kho thành công
     public async Task<bool> AddInventoryAsync(Inventory item)
     {
