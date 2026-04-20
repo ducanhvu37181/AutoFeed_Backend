@@ -7,6 +7,7 @@ namespace AutoFeed_Backend_Services.Services;
 public class ReportService : IReportService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly INotificationService _notificationService;
 
     private static readonly string[] AllowedStatuses = { "pending", "reviewed", "rejected" };
 
@@ -15,9 +16,10 @@ public class ReportService : IReportService
         _unitOfWork = new UnitOfWork();
     }
 
-    public ReportService(IUnitOfWork unitOfWork)
+    public ReportService(IUnitOfWork unitOfWork, INotificationService notificationService)
     {
         _unitOfWork = unitOfWork;
+        _notificationService = notificationService;
     }
 
   
@@ -27,7 +29,27 @@ public class ReportService : IReportService
         report.Status = "pending";
         report.CreateDate = DateTime.Now;
         _unitOfWork.Reports.PrepareCreate(report);
-        return await _unitOfWork.SaveChangesWithTransactionAsync();
+        var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+
+        // Tạo notification cho managers khi có report mới
+        if (result > 0 && _notificationService != null)
+        {
+            // Load user để lấy FullName
+            var user = await _unitOfWork.Users.GetByIdAsync(report.UserId);
+            var managers = await _unitOfWork.Users.GetAllByRoleDescriptionContainsAsync("manager");
+            foreach (var manager in managers)
+            {
+                await _notificationService.CreateNotificationAsync(
+                    manager.UserId,
+                    "Report",
+                    "Có báo cáo mới",
+                    $"Người dùng {user?.FullName ?? "Unknown"} đã gửi báo cáo mới: {report.Type}",
+                    report.ReportId
+                );
+            }
+        }
+
+        return result;
     }
 
     

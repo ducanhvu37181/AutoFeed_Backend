@@ -120,6 +120,13 @@ public static class ServiceProvider
         return services;
     }
 
+    public static IServiceCollection AddNotificationServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<INotificationService, NotificationService>();
+        return services;
+    }
+
     public static IServiceCollection AddServiceProvider(this IServiceCollection services)
     {
         services.AddTaskServices();
@@ -138,6 +145,7 @@ public static class ServiceProvider
         services.AddDataIoTServices();
         services.AddErrorIoTServices();
         services.AddBarnImageServices();
+        services.AddNotificationServices();
         return services;
     }
 }

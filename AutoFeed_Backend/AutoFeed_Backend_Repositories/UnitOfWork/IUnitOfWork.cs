@@ -23,6 +23,7 @@ public interface IUnitOfWork
 
     ReportRepository Reports { get; }
     DataIoTRepository DataIoTs { get; }
+    NotificationRepository Notifications { get; }
 
     int SaveChangesWithTransaction();
     Task<int> SaveChangesWithTransactionAsync();
