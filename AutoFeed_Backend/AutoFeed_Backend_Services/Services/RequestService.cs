@@ -9,6 +9,7 @@ namespace AutoFeed_Backend_Services.Services;
 public class RequestService : IRequestService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly INotificationService _notificationService;
     private static readonly string[] AllowedStatuses = { "pending", "approved", "rejected" };
 
     public RequestService()
@@ -16,9 +17,10 @@ public class RequestService : IRequestService
         _unitOfWork = new UnitOfWork();
     }
 
-    public RequestService(IUnitOfWork unitOfWork)
+    public RequestService(IUnitOfWork unitOfWork, INotificationService notificationService)
     {
         _unitOfWork = unitOfWork;
+        _notificationService = notificationService;
     }
 
     // Create
@@ -27,7 +29,27 @@ public class RequestService : IRequestService
         request.Status = "pending";
         request.CreatedAt = System.DateTime.Now;
         _unitOfWork.Requests.PrepareCreate(request);
-        return await _unitOfWork.SaveChangesWithTransactionAsync();
+        var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+
+        // Tạo notification cho managers khi có request mới
+        if (result > 0 && _notificationService != null)
+        {
+            // Load user để lấy FullName
+            var user = await _unitOfWork.Users.GetByIdAsync(request.UserId);
+            var managers = await _unitOfWork.Users.GetAllByRoleDescriptionContainsAsync("manager");
+            foreach (var manager in managers)
+            {
+                await _notificationService.CreateNotificationAsync(
+                    manager.UserId,
+                    "Request",
+                    "Có yêu cầu mới",
+                    $"Người dùng {user?.FullName ?? "Unknown"} đã gửi yêu cầu mới: {request.Type}",
+                    request.RequestId
+                );
+            }
+        }
+
+        return result;
     }
 
     // Read
