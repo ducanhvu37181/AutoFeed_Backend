@@ -89,4 +89,22 @@ public class BarnService : IBarnService
         var hasActiveChickenBarn = await _unitOfWork.ChickenBarns.IsActiveAsync(barnId);
         return hasActiveChickenBarn ? "used" : "empty";
     }
+
+    public async Task<decimal> GetFoodWeekAsync(int barnId)
+    {
+        var today = DateTime.Now.Date;
+        var diff = (7 + ((int)today.DayOfWeek - (int)DayOfWeek.Monday)) % 7;
+        var mondayThisWeek = today.AddDays(-diff);
+        var mondayLastWeek = mondayThisWeek.AddDays(-7);
+        var sundayLastWeek = mondayLastWeek.AddDays(6);
+        return await _unitOfWork.DataIoTs.GetTotalFoodByDateRangeAsync(barnId, mondayLastWeek, sundayLastWeek);
+    }
+
+    public async Task<decimal> GetFoodMonthAsync(int barnId)
+    {
+        var today = DateTime.Now.Date;
+        var firstDay = new DateTime(today.Year, today.Month, 1);
+        var lastDay = firstDay.AddMonths(1).AddDays(-1);
+        return await _unitOfWork.DataIoTs.GetTotalFoodByDateRangeAsync(barnId, firstDay, lastDay);
+    }
 }
