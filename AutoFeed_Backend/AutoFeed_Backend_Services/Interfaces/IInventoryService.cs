@@ -11,6 +11,10 @@ public interface IInventoryService
 
     // Lấy inventory sắp hết hạn
     Task<IEnumerable<object>> GetExpiringSoonAsync(int days = 30);
+
+    // Lấy danh sách thức ăn đã hết hạn
+    Task<IEnumerable<object>> GetExpiredInventoryAsync();
+
     //Lấy patch gần hết hạn nhất
     Task<IEnumerable<object>> GetNearestExpiredAsync();
 

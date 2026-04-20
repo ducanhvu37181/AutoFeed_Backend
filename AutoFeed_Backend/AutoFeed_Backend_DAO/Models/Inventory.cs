@@ -17,5 +17,7 @@ public partial class Inventory
 
     public DateOnly ExpiredDate { get; set; }
 
+    public DateOnly ImportDate { get; set; }
+
     public virtual Food Food { get; set; }
 }

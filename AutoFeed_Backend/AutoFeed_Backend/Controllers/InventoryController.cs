@@ -48,6 +48,21 @@ public class InventoryController : ControllerBase
         });
     }
 
+    // GET api/Inventory/expired
+    // Lấy danh sách thức ăn đã hết hạn
+    [HttpGet("expired")]
+    public async Task<IActionResult> GetExpired()
+    {
+        var data = await _service.GetExpiredInventoryAsync();
+        return Ok(new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = data,
+            Description = "Success"
+        });
+    }
+
     // POST api/Inventory/add
     // Manager nhập kho: thêm một lô hàng mới vào inventory
     [HttpPost("add")]
