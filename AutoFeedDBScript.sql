@@ -50,6 +50,7 @@ CREATE TABLE [dbo].[BarnImage] (
     [barnId] INT NOT NULL,
     [url] NVARCHAR(MAX) NOT NULL,
     [description] NVARCHAR(MAX) NULL,
+    [captureDate] DATETIME DEFAULT GETDATE(),
     CONSTRAINT [FK_BarnImage_Barn] FOREIGN KEY([barnId]) REFERENCES [dbo].[Barn] ([barnID])
 );
 
