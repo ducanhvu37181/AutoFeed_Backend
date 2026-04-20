@@ -42,8 +42,8 @@ public class RequestService : IRequestService
                 await _notificationService.CreateNotificationAsync(
                     manager.UserId,
                     "Request",
-                    "Có yêu cầu mới",
-                    $"Người dùng {user?.FullName ?? "Unknown"} đã gửi yêu cầu mới: {request.Type}",
+                    "New Request",
+                    $"You have a notification from {user?.FullName ?? "Unknown"}",
                     request.RequestId
                 );
             }

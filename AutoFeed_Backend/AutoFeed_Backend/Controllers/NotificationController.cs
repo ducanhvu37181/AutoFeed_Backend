@@ -18,12 +18,12 @@ public class NotificationController : ControllerBase
     }
 
     // GET api/Notification
-    // Lấy tất cả notifications của user hiện tại
+    // Get all notifications for current user
     [HttpGet]
     public async Task<IActionResult> GetNotifications()
     {
-        // Lấy userId từ JWT token (giả định đã được xử lý trong middleware)
-        // Tạm thời hardcode userId = 1 để test, sau này sẽ lấy từ token
+        // Get userId from JWT token (assumed to be handled in middleware)
+        // Temporarily hardcoded userId = 1 for testing, will get from token later
         var userId = 1;
 
         var notifications = await _notificationService.GetByUserIdAsync(userId);
@@ -37,7 +37,7 @@ public class NotificationController : ControllerBase
     }
 
     // GET api/Notification/unread
-    // Lấy các notifications chưa đọc của user hiện tại
+    // Get unread notifications for current user
     [HttpGet("unread")]
     public async Task<IActionResult> GetUnreadNotifications()
     {
@@ -54,7 +54,7 @@ public class NotificationController : ControllerBase
     }
 
     // GET api/Notification/unread-count
-    // Lấy số lượng notifications chưa đọc của user hiện tại
+    // Get unread notification count for current user
     [HttpGet("unread-count")]
     public async Task<IActionResult> GetUnreadCount()
     {
@@ -71,7 +71,7 @@ public class NotificationController : ControllerBase
     }
 
     // PUT api/Notification/{id}/read
-    // Đánh dấu một notification đã đọc
+    // Mark a notification as read
     [HttpPut("{id}/read")]
     public async Task<IActionResult> MarkAsRead(int id)
     {
@@ -86,7 +86,7 @@ public class NotificationController : ControllerBase
     }
 
     // PUT api/Notification/read-all
-    // Đánh dấu tất cả notifications của user hiện tại đã đọc
+    // Mark all notifications for current user as read
     [HttpPut("read-all")]
     public async Task<IActionResult> MarkAllAsRead()
     {
