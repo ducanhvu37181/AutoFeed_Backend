@@ -66,6 +66,7 @@ public class BarnController : ControllerBase
             var status = await _barnService.GetBarnStatusAsync(b.BarnId);
             var foodWeek = await _barnService.GetFoodWeekAsync(b.BarnId);
             var foodMonth = await _barnService.GetFoodMonthAsync(b.BarnId);
+            var foodToday = await _barnService.GetFoodTodayAsync(b.BarnId);
             result.Add(new {
                 b.BarnId,
                 b.Temperature,
@@ -77,7 +78,8 @@ public class BarnController : ControllerBase
                 b.CreateDate,
                 Status = status,
                 FoodWeek = foodWeek,
-                FoodMonth = foodMonth
+                FoodMonth = foodMonth,
+                FoodToday = foodToday
             });
         }
 
@@ -130,6 +132,7 @@ public class BarnController : ControllerBase
             var status = await _barnService.GetBarnStatusAsync(b.BarnId);
             var foodWeek = await _barnService.GetFoodWeekAsync(b.BarnId);
             var foodMonth = await _barnService.GetFoodMonthAsync(b.BarnId);
+            var foodToday = await _barnService.GetFoodTodayAsync(b.BarnId);
             result.Add(new {
                 b.BarnId,
                 b.Temperature,
@@ -141,7 +144,8 @@ public class BarnController : ControllerBase
                 b.CreateDate,
                 Status = status,
                 FoodWeek = foodWeek,
-                FoodMonth = foodMonth
+                FoodMonth = foodMonth,
+                FoodToday = foodToday
             });
         }
 
@@ -157,6 +161,7 @@ public class BarnController : ControllerBase
         var status = await _barnService.GetBarnStatusAsync(b.BarnId);
         var foodWeek = await _barnService.GetFoodWeekAsync(b.BarnId);
         var foodMonth = await _barnService.GetFoodMonthAsync(b.BarnId);
+        var foodToday = await _barnService.GetFoodTodayAsync(b.BarnId);
 
         return Ok(new
         {
@@ -170,7 +175,8 @@ public class BarnController : ControllerBase
             b.CreateDate,
             Status = status,
             FoodWeek = foodWeek,
-            FoodMonth = foodMonth
+            FoodMonth = foodMonth,
+            FoodToday = foodToday
         });
     }
 

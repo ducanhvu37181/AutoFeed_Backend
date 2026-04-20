@@ -80,6 +80,20 @@ public class DataIoTRepository : GenericRepository<DataIoT>
         return total;
     }
 
+    public async Task<decimal> GetFoodTodayAsync(int barnId)
+    {
+        var today = DateTime.Now.Date;
+        var last = await _context.DataIoTs
+            .Where(x => x.BarnId == barnId
+                        && x.Description == "food today"
+                        && x.RecordDate.HasValue
+                        && x.RecordDate.Value.Date == today)
+            .OrderByDescending(x => x.SequenceNumber)
+            .FirstOrDefaultAsync();
+
+        return last?.Value ?? 0;
+    }
+
     public async Task<int> RemoveByDateAsync(DateTime date)
     {
         var d = date.Date;

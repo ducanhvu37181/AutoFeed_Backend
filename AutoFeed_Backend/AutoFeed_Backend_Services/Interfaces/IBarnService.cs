@@ -23,4 +23,5 @@ public interface IBarnService
     Task<string> GetBarnStatusAsync(int barnId);
     Task<decimal> GetFoodWeekAsync(int barnId);
     Task<decimal> GetFoodMonthAsync(int barnId);
+    Task<decimal> GetFoodTodayAsync(int barnId);
 }
