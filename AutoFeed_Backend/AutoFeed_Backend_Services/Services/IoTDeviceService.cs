@@ -62,7 +62,7 @@ namespace AutoFeed_Backend_Services.Services
             {
                 Name = name,
                 Description = description,
-                Status = true // Mặc định Online
+                Status = false // Mặc định Offline khi tạo mới
             };
 
             await _unitOfWork.IoTDevices.CreateAsync(device);
