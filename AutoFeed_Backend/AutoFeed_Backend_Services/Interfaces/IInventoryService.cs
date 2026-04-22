@@ -6,8 +6,8 @@ namespace AutoFeed_Backend_Services.Interfaces;
 
 public interface IInventoryService
 {
-    // Search food trong inventory 
-    Task<IEnumerable<object>> SearchInventoryAsync(string? search, string? type);
+    // Search food trong inventory
+    Task<IEnumerable<object>> SearchInventoryAsync(string? search);
 
     // Lấy inventory sắp hết hạn
     Task<IEnumerable<object>> GetExpiringSoonAsync(int days = 30);
@@ -18,6 +18,12 @@ public interface IInventoryService
     // Lấy danh sách thức ăn còn hạn sử dụng
     Task<IEnumerable<object>> GetValidInventoryAsync();
 
+    // Lấy tất cả inventory chưa sử dụng
+    Task<IEnumerable<object>> GetUnusedInventoryAsync();
+
+    // Lấy tất cả inventory đã sử dụng
+    Task<IEnumerable<object>> GetUsedInventoryAsync();
+
     //Lấy patch gần hết hạn nhất
     Task<IEnumerable<object>> GetNearestExpiredAsync();
 
@@ -26,6 +32,12 @@ public interface IInventoryService
 
     // Cập nhật số lượng và ngày hết hạn của inventory theo ID
     Task<Inventory?> UpdateInventoryAsync(int inventId, int quantity, DateOnly? expiredDate);
+
+    // Lấy lịch sử inventory theo inventory ID
+    Task<IEnumerable<object>> GetInventoryHistoryAsync(int inventId);
+
+    // Lấy tất cả lịch sử inventory
+    Task<IEnumerable<object>> GetAllInventoryHistoryAsync();
 
     //Xuất kho: farmer lấy food từ inventory để cho vào máy cho ăn tự động
     //Task<bool> ConsumeInventoryAsync(int foodId, int quantity);
