@@ -34,4 +34,6 @@ public partial class User
     public virtual Role Role { get; set; }
 
     public virtual ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
+
+    public virtual ICollection<InventoryHistory> InventoryHistories { get; set; } = new List<InventoryHistory>();
 }

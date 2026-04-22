@@ -10,7 +10,6 @@
 
     public class FoodUpdateRequest
     {
-        public int FoodId { get; set; } // Phải có cái này để hết lỗi Build
         public string Name { get; set; } = null!;
         public string Type { get; set; } = null!;
         public string? Note { get; set; }

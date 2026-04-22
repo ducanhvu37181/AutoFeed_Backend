@@ -9,7 +9,7 @@ public partial class Inventory
 {
     public int InventId { get; set; }
 
-    public int FoodId { get; set; }
+    public string FoodName { get; set; }
 
     public int Quantity { get; set; }
 
@@ -19,7 +19,9 @@ public partial class Inventory
 
     public DateOnly ExpiredDate { get; set; }
 
+    public string Status { get; set; }
+
     public int? DaysExpired { get; set; }
 
-    public virtual Food Food { get; set; }
+    public virtual ICollection<InventoryHistory> InventoryHistories { get; set; } = new List<InventoryHistory>();
 }

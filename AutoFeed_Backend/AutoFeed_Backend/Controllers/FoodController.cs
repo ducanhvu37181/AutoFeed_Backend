@@ -66,18 +66,9 @@ namespace AutoFeed_Backend.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] FoodUpdateRequest request)
         {
-            if (id != request.FoodId)
-                return BadRequest(new ApiResponse<object>
-                {
-                    Status = false,
-                    HttpCode = 400,
-                    Data = null,
-                    Description = "ID mismatch!"
-                });
-
             var food = new Food
             {
-                FoodId = request.FoodId,
+                FoodId = id,
                 Name = request.Name,
                 Type = request.Type,
                 Note = request.Note

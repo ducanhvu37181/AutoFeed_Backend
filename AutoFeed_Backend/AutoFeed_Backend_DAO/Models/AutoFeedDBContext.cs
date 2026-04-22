@@ -40,6 +40,8 @@ public partial class AutoFeedDBContext : DbContext
 
     public virtual DbSet<Inventory> Inventories { get; set; }
 
+    public virtual DbSet<InventoryHistory> InventoryHistories { get; set; }
+
     public virtual DbSet<IoTDevice> IoTDevices { get; set; }
 
     public virtual DbSet<LargeChicken> LargeChickens { get; set; }
@@ -70,7 +72,12 @@ public partial class AutoFeedDBContext : DbContext
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer(GetConnectionString("DefaultConnection")).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseSqlServer("Name=ConnectionStrings:DefaultConnection");
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -371,17 +378,61 @@ public partial class AutoFeedDBContext : DbContext
             entity.Property(e => e.InventId).HasColumnName("inventID");
             entity.Property(e => e.DaysExpired).HasComputedColumnSql("(case when datediff(day,getdate(),[expiredDate])>=(0) then (0) else datediff(day,getdate(),[expiredDate]) end)", false);
             entity.Property(e => e.ExpiredDate).HasColumnName("expiredDate");
-            entity.Property(e => e.FoodId).HasColumnName("foodID");
+            entity.Property(e => e.FoodName)
+                .IsRequired()
+                .HasMaxLength(100)
+                .HasColumnName("foodName");
             entity.Property(e => e.ImportDate).HasColumnName("importDate");
             entity.Property(e => e.Quantity).HasColumnName("quantity");
+            entity.Property(e => e.Status)
+                .IsRequired()
+                .HasMaxLength(10)
+                .HasDefaultValue("unused")
+                .HasColumnName("status");
             entity.Property(e => e.WeightPerBag)
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("weightPerBag");
+        });
 
-            entity.HasOne(d => d.Food).WithMany(p => p.Inventories)
-                .HasForeignKey(d => d.FoodId)
+        modelBuilder.Entity<InventoryHistory>(entity =>
+        {
+            entity.HasKey(e => e.HistoryId).HasName("PK__Inventor__3F1D4D8A8B9C0D1E");
+
+            entity.ToTable("InventoryHistory");
+
+            entity.Property(e => e.HistoryId).HasColumnName("historyID");
+            entity.Property(e => e.InventId).HasColumnName("inventID");
+            entity.Property(e => e.FoodName)
+                .IsRequired()
+                .HasMaxLength(100)
+                .HasColumnName("foodName");
+            entity.Property(e => e.OldQuantity).HasColumnName("oldQuantity");
+            entity.Property(e => e.NewQuantity).HasColumnName("newQuantity");
+            entity.Property(e => e.QuantityChange).HasColumnName("quantityChange");
+            entity.Property(e => e.WeightPerBag)
+                .HasColumnType("decimal(18, 2)")
+                .HasColumnName("weightPerBag");
+            entity.Property(e => e.ImportDate).HasColumnName("importDate");
+            entity.Property(e => e.ExpiredDate).HasColumnName("expiredDate");
+            entity.Property(e => e.ChangedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("changedAt");
+            entity.Property(e => e.ChangedBy).HasColumnName("changedBy");
+            entity.Property(e => e.ActionType)
+                .IsRequired()
+                .HasMaxLength(20)
+                .HasColumnName("actionType");
+
+            entity.HasOne(d => d.Inventory).WithMany(p => p.InventoryHistories)
+                .HasForeignKey(d => d.InventId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Inventory_Food");
+                .HasConstraintName("FK_InventoryHistory_Inventory");
+
+            entity.HasOne(d => d.ChangedByUser).WithMany(p => p.InventoryHistories)
+                .HasForeignKey(d => d.ChangedBy)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_InventoryHistory_User");
         });
 
         modelBuilder.Entity<IoTDevice>(entity =>

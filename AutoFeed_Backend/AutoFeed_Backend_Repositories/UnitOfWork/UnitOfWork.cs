@@ -19,6 +19,7 @@ public class UnitOfWork : IUnitOfWork
     private BarnRepository _barnRepository;
     private FlockRepository _flockRepository;
     private InventoryRepository _inventoryRepository;
+    private InventoryHistoryRepository _inventoryHistoryRepository;
     private ErrorIoTRepository _errorIoTRepository;
     private BarnImageRepository _barnImageRepository;
 
@@ -84,9 +85,13 @@ public class UnitOfWork : IUnitOfWork
     {
         get { return _flockRepository ??= new FlockRepository(_context); }
     }
-    public InventoryRepository Inventories 
-    { 
-        get { return _inventoryRepository ??= new InventoryRepository(_context); } 
+    public InventoryRepository Inventories
+    {
+        get { return _inventoryRepository ??= new InventoryRepository(_context); }
+    }
+    public InventoryHistoryRepository InventoryHistories
+    {
+        get { return _inventoryHistoryRepository ??= new InventoryHistoryRepository(_context); }
     }
     public ErrorIoTRepository ErrorIoTs
     {
