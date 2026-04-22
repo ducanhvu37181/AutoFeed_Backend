@@ -19,27 +19,72 @@ public class InventoryService : IInventoryService
     }
 
     // Search food trong inventory — trả về object gọn cho frontend
-    public async Task<IEnumerable<object>> SearchInventoryAsync(string? search, string? type)
+    public async Task<IEnumerable<object>> SearchInventoryAsync(string? search)
     {
-        var items = await _unitOfWork.Inventories.SearchAsync(search, type);
+        var items = await _unitOfWork.Inventories.SearchAsync(search);
 
         return items.Select(i => new
         {
             InventId = i.InventId,
-            FoodId = i.FoodId,
-            FoodName = i.Food?.Name,
-            FoodType = i.Food?.Type,
+            FoodName = i.FoodName,
             Quantity = i.Quantity,
             WeightPerBag = i.WeightPerBag,
             TotalWeight = i.Quantity * i.WeightPerBag,
             ExpiredDate = i.ExpiredDate.ToString("yyyy-MM-dd") ?? "N/A",
-            Status = i.ExpiredDate == null
-    ? "Unknown"
-    : i.ExpiredDate <= DateOnly.FromDateTime(DateTime.Today)
-        ? "Expired"
-        : i.ExpiredDate <= DateOnly.FromDateTime(DateTime.Today.AddDays(30))
-            ? "Expiring Soon"
-            : "Good",
+            Status = i.Status,
+            ExpirationStatus = i.ExpiredDate == null
+                ? "Unknown"
+                : i.ExpiredDate <= DateOnly.FromDateTime(DateTime.Today)
+                    ? "Expired"
+                    : i.ExpiredDate <= DateOnly.FromDateTime(DateTime.Today.AddDays(30))
+                        ? "Expiring Soon"
+                        : "Good",
+        });
+    }
+
+    // Lấy tất cả inventory chưa sử dụng
+    public async Task<IEnumerable<object>> GetUnusedInventoryAsync()
+    {
+        var items = await _unitOfWork.Inventories.GetUnusedInventoryAsync();
+        return items.Select(i => new
+        {
+            InventId = i.InventId,
+            FoodName = i.FoodName,
+            Quantity = i.Quantity,
+            WeightPerBag = i.WeightPerBag,
+            TotalWeight = i.Quantity * i.WeightPerBag,
+            ExpiredDate = i.ExpiredDate.ToString("yyyy-MM-dd") ?? "N/A",
+            Status = i.Status,
+            ExpirationStatus = i.ExpiredDate == null
+                ? "Unknown"
+                : i.ExpiredDate <= DateOnly.FromDateTime(DateTime.Today)
+                    ? "Expired"
+                    : i.ExpiredDate <= DateOnly.FromDateTime(DateTime.Today.AddDays(30))
+                        ? "Expiring Soon"
+                        : "Good",
+        });
+    }
+
+    // Lấy tất cả inventory đã sử dụng
+    public async Task<IEnumerable<object>> GetUsedInventoryAsync()
+    {
+        var items = await _unitOfWork.Inventories.GetUsedInventoryAsync();
+        return items.Select(i => new
+        {
+            InventId = i.InventId,
+            FoodName = i.FoodName,
+            Quantity = i.Quantity,
+            WeightPerBag = i.WeightPerBag,
+            TotalWeight = i.Quantity * i.WeightPerBag,
+            ExpiredDate = i.ExpiredDate.ToString("yyyy-MM-dd") ?? "N/A",
+            Status = i.Status,
+            ExpirationStatus = i.ExpiredDate == null
+                ? "Unknown"
+                : i.ExpiredDate <= DateOnly.FromDateTime(DateTime.Today)
+                    ? "Expired"
+                    : i.ExpiredDate <= DateOnly.FromDateTime(DateTime.Today.AddDays(30))
+                        ? "Expiring Soon"
+                        : "Good",
         });
     }
 
@@ -55,8 +100,8 @@ public class InventoryService : IInventoryService
 
         return items.Select(i => new
         {
-            i.FoodId,
-            FoodName = i.Food?.Name,
+            i.InventId,
+            i.FoodName,
             i.Quantity,
             i.ExpiredDate,
             DaysLeft = i.ExpiredDate.DayNumber - today.DayNumber
@@ -76,9 +121,7 @@ public class InventoryService : IInventoryService
         return items.Select(i => new
         {
             InventId = i.InventId,
-            FoodId = i.FoodId,
-            FoodName = i.Food?.Name,
-            FoodType = i.Food?.Type,
+            FoodName = i.FoodName,
             Quantity = i.Quantity,
             WeightPerBag = i.WeightPerBag,
             TotalWeight = i.Quantity * i.WeightPerBag,
@@ -101,19 +144,17 @@ public class InventoryService : IInventoryService
         return items.Select(i => new
         {
             InventId = i.InventId,
-            FoodId = i.FoodId,
-            FoodName = i.Food?.Name,
-            FoodType = i.Food?.Type,
+            FoodName = i.FoodName,
             Quantity = i.Quantity,
             WeightPerBag = i.WeightPerBag,
             TotalWeight = i.Quantity * i.WeightPerBag,
             ExpiredDate = i.ExpiredDate.ToString("yyyy-MM-dd"),
-            DaysRemaining = i.ExpiredDate.DayNumber - today.DayNumber,
+            DaysLeft = i.ExpiredDate.DayNumber - today.DayNumber,
             ImportDate = i.ImportDate.ToString("yyyy-MM-dd")
         });
     }
 
-    // Nhập kho: tăng quantity sau khi nhập kho thành công
+    // Nhập kho: set status = 'unused' khi thêm mới
     public async Task<bool> AddInventoryAsync(Inventory item)
     {
         var today = DateOnly.FromDateTime(DateTime.Today);
@@ -134,24 +175,64 @@ public class InventoryService : IInventoryService
         if (item.ImportDate == default)
             item.ImportDate = today;
 
+        // Set status to 'unused' when adding new inventory
+        item.Status = "unused";
+
         var existing = await _unitOfWork.Inventories
-            .FirstOrDefaultAsync(x => x.FoodId == item.FoodId
+            .FirstOrDefaultAsync(x => x.FoodName == item.FoodName
            && x.ExpiredDate == item.ExpiredDate);
 
         if (existing != null)
         {
             existing.Quantity += item.Quantity;
             _unitOfWork.Inventories.PrepareUpdate(existing);
+            await _unitOfWork.SaveChangesWithTransactionAsync();
+
+            // Tạo history record cho update sau khi đã save
+            var history = new InventoryHistory
+            {
+                InventId = existing.InventId,
+                FoodName = existing.FoodName,
+                OldQuantity = existing.Quantity - item.Quantity,
+                NewQuantity = existing.Quantity,
+                QuantityChange = item.Quantity,
+                WeightPerBag = existing.WeightPerBag,
+                ImportDate = existing.ImportDate,
+                ExpiredDate = existing.ExpiredDate,
+                ChangedAt = DateTime.Now,
+                ActionType = "POST"
+            };
+            _unitOfWork.InventoryHistories.PrepareCreate(history);
+            await _unitOfWork.SaveChangesWithTransactionAsync();
         }
         else
         {
             _unitOfWork.Inventories.PrepareCreate(item);
+            await _unitOfWork.SaveChangesWithTransactionAsync();
+
+            // Tạo history record cho insert sau khi đã save để lấy InventId
+            var history = new InventoryHistory
+            {
+                InventId = item.InventId,
+                FoodName = item.FoodName,
+                OldQuantity = 0,
+                NewQuantity = item.Quantity,
+                QuantityChange = item.Quantity,
+                WeightPerBag = item.WeightPerBag,
+                ImportDate = item.ImportDate,
+                ExpiredDate = item.ExpiredDate,
+                ChangedAt = DateTime.Now,
+                ActionType = "POST"
+            };
+            _unitOfWork.InventoryHistories.PrepareCreate(history);
+            await _unitOfWork.SaveChangesWithTransactionAsync();
         }
 
-        return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
+        return true;
     }
 
     // Cập nhật số lượng và ngày hết hạn của inventory theo ID
+    // Khi quantity thay đổi thì status tự động chuyển thành 'used'
     public async Task<Inventory?> UpdateInventoryAsync(int inventId, int quantity, DateOnly? expiredDate)
     {
         var today = DateOnly.FromDateTime(DateTime.Today);
@@ -169,7 +250,33 @@ public class InventoryService : IInventoryService
         if (expiredDate.HasValue && expiredDate.Value > today.AddYears(2))
             throw new Exception("Expired date too far in future");
 
+        // Lưu quantity cũ để tạo history
+        int oldQuantity = inventory.Quantity;
+
         inventory.Quantity = quantity;
+
+        // Nếu quantity thay đổi thì set status = 'used'
+        if (oldQuantity != quantity)
+        {
+            inventory.Status = "used";
+
+            // Tạo history record cho update
+            var history = new InventoryHistory
+            {
+                InventId = inventory.InventId,
+                FoodName = inventory.FoodName,
+                OldQuantity = oldQuantity,
+                NewQuantity = quantity,
+                QuantityChange = quantity - oldQuantity,
+                WeightPerBag = inventory.WeightPerBag,
+                ImportDate = inventory.ImportDate,
+                ExpiredDate = inventory.ExpiredDate,
+                ChangedAt = DateTime.Now,
+                ActionType = "PUT"
+            };
+            _unitOfWork.InventoryHistories.PrepareCreate(history);
+        }
+
         if (expiredDate.HasValue)
             inventory.ExpiredDate = expiredDate.Value;
 
@@ -236,14 +343,12 @@ public class InventoryService : IInventoryService
         var items = await _unitOfWork.Inventories.GetAllAsync();
 
         return items
-            .GroupBy(x => x.FoodId)
+            .GroupBy(x => x.FoodName)
             .Select(g => new
             {
-                FoodId = g.Key,
-                FoodName = g.First().Food?.Name,
+                FoodName = g.Key,
                 TotalQuantity = g.Sum(x => x.Quantity),
                 TotalWeight = g.Sum(x => x.Quantity * x.WeightPerBag),
-
                 // gần hết hạn nhất
                 NearestExpiredDate = g.Min(x => x.ExpiredDate)
             });
@@ -255,19 +360,62 @@ public class InventoryService : IInventoryService
         var items = await _unitOfWork.Inventories.GetAllAsync();
 
         return items
-            .GroupBy(x => x.FoodId)
+            .GroupBy(x => x.FoodName)
             .Select(g =>
             {
                 var nearest = g.OrderBy(x => x.ExpiredDate).First();
 
                 return new
                 {
-                    FoodId = g.Key,
-                    FoodName = nearest.Food?.Name,
+                    FoodName = g.Key,
                     ExpiredDate = nearest.ExpiredDate,
                     Quantity = nearest.Quantity
                 };
             });
+    }
+
+    // Lấy lịch sử inventory theo inventory ID
+    public async Task<IEnumerable<object>> GetInventoryHistoryAsync(int inventId)
+    {
+        var items = await _unitOfWork.InventoryHistories.GetHistoryByInventoryIdAsync(inventId);
+        return items.Select(h => new
+        {
+            HistoryId = h.HistoryId,
+            InventId = h.InventId,
+            FoodName = h.FoodName,
+            OldQuantity = h.OldQuantity,
+            NewQuantity = h.NewQuantity,
+            QuantityChange = h.QuantityChange,
+            WeightPerBag = h.WeightPerBag,
+            TotalWeight = h.NewQuantity * h.WeightPerBag,
+            ImportDate = h.ImportDate.ToString("yyyy-MM-dd"),
+            ExpiredDate = h.ExpiredDate.ToString("yyyy-MM-dd"),
+            ChangedAt = h.ChangedAt.ToString("yyyy-MM-dd HH:mm:ss"),
+            ChangedBy = h.ChangedBy,
+            ActionType = h.ActionType
+        });
+    }
+
+    // Lấy tất cả lịch sử inventory
+    public async Task<IEnumerable<object>> GetAllInventoryHistoryAsync()
+    {
+        var items = await _unitOfWork.InventoryHistories.GetAllHistoryAsync();
+        return items.Select(h => new
+        {
+            HistoryId = h.HistoryId,
+            InventId = h.InventId,
+            FoodName = h.FoodName,
+            OldQuantity = h.OldQuantity,
+            NewQuantity = h.NewQuantity,
+            QuantityChange = h.QuantityChange,
+            WeightPerBag = h.WeightPerBag,
+            TotalWeight = h.NewQuantity * h.WeightPerBag,
+            ImportDate = h.ImportDate.ToString("yyyy-MM-dd"),
+            ExpiredDate = h.ExpiredDate.ToString("yyyy-MM-dd"),
+            ChangedAt = h.ChangedAt.ToString("yyyy-MM-dd HH:mm:ss"),
+            ChangedBy = h.ChangedBy,
+            ActionType = h.ActionType
+        });
     }
 
     // Tạo feeding session, để khi farmer lấy bao thức ăn dùng còn dư thì không bị mất dữ liệu

@@ -18,12 +18,72 @@ public class InventoryController : ControllerBase
         _service = service;
     }
 
-    // GET api/Inventory?search=xxx&type=yyy
-    // Tìm kiếm food trong kho inventory, lọc theo tên và loại
+    // GET api/Inventory?search=xxx
+    // Tìm kiếm food trong kho inventory, lọc theo tên
     [HttpGet]
-    public async Task<IActionResult> Search([FromQuery] string? search, [FromQuery] string? type)
+    public async Task<IActionResult> Search([FromQuery] string? search)
     {
-        var data = await _service.SearchInventoryAsync(search, type);
+        var data = await _service.SearchInventoryAsync(search);
+        return Ok(new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = data,
+            Description = "Success"
+        });
+    }
+
+    // GET api/Inventory/unused
+    // Lấy tất cả inventory chưa sử dụng
+    [HttpGet("unused")]
+    public async Task<IActionResult> GetUnused()
+    {
+        var data = await _service.GetUnusedInventoryAsync();
+        return Ok(new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = data,
+            Description = "Success"
+        });
+    }
+
+    // GET api/Inventory/used
+    // Lấy tất cả inventory đã sử dụng
+    [HttpGet("used")]
+    public async Task<IActionResult> GetUsed()
+    {
+        var data = await _service.GetUsedInventoryAsync();
+        return Ok(new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = data,
+            Description = "Success"
+        });
+    }
+
+    // GET api/Inventory/history/{id}
+    // Lấy lịch sử inventory theo inventory ID
+    [HttpGet("history/{id:int}")]
+    public async Task<IActionResult> GetHistory(int id)
+    {
+        var data = await _service.GetInventoryHistoryAsync(id);
+        return Ok(new ApiResponse<object>
+        {
+            Status = true,
+            HttpCode = 200,
+            Data = data,
+            Description = "Success"
+        });
+    }
+
+    // GET api/Inventory/history
+    // Lấy tất cả lịch sử inventory
+    [HttpGet("history")]
+    public async Task<IActionResult> GetAllHistory()
+    {
+        var data = await _service.GetAllInventoryHistoryAsync();
         return Ok(new ApiResponse<object>
         {
             Status = true,
@@ -96,7 +156,7 @@ public class InventoryController : ControllerBase
 
         var entity = new Inventory
         {
-            FoodId = model.FoodId,
+            FoodName = model.FoodName,
             Quantity = model.Quantity,
             WeightPerBag = model.WeightPerBag,
             ExpiredDate = expiredDate
@@ -112,9 +172,10 @@ public class InventoryController : ControllerBase
                 HttpCode = 200,
                 Data = new
                 {
-                    entity.FoodId,
+                    entity.FoodName,
                     entity.Quantity,
-                    entity.ExpiredDate
+                    entity.ExpiredDate,
+                    entity.Status
                 },
                 Description = "Inventory added successfully"
             });
@@ -303,10 +364,11 @@ public class InventoryController : ControllerBase
                 Data = new
                 {
                     InventId = inventory.InventId,
-                    FoodId = inventory.FoodId,
+                    FoodName = inventory.FoodName,
                     Quantity = inventory.Quantity,
                     WeightPerBag = inventory.WeightPerBag,
-                    ExpiredDate = inventory.ExpiredDate.ToString("yyyy-MM-dd")
+                    ExpiredDate = inventory.ExpiredDate.ToString("yyyy-MM-dd"),
+                    Status = inventory.Status
                 },
                 Description = "Inventory updated successfully"
             });
