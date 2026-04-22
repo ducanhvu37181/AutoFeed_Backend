@@ -146,13 +146,32 @@ CREATE TABLE [dbo].[LargeChicken] (
 
 CREATE TABLE [dbo].[Inventory] (
     [inventID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-    [foodID] INT NOT NULL,
+    [foodName] NVARCHAR(100) NOT NULL,
     [quantity] INT NOT NULL,
     [weightPerBag] DECIMAL(18, 2) NOT NULL,
     [importDate] DATE NOT NULL,
     [expiredDate] DATE NOT NULL,
+    [status] NVARCHAR(10) NOT NULL DEFAULT 'unused',
     [DaysExpired] AS IIF(DATEDIFF(DAY, GETDATE(), [expiredDate]) >= 0, 0, DATEDIFF(DAY, GETDATE(), [expiredDate])),
-    CONSTRAINT [FK_Inventory_Food] FOREIGN KEY([foodID]) REFERENCES [dbo].[Food] ([foodID])
+    CONSTRAINT [CK_Inventory_Status] CHECK ([status] IN ('unused', 'used'))
+);
+
+CREATE TABLE [dbo].[InventoryHistory] (
+    [historyID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    [inventID] INT NOT NULL,
+    [foodName] NVARCHAR(100) NOT NULL,
+    [oldQuantity] INT NOT NULL,
+    [newQuantity] INT NOT NULL,
+    [quantityChange] INT NOT NULL,
+    [weightPerBag] DECIMAL(18, 2) NOT NULL,
+    [importDate] DATE NOT NULL,
+    [expiredDate] DATE NOT NULL,
+    [changedAt] DATETIME NOT NULL DEFAULT GETDATE(),
+    [changedBy] INT NULL,
+    [actionType] NVARCHAR(20) NOT NULL,
+    CONSTRAINT [FK_InventoryHistory_Inventory] FOREIGN KEY([inventID]) REFERENCES [dbo].[Inventory] ([inventID]),
+    CONSTRAINT [FK_InventoryHistory_User] FOREIGN KEY([changedBy]) REFERENCES [dbo].[User] ([userID]),
+    CONSTRAINT [CK_InventoryHistory_ActionType] CHECK ([actionType] IN ('POST', 'PUT', 'DELETE'))
 );
 
 CREATE TABLE [dbo].[ChickenBarn] (
@@ -250,7 +269,7 @@ CREATE TABLE [dbo].[Schedule] (
 GO
 
 CREATE TABLE [dbo].[Notification] (
-    [notificationID] INT IDENTITY(1,1) PRIMARY KEY,
+    [notificationID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [userID] INT NOT NULL,
     [type] NVARCHAR(50) NOT NULL,
     [title] NVARCHAR(200) NOT NULL,
@@ -292,16 +311,17 @@ INSERT INTO [User] (roleID, email, password, fullName, phone, username, avatarUR
 
 
 -- 3.4 Flock & Large Chicken
-INSERT INTO [FlockChicken] (name, quantity, weight, DoB, transferDate, healthStatus, isActive) VALUES 
-('Flock_1', 0, 0.45, '2025-12-01', '2026-04-01', 'healthy', 0), ('Flock_2', 0, 0.50, '2025-12-05', '2026-04-01', 'healthy', 0), ('Flock_3', 0, 0.48, '2025-12-10', '2026-04-02', 'healthy', 0), ('Flock_4', 0, 0.52, '2025-12-15', '2026-04-02', 'healthy', 0), ('Flock_5', 0, 0.47, '2025-12-20', '2026-04-03', 'healthy', 0),
-('Flock_6', 3, 0.35, '2026-01-10', NULL, 'healthy', 1), ('Flock_7', 3, 0.38, '2026-02-15', NULL, 'healthy', 1), ('Flock_8', 3, 0.30, '2026-03-01', NULL, 'sick', 1), ('Flock_9', 3, 0.32, '2026-01-05', NULL, 'healthy', 1), ('Flock_10', 3, 0.34, '2026-03-15', NULL, 'healthy', 1);
+INSERT INTO [FlockChicken] (name, quantity, weight, DoB, transferDate, healthStatus, isActive) VALUES
+('Flock1_BinhDinh', 0, 0.45, '2025-12-01', '2026-04-01', 'healthy', 0), ('Flock1_CaoLanh', 0, 0.50, '2025-12-05', '2026-04-01', 'healthy', 0), ('Flock1_BenTre', 0, 0.48, '2025-12-10', '2026-04-02', 'healthy', 0), ('Flock1_DoSon', 0, 0.52, '2025-12-15', '2026-04-02', 'healthy', 0), ('Flock1_NghiTam', 0, 0.47, '2025-12-20', '2026-04-03', 'healthy', 0),
+('Flock2_BinhDinh', 3, 0.35, '2026-01-10', NULL, 'healthy', 1), ('Flock2_CaoLanh', 3, 0.38, '2026-02-15', NULL, 'healthy', 1), ('Flock2_BenTre', 3, 0.30, '2026-03-01', NULL, 'sick', 1), ('Flock2_DoSon', 3, 0.32, '2026-01-05', NULL, 'healthy', 1), ('Flock2_NghiTam', 3, 0.34, '2026-03-15', NULL, 'healthy', 1),
+('Flock Isolation 1', 0, 0.0, '2026-04-01', NULL, 'sick', 1), ('Flock Isolation 2', 0, 0.0, '2026-04-02', NULL, 'sick', 1), ('Flock Isolation 3', 0, 0.0, '2026-04-03', NULL, 'sick', 1);
 
-INSERT INTO [LargeChicken] (flockID, name, weight, healthStatus, url) VALUES 
-(1, 'LChickenFromFlock1_Barn1', 3.5, 'healthy', 'https://tse2.mm.bing.net/th/id/OIP.uMHvXzIat56m-af5peVqGgHaJq?rs=1&pid=ImgDetMain&o=7&rm=3'), (1, 'LChickenFromFlock1_Barn2', 3.4, 'healthy', 'https://anhdephd.vn/wp-content/uploads/2022/05/hinh-nen-ga-choi-dep.jpg'), (1, 'LChickenFromFlock1_Barn3', 3.6, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-duoc-chai-long-ti-mi.jpg'),
-(2, 'LChickenFromFlock2_Barn4', 3.5, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-so-huu-bo-long-mau-do-nau.jpg'), (2, 'LChickenFromFlock2_Barn5', 3.7, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-co-cua.jpg'), (2, 'LChickenFromFlock2_Barn6', 3.8, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-xong-tran.jpg'),
-(3, 'LChickenFromFlock3_Barn7', 3.5, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-chuyen-nghiep.jpg'), (3, 'LChickenFromFlock3_Barn8', 3.9, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-dung-manh.jpg'), (3, 'LChickenFromFlock3_Barn9', 3.4, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-hien-ngang.jpg'),
-(4, 'LChickenFromFlock4_Barn10', 3.5, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-khi-dung-duoi-anh-nang-gat.jpg'), (4, 'LChickenFromFlock4_Barn11', 3.6, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-long-trang.jpg'), (4, 'LChickenFromFlock4_Barn12', 3.7, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-sieu-chien.jpg'),
-(5, 'LChickenFromFlock5_Barn13', 3.8, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-vung-hoang-da.jpg'), (5, 'LChickenFromFlock5_Barn14', 3.5, 'healthy', 'https://img1.kienthucvui.vn/uploads/2021/01/15/anh-ga-troi-tren-nen-co-xanh_011040616.jpg'), (5, 'LChickenFromFlock5_Barn15', 3.9, 'healthy', 'https://img1.kienthucvui.vn/uploads/2021/01/15/anh-giong-ga-choi-noi-tieng-tai-viet-nam_011040771.jpg');
+INSERT INTO [LargeChicken] (flockID, name, weight, healthStatus, url) VALUES
+(1, 'Ace_BinhDinh1', 3.5, 'healthy', 'https://tse2.mm.bing.net/th/id/OIP.uMHvXzIat56m-af5peVqGgHaJq?rs=1&pid=ImgDetMain&o=7&rm=3'), (1, 'Bolt_BinhDinh1', 3.4, 'healthy', 'https://anhdephd.vn/wp-content/uploads/2022/05/hinh-nen-ga-choi-dep.jpg'), (1, 'Blaze_BinhDinh1', 3.6, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-duoc-chai-long-ti-mi.jpg'),
+(2, 'Rex_CaoLanh1', 3.5, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-so-huu-bo-long-mau-do-nau.jpg'), (2, 'Tank_CaoLanh1', 3.7, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-co-cua.jpg'), (2, 'Shadow_CaoLanh1', 3.8, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-xong-tran.jpg'),
+(3, 'Dark_Bentre1', 3.5, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-chuyen-nghiep.jpg'), (3, 'Ghost_Bentre1', 3.9, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-dung-manh.jpg'), (3, 'Grim_Bentre1', 3.4, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-hien-ngang.jpg'),
+(4, 'Raven_DoSon1', 3.5, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-khi-dung-duoi-anh-nang-gat.jpg'), (4, 'Duke_DoSon1', 3.6, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-long-trang.jpg'), (4, 'Chief_DoSon1', 3.7, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-sieu-chien.jpg'),
+(5, 'Spike_NghiTam1', 3.8, 'healthy', 'https://haycafe.vn/wp-content/uploads/2022/03/Anh-ga-choi-vung-hoang-da.jpg'), (5, 'Titan_NghiTam1', 3.5, 'healthy', 'https://img1.kienthucvui.vn/uploads/2021/01/15/anh-ga-troi-tren-nen-co-xanh_011040616.jpg'), (5, 'Hawk_NghiTam1', 3.9, 'healthy', 'https://img1.kienthucvui.vn/uploads/2021/01/15/anh-giong-ga-choi-noi-tieng-tai-viet-nam_011040771.jpg');
 
 -- 3.5 ChickenBarn
 INSERT INTO [ChickenBarn] (barnID, flockID, chickenLID, startDate, exportDate, status) VALUES 
@@ -336,74 +356,17 @@ GO
 INSERT INTO [Task] (title, description, startTime, endTime) VALUES 
 ('Sanitation','Floor sweeping','08:00','09:30'), ('Medical Audit','Health check','10:00','11:30'), ('Inventory Count','Count bags','14:00','15:30'), ('Maintenance','Check wires','16:00','17:00'), ('Pressure Check','Test pipes','09:30','10:30');
 
--- 3.8 FeedingRules & Details (20 rules: 5 Flocks + 15 LargeChickens, each 3 details)
--- Rules 1-5: Active Flocks (6,7,8,9,10)
+-- 3.8 FeedingRules & Details (3 samples, each with Breakfast/Lunch/Dinner)
 INSERT INTO [FeedingRule] (flockID, chickenLID, startDate, endDate, times, description) VALUES 
-(6, NULL, '2026-04-10', '2026-05-10', 3, 'Flock 6 Diet'),
-(7, NULL, '2026-04-12', '2026-05-12', 3, 'Flock 7 Diet'),
-(8, NULL, '2026-04-14', '2026-05-14', 3, 'Flock 8 Diet'),
-(9, NULL, '2026-04-15', '2026-05-15', 3, 'Flock 9 Diet'),
-(10, NULL, '2026-04-16', '2026-05-16', 3, 'Flock 10 Diet');
-
--- Rules 6-20: Large Chickens (1-15)
-INSERT INTO [FeedingRule] (flockID, chickenLID, startDate, endDate, times, description) VALUES 
-(NULL, 1, '2026-04-01', '2026-05-01', 3, 'LChicken 1 Diet'),
-(NULL, 2, '2026-04-01', '2026-05-01', 3, 'LChicken 2 Diet'),
-(NULL, 3, '2026-04-01', '2026-05-01', 3, 'LChicken 3 Diet'),
-(NULL, 4, '2026-04-01', '2026-05-01', 3, 'LChicken 4 Diet'),
-(NULL, 5, '2026-04-01', '2026-05-01', 3, 'LChicken 5 Diet'),
-(NULL, 6, '2026-04-01', '2026-05-01', 3, 'LChicken 6 Diet'),
-(NULL, 7, '2026-04-02', '2026-05-02', 3, 'LChicken 7 Diet'),
-(NULL, 8, '2026-04-02', '2026-05-02', 3, 'LChicken 8 Diet'),
-(NULL, 9, '2026-04-02', '2026-05-02', 3, 'LChicken 9 Diet'),
-(NULL, 10, '2026-04-02', '2026-05-02', 3, 'LChicken 10 Diet'),
-(NULL, 11, '2026-04-02', '2026-05-02', 3, 'LChicken 11 Diet'),
-(NULL, 12, '2026-04-02', '2026-05-02', 3, 'LChicken 12 Diet'),
-(NULL, 13, '2026-04-03', '2026-05-03', 3, 'LChicken 13 Diet'),
-(NULL, 14, '2026-04-03', '2026-05-03', 3, 'LChicken 14 Diet'),
-(NULL, 15, '2026-04-03', '2026-05-03', 3, 'LChicken 15 Diet');
+(6, NULL, '2026-04-10', '2026-05-10', 3, 'Flock 6 Diet'), (NULL, 1, '2026-04-01', '2026-05-01', 3, 'LChicken 1 Diet'), (7, NULL, '2026-04-12', '2026-05-12', 3, 'Flock 7 Diet');
 
 INSERT INTO [FeedingRuleDetail] (ruleID, foodID, feedHour, feedMinute, amount, description) VALUES 
--- Rule 1: Flock 6
+-- Rule 1
 (1, 3, 7, 0, 5.0, 'Morning - Pellet'), (1, 3, 12, 0, 4.0, 'Lunch - Pellet'), (1, 5, 18, 0, 1.0, 'Dinner - Vitamin Mix'),
--- Rule 2: Flock 7
-(2, 1, 7, 30, 7.0, 'Morning - Corn'), (2, 1, 12, 30, 6.0, 'Lunch - Corn'), (2, 3, 18, 30, 5.0, 'Dinner - Pellet'),
--- Rule 3: Flock 8
-(3, 2, 7, 0, 6.0, 'Morning - Soy'), (3, 3, 12, 0, 5.0, 'Lunch - Pellet'), (3, 4, 18, 0, 2.0, 'Dinner - Mineral'),
--- Rule 4: Flock 9
-(4, 1, 7, 30, 8.0, 'Morning - Corn'), (4, 2, 12, 30, 6.0, 'Lunch - Soy'), (4, 5, 18, 30, 1.5, 'Dinner - Vitamin Mix'),
--- Rule 5: Flock 10
-(5, 3, 7, 0, 5.5, 'Morning - Pellet'), (5, 1, 12, 0, 7.0, 'Lunch - Corn'), (5, 4, 18, 0, 2.5, 'Dinner - Mineral'),
--- Rule 6: LChicken 1
-(6, 2, 8, 30, 10.0, 'Morning - Soy'), (6, 2, 13, 0, 8.0, 'Lunch - Soy'), (6, 4, 19, 0, 2.0, 'Dinner - Mineral'),
--- Rule 7: LChicken 2
-(7, 1, 8, 0, 9.0, 'Morning - Corn'), (7, 3, 13, 0, 7.0, 'Lunch - Pellet'), (7, 5, 19, 0, 1.5, 'Dinner - Vitamin Mix'),
--- Rule 8: LChicken 3
-(8, 3, 7, 30, 8.0, 'Morning - Pellet'), (8, 2, 12, 30, 9.0, 'Lunch - Soy'), (8, 4, 18, 30, 2.5, 'Dinner - Mineral'),
--- Rule 9: LChicken 4
-(9, 1, 8, 0, 10.0, 'Morning - Corn'), (9, 1, 13, 0, 8.0, 'Lunch - Corn'), (9, 5, 19, 0, 1.0, 'Dinner - Vitamin Mix'),
--- Rule 10: LChicken 5
-(10, 2, 7, 30, 9.5, 'Morning - Soy'), (10, 3, 12, 30, 7.5, 'Lunch - Pellet'), (10, 4, 18, 30, 3.0, 'Dinner - Mineral'),
--- Rule 11: LChicken 6
-(11, 1, 8, 0, 8.0, 'Morning - Corn'), (11, 2, 13, 0, 9.0, 'Lunch - Soy'), (11, 5, 19, 0, 1.5, 'Dinner - Vitamin Mix'),
--- Rule 12: LChicken 7
-(12, 3, 7, 0, 7.0, 'Morning - Pellet'), (12, 1, 12, 0, 8.0, 'Lunch - Corn'), (12, 4, 18, 0, 2.0, 'Dinner - Mineral'),
--- Rule 13: LChicken 8
-(13, 2, 8, 30, 10.0, 'Morning - Soy'), (13, 3, 13, 0, 6.0, 'Lunch - Pellet'), (13, 5, 19, 0, 2.0, 'Dinner - Vitamin Mix'),
--- Rule 14: LChicken 9
-(14, 1, 7, 30, 9.0, 'Morning - Corn'), (14, 2, 12, 30, 7.0, 'Lunch - Soy'), (14, 4, 18, 30, 2.5, 'Dinner - Mineral'),
--- Rule 15: LChicken 10
-(15, 3, 8, 0, 8.5, 'Morning - Pellet'), (15, 1, 13, 0, 7.5, 'Lunch - Corn'), (15, 5, 19, 0, 1.0, 'Dinner - Vitamin Mix'),
--- Rule 16: LChicken 11
-(16, 2, 7, 0, 9.0, 'Morning - Soy'), (16, 3, 12, 0, 6.5, 'Lunch - Pellet'), (16, 4, 18, 0, 3.0, 'Dinner - Mineral'),
--- Rule 17: LChicken 12
-(17, 1, 8, 30, 10.0, 'Morning - Corn'), (17, 2, 13, 0, 8.0, 'Lunch - Soy'), (17, 5, 19, 0, 1.5, 'Dinner - Vitamin Mix'),
--- Rule 18: LChicken 13
-(18, 3, 7, 0, 7.5, 'Morning - Pellet'), (18, 1, 12, 0, 9.0, 'Lunch - Corn'), (18, 4, 18, 0, 2.0, 'Dinner - Mineral'),
--- Rule 19: LChicken 14
-(19, 2, 8, 0, 8.0, 'Morning - Soy'), (19, 3, 13, 0, 7.0, 'Lunch - Pellet'), (19, 5, 19, 0, 2.0, 'Dinner - Vitamin Mix'),
--- Rule 20: LChicken 15
-(20, 1, 7, 30, 11.0, 'Morning - Corn'), (20, 2, 12, 30, 9.0, 'Lunch - Soy'), (20, 4, 18, 30, 3.0, 'Dinner - Mineral');
+-- Rule 2
+(2, 2, 8, 30, 10.0, 'Morning - Soy'), (2, 2, 13, 0, 8.0, 'Lunch - Soy'), (2, 4, 19, 0, 2.0, 'Dinner - Mineral'),
+-- Rule 3
+(3, 1, 7, 30, 7.0, 'Morning - Corn'), (3, 1, 12, 30, 6.0, 'Lunch - Corn'), (3, 3, 18, 30, 5.0, 'Dinner - Pellet');
 
 -- 3.9 Reports & Requests (Including 'Flock' type)
 INSERT INTO [Report] (userID, type, description, status, url, createDate) VALUES 
@@ -441,19 +404,23 @@ INSERT INTO [Schedule] (userID, taskID, CBarnID, description, note, priority, st
 (3, 5, 14, 'Clean nozzle', 'N', 'high', 'pending', '2026-04-23', '2026-04-23', '2026-04-21');
 
 -- 3.11 Inventory (Today: 2026-04-21)
-INSERT INTO [Inventory] (foodID, quantity, weightPerBag, importDate, expiredDate) VALUES 
--- 1. EXPIRED ITEMS (DaysExpired < 0)
-(1, 3, 20.0, '2026-01-10', '2026-04-10'),   -- Organic Corn (Expired 11 days ago)
-(5, 1, 5.0, '2026-01-15', '2026-04-15'),    -- Vitamin Mix (Expired 6 days ago)
-(3, 5, 25.0, '2026-02-01', '2026-04-18'),   -- Growth Pellet (Expired 3 days ago)
+INSERT INTO [Inventory] (foodName, quantity, weightPerBag, importDate, expiredDate, status) VALUES
+-- 1. EXPIRED ITEMS (DaysExpired < 0) - USED
+('Organic Corn', 3, 20.0, '2026-01-10', '2026-04-10', 'used'),   -- Organic Corn (Expired 11 days ago)
+('Vitamin Mix', 1, 5.0, '2026-01-15', '2026-04-15', 'used'),    -- Vitamin Mix (Expired 6 days ago)
+('Growth Pellet', 5, 25.0, '2026-02-01', '2026-04-18', 'used'),   -- Growth Pellet (Expired 3 days ago)
 
--- 2. NEAR EXPIRY (DaysExpired 0~5)
-(2, 50, 25.0, '2026-02-20', '2026-04-21'),  -- Soy Protein (Expires today)
-(4, 20, 10.0, '2026-03-01', '2026-04-25'),  -- Mineral Block (4 days left)
+-- 2. NEAR EXPIRY (DaysExpired 0~5) - USED
+('Soy Protein', 50, 25.0, '2026-02-20', '2026-04-21', 'used'),  -- Soy Protein (Expires today)
+('Mineral Block', 20, 10.0, '2026-03-01', '2026-04-25', 'used'),  -- Mineral Block (4 days left)
 
--- 3. SAFE (DaysExpired > 30)
-(1, 200, 20.0, '2026-04-01', '2027-01-01'),  -- Organic Corn (255 days left)
-(3, 150, 25.0, '2026-04-05', '2026-12-30'); -- Growth Pellet (253 days left)
+-- 3. SAFE (DaysExpired > 30) - USED
+('Organic Corn', 200, 20.0, '2026-04-01', '2027-01-01', 'used'),  -- Organic Corn (255 days left)
+('Growth Pellet', 150, 25.0, '2026-04-05', '2026-12-30', 'used'), -- Growth Pellet (253 days left)
+
+-- 4. NEW INVENTORY - UNUSED
+('Soy Protein', 100, 25.0, '2026-04-15', '2027-04-15', 'unused'),  -- New Soy Protein
+('Mineral Block', 50, 10.0, '2026-04-18', '2027-04-18', 'unused'); -- New Mineral Block
 
 -- 3.12 Data_IoT: "food today" for active barns (excluding Barn 1)
 -- 21 days (2026-04-01 ~ 2026-04-21), 3 measurements/day
