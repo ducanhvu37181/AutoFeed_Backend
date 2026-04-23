@@ -53,6 +53,7 @@ public class InventoryService : IInventoryService
             Quantity = i.Quantity,
             WeightPerBag = i.WeightPerBag,
             TotalWeight = i.Quantity * i.WeightPerBag,
+            ImportDate = i.ImportDate.ToString("yyyy-MM-dd") ?? "N/A",
             ExpiredDate = i.ExpiredDate.ToString("yyyy-MM-dd") ?? "N/A",
             Status = i.Status,
             ExpirationStatus = i.ExpiredDate == null
@@ -76,6 +77,7 @@ public class InventoryService : IInventoryService
             Quantity = i.Quantity,
             WeightPerBag = i.WeightPerBag,
             TotalWeight = i.Quantity * i.WeightPerBag,
+            ImportDate = i.ImportDate.ToString("yyyy-MM-dd") ?? "N/A",
             ExpiredDate = i.ExpiredDate.ToString("yyyy-MM-dd") ?? "N/A",
             Status = i.Status,
             ExpirationStatus = i.ExpiredDate == null
