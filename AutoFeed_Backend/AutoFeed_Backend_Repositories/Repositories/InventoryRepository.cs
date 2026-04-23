@@ -56,10 +56,12 @@ public class InventoryRepository : GenericRepository<Inventory>
         return await _context.Database.SqlQueryRaw<InventoryDTO>(sql).ToListAsync();
     }
 
-    // Lấy tất cả inventory đã sử dụng (status = 'used')
+    // Lấy tất cả inventory đã sử dụng (status = 'used') và chưa quá hạn
     public async Task<List<InventoryDTO>> GetUsedInventoryAsync()
     {
-        string sql = "SELECT inventID, foodName, quantity, weightPerBag, importDate, expiredDate, status FROM Inventory WHERE status = 'used'";
-        return await _context.Database.SqlQueryRaw<InventoryDTO>(sql).ToListAsync();
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        string sql = "SELECT inventID, foodName, quantity, weightPerBag, importDate, expiredDate, status FROM Inventory WHERE status = 'used' AND expiredDate >= @today";
+        var param = new Microsoft.Data.SqlClient.SqlParameter("@today", today);
+        return await _context.Database.SqlQueryRaw<InventoryDTO>(sql, param).ToListAsync();
     }
 }
