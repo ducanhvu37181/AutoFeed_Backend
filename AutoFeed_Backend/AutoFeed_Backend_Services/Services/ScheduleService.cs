@@ -302,6 +302,15 @@ public class ScheduleService : IScheduleService
         return user?.Username ?? string.Empty;
     }
 
+    public async Task<bool> UserExistsAsync(int userId)
+    {
+        if (userId <= 0)
+            return false;
+
+        var user = await _unitOfWork.Users.GetByIdAsync(userId);
+        return user != null;
+    }
+
     public async Task<List<ScheduleModel>> GetSchedulesByUserAsync(int userId)
     {
         return await _unitOfWork.Schedules.GetByUserIdAsync(userId);
