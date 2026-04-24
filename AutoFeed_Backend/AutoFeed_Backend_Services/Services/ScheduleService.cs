@@ -41,6 +41,13 @@ public class ScheduleService : IScheduleService
 
                 var newTask = taskMap[sch.TaskId];
 
+                // Check if task is active
+                if (newTask.Status == false)
+                {
+                    results.Add((null, false, "Task is not active"));
+                    continue;
+                }
+
                 // check against existing DB schedules and newly created ones in this batch
                 var conflict = false;
                 var start = sch.StartDate;
@@ -163,12 +170,25 @@ public class ScheduleService : IScheduleService
         var start = schedule.StartDate;
         var end = schedule.EndDate ?? schedule.StartDate;
 
+        // Validate date range
+        if (end < start)
+        {
+            return -3; // Invalid date range
+        }
+
         // get the task times for the new schedule
         var newTask = await _unitOfWork.Tasks.GetByIdAsync(schedule.TaskId);
         if (newTask == null)
         {
             // invalid task
             return 0;
+        }
+
+        // Check if task is active
+        if (newTask.Status == false)
+        {
+            // task is not active, cannot create schedule
+            return -2; // -2 indicates inactive task
         }
 
         for (var d = start; d <= end; d = d.AddDays(1))
@@ -408,6 +428,96 @@ public class ScheduleService : IScheduleService
                 return true;
         }
         return false;
+    }
+
+    public async Task<int> ValidateScheduleAsync(ScheduleModel schedule)
+    {
+        // Validate date range
+        var start = schedule.StartDate;
+        var end = schedule.EndDate ?? schedule.StartDate;
+        if (end < start)
+        {
+            return -3; // Invalid date range
+        }
+
+        // get the task times for the new schedule
+        var newTask = await _unitOfWork.Tasks.GetByIdAsync(schedule.TaskId);
+        if (newTask == null)
+        {
+            return -1; // Invalid task
+        }
+
+        // Check if task is active
+        if (newTask.Status == false)
+        {
+            return -2; // Task is not active
+        }
+
+        for (var d = start; d <= end; d = d.AddDays(1))
+        {
+            // 1) cbarn + task conflict (prevents two users taking same task on same cbarn at same date)
+            var existing = await _unitOfWork.Schedules.GetByCbarnTaskAndDateAsync(schedule.CbarnId, schedule.TaskId, d);
+            if (existing != null && existing.Count > 0)
+            {
+                // ensure we ignore any existing schedules whose task has been disabled or the schedule is completed
+                foreach (var ex in existing)
+                {
+                    // ignore schedules that are completed or disabled
+                    if (!string.IsNullOrEmpty(ex.Status))
+                    {
+                        var st = ex.Status.ToLower();
+                        if (st == "completed" || st == "disabled")
+                            continue;
+                    }
+
+                    var exTask = await _unitOfWork.Tasks.GetByIdAsync(ex.TaskId);
+                    if (exTask != null && exTask.Status == false)
+                        continue; // ignore disabled tasks
+
+                    // conflict remains
+                    return -1;
+                }
+            }
+
+            // 2 & 3) user cannot have overlapping tasks at the same time (regardless of cbarn)
+            var userSchedules = await _unitOfWork.Schedules.GetByUserAndDateAsync(schedule.UserId, d.ToDateTime(System.TimeOnly.MinValue));
+            if (userSchedules != null && userSchedules.Count > 0)
+            {
+                foreach (var us in userSchedules)
+                {
+                    // skip schedules that are completed or disabled
+                    if (!string.IsNullOrEmpty(us.Status))
+                    {
+                        var ust = us.Status.ToLower();
+                        if (ust == "completed" || ust == "disabled")
+                            continue;
+                    }
+
+                    var existingTask = await _unitOfWork.Tasks.GetByIdAsync(us.TaskId);
+                    if (existingTask == null)
+                        continue;
+
+                    // ignore disabled tasks when checking user overlaps
+                    if (existingTask.Status == false)
+                        continue;
+
+                    // check time overlap between newTask and existingTask
+                    var aStart = newTask.StartTime;
+                    var aEnd = newTask.EndTime;
+                    var bStart = existingTask.StartTime;
+                    var bEnd = existingTask.EndTime;
+
+                    // overlap check: startA < endB && startB < endA
+                    if (aStart < bEnd && bStart < aEnd)
+                    {
+                        // conflict: user already has a task at this time (could be different cbarn)
+                        return -1;
+                    }
+                }
+            }
+        }
+
+        return 0; // Valid
     }
 
     private async Task<List<ScheduleResponse>> MapToResponsesAsync(IEnumerable<ScheduleModel> items)
