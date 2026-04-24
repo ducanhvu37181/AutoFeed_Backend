@@ -152,6 +152,19 @@ public class ScheduleController : ControllerBase
             return BadRequest(error);
         }
 
+        // Validate user exists
+        var userExists = await _service.UserExistsAsync(model.UserId);
+        if (!userExists)
+        {
+            return NotFound(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 404,
+                Data = null,
+                Description = "userId not found"
+            });
+        }
+
         if (model.EndDate.HasValue && model.EndDate.Value < model.StartDate)
         {
             return BadRequest(new ApiResponse<object>
@@ -215,6 +228,19 @@ public class ScheduleController : ControllerBase
                 HttpCode = 400,
                 Data = null,
                 Description = "Invalid request"
+            });
+        }
+
+        // Validate user exists
+        var userExists = await _service.UserExistsAsync(model.UserId);
+        if (!userExists)
+        {
+            return NotFound(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 404,
+                Data = null,
+                Description = "userId not found"
             });
         }
 
