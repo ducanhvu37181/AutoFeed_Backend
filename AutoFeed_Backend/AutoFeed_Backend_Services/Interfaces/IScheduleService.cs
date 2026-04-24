@@ -22,6 +22,9 @@ public interface IScheduleService
     // helper to resolve username by user id
     Task<string> GetUserNameByIdAsync(int userId);
 
+    // Check if user exists
+    Task<bool> UserExistsAsync(int userId);
+
     Task<List<ScheduleModel>> GetSchedulesByUserAsync(int userId);
 
     // higher-level mapping helpers

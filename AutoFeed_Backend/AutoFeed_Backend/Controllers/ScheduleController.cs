@@ -24,6 +24,17 @@ public class ScheduleController : ControllerBase
     [HttpGet("user/{userId:int}")]
     public async Task<IActionResult> GetByUser(int userId)
     {
+        // Validate user exists
+        var userExists = await _service.UserExistsAsync(userId);
+        if (!userExists)
+            return NotFound(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 404,
+                Data = null,
+                Description = "userId not found"
+            });
+
         var dto = await _service.GetSchedulesByUserResponsesAsync(userId);
         var response = new ApiResponse<object>
         {
@@ -38,6 +49,17 @@ public class ScheduleController : ControllerBase
     [HttpGet("user/{userId:int}/date")]
     public async Task<IActionResult> GetByUserAndDate(int userId, [FromQuery] System.DateTime date)
     {
+        // Validate user exists
+        var userExists = await _service.UserExistsAsync(userId);
+        if (!userExists)
+            return NotFound(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 404,
+                Data = null,
+                Description = "userId not found"
+            });
+
         var dto = await _service.GetSchedulesByUserAndDateAsync(userId, date);
         var response = new ApiResponse<object>
         {
