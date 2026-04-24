@@ -49,4 +49,8 @@ public interface IScheduleService
 
     // Best-effort batch create: try to create each schedule, return per-item results
     Task<List<(int? SchedId, bool Success, string Message)>> CreateSingleScheduleAsync(IEnumerable<ScheduleModel> schedules);
+
+    // Validate schedule conflicts without creating DB records
+    // Returns: 0 = valid, -1 = conflict, -2 = task inactive, -3 = invalid date range
+    Task<int> ValidateScheduleAsync(ScheduleModel schedule);
 }

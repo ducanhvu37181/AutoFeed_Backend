@@ -152,6 +152,17 @@ public class ScheduleController : ControllerBase
             return BadRequest(error);
         }
 
+        if (model.EndDate.HasValue && model.EndDate.Value < model.StartDate)
+        {
+            return BadRequest(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "EndDate cannot be earlier than StartDate"
+            });
+        }
+
         var schedule = new ScheduleModel
         {
             UserId = model.UserId,
@@ -165,31 +176,23 @@ public class ScheduleController : ControllerBase
             EndDate = model.EndDate ?? model.StartDate
         };
 
-        var id = await _service.CreateMultipleScheduleAsync(schedule);
-        if (id == -1)
-        {
-            return StatusCode(409, new ApiResponse<object>
-            {
-                Status = false,
-                HttpCode = 409,
-                Data = null,
-                Description = "Schedule conflict: overlapping schedule exists"
-            });
-        }
+        // Use CreateSingleScheduleAsync for single schedule creation
+        var results = await _service.CreateSingleScheduleAsync(new List<ScheduleModel> { schedule });
+        var result = results.FirstOrDefault();
 
-        if (id <= 0)
+        if (results.Count == 0 || !result.Success)
         {
             var error = new ApiResponse<object>
             {
                 Status = false,
                 HttpCode = 500,
                 Data = null,
-                Description = "Create failed"
+                Description = results.Count == 0 ? "Create failed" : result.Message
             };
             return StatusCode(500, error);
         }
 
-        var responseDto = await _service.GetScheduleResponseByIdAsync(id);
+        var responseDto = await _service.GetScheduleResponseByIdAsync(result.SchedId.Value);
         var response = new ApiResponse<object>
         {
             Status = true,
@@ -197,7 +200,7 @@ public class ScheduleController : ControllerBase
             Data = responseDto,
             Description = "Created"
         };
-        return CreatedAtAction(nameof(Get), new { id = schedule.SchedId }, response);
+        return CreatedAtAction(nameof(Get), new { id = result.SchedId.Value }, response);
     }
 
     // New endpoint: create multiple schedules for each day in range
@@ -229,6 +232,54 @@ public class ScheduleController : ControllerBase
                 HttpCode = 400,
                 Data = null,
                 Description = "EndDate cannot be earlier than StartDate"
+            });
+        }
+
+        // Validate the schedule range without creating DB records
+        var schedule = new ScheduleModel
+        {
+            UserId = model.UserId,
+            TaskId = model.TaskId,
+            CbarnId = model.CbarnId,
+            Description = model.Description,
+            Note = model.Note,
+            Priority = model.Priority,
+            Status = model.Status ?? "pending",
+            StartDate = model.StartDate,
+            EndDate = model.EndDate ?? model.StartDate
+        };
+
+        var validationResult = await _service.ValidateScheduleAsync(schedule);
+        if (validationResult == -3)
+        {
+            return BadRequest(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "EndDate cannot be earlier than StartDate"
+            });
+        }
+
+        if (validationResult == -2)
+        {
+            return BadRequest(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Task is not active"
+            });
+        }
+
+        if (validationResult == -1)
+        {
+            return StatusCode(409, new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 409,
+                Data = null,
+                Description = "Schedule conflict: overlapping schedule exists"
             });
         }
 
