@@ -13,12 +13,14 @@ namespace AutoFeed_Backend.Controllers
         private readonly IFeedingRuleService _feedingRuleService;
         private readonly IFlockService _flockService;
         private readonly ILargeChickenService _largeChickenService;
+        private readonly IFoodService _foodService;
 
-        public FeedingRuleController(IFeedingRuleService feedingRuleService, IFlockService flockService, ILargeChickenService largeChickenService)
+        public FeedingRuleController(IFeedingRuleService feedingRuleService, IFlockService flockService, ILargeChickenService largeChickenService, IFoodService foodService)
         {
             _feedingRuleService = feedingRuleService;
             _flockService = flockService;
             _largeChickenService = largeChickenService;
+            _foodService = foodService;
         }
 
         [HttpGet]
@@ -41,8 +43,145 @@ namespace AutoFeed_Backend.Controllers
         [HttpPost("detail")]
         public async Task<IActionResult> AddDetail([FromBody] RuleDetailCreateDto dto)
         {
-            var (success, message) = await _feedingRuleService.AddDetailAsync(dto);
-            return success ? Ok(new { success = true, message }) : BadRequest(new { success = false, message });
+            // Validate RuleID > 0
+            if (dto.RuleID <= 0)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "RuleID must be greater than 0"
+                });
+            }
+
+            // Validate RuleID exists
+            var ruleExists = await _feedingRuleService.GetRuleByIdAsync(dto.RuleID);
+            if (ruleExists == null)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "RuleID not found"
+                });
+            }
+
+            // Validate FoodID > 0
+            if (dto.FoodID <= 0)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "FoodID must be greater than 0"
+                });
+            }
+
+            // Validate FoodID exists
+            var foodExists = await _foodService.GetFoodByIdAsync(dto.FoodID);
+            if (foodExists == null)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "FoodID not found"
+                });
+            }
+
+            // Validate Amount > 0
+            if (dto.Amount <= 0)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "Amount must be greater than 0"
+                });
+            }
+
+            // Validate FeedHour range (0-23)
+            if (dto.FeedHour < 0 || dto.FeedHour > 23)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "FeedHour must be between 0 and 23"
+                });
+            }
+
+            // Validate FeedMinute range (0-59)
+            if (dto.FeedMinute < 0 || dto.FeedMinute > 59)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "FeedMinute must be between 0 and 59"
+                });
+            }
+
+            // Validate Description not empty
+            if (string.IsNullOrWhiteSpace(dto.Description))
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "Description cannot be empty"
+                });
+            }
+
+            try
+            {
+                var (success, message) = await _feedingRuleService.AddDetailAsync(dto);
+                if (success)
+                {
+                    return Ok(new ApiResponse<object>
+                    {
+                        Status = true,
+                        HttpCode = 201,
+                        Data = null,
+                        Description = message ?? "Feeding rule detail created successfully!"
+                    });
+                }
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = message ?? "Failed to create feeding rule detail"
+                });
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateException ex) when (ex.InnerException?.Message.Contains("duplicate") == true || ex.InnerException?.Message.Contains("unique") == true)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "Duplicate feeding rule detail for this rule and time."
+                });
+            }
+            catch
+            {
+                return StatusCode(500, new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 500,
+                    Data = null,
+                    Description = "Internal server error"
+                });
+            }
         }
 
         [HttpPost]
