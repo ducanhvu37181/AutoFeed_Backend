@@ -313,7 +313,7 @@ public class ReportController : ControllerBase
                 Status = false,
                 HttpCode = 400,
                 Data = null,
-                Description = "Report not found or invalid status. Allowed: pending, reviewed, rejected"
+                Description = "Report not found or invalid status. Allowed: pending, reviewed"
             });
 
         return Ok(new ApiResponse<object>
