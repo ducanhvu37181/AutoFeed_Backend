@@ -152,6 +152,19 @@ public class TaskController : ControllerBase
             EndTime = ParseTime(model.EndTime)
         };
 
+        // Validate startTime <= endTime
+        if (task.StartTime > task.EndTime)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Invalid time range: StartTime must be less than or equal to EndTime"
+            };
+            return BadRequest(error);
+        }
+
         var id = await _service.CreateTaskAsync(task);
         if (id <= 0)
         {
@@ -207,6 +220,20 @@ public class TaskController : ControllerBase
         existing.Description = model.Description;
         existing.StartTime = model.StartTime;
         existing.EndTime = model.EndTime;
+
+        // Validate startTime <= endTime
+        if (existing.StartTime > existing.EndTime)
+        {
+            var error = new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Invalid time range: StartTime must be less than or equal to EndTime"
+            };
+            return BadRequest(error);
+        }
+
         // Update status if provided
         if (model.Status.HasValue)
         {
@@ -248,7 +275,7 @@ public class TaskController : ControllerBase
                 Status = false,
                 HttpCode = 404,
                 Data = null,
-                Description = "Not Found or Delete failed"
+                Description = "Not Found or Inactive failed"
             };
             return NotFound(error);
         }
@@ -258,7 +285,7 @@ public class TaskController : ControllerBase
             Status = true,
             HttpCode = 200,
             Data = null,
-            Description = "Delete success"
+            Description = "Inactive success"
         };
         return Ok(success);
     }
