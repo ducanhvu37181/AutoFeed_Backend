@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AutoFeed_Backend_Services.Interfaces;
 using AutoFeed_Backend_Services.Models.Requests.FeedingRuleRequest;
+using AutoFeed_Backend.Models.Responses;
 using System.Threading.Tasks;
 
 namespace AutoFeed_Backend.Controllers
@@ -10,7 +11,15 @@ namespace AutoFeed_Backend.Controllers
     public class FeedingRuleController : ControllerBase
     {
         private readonly IFeedingRuleService _feedingRuleService;
-        public FeedingRuleController(IFeedingRuleService feedingRuleService) => _feedingRuleService = feedingRuleService;
+        private readonly IFlockService _flockService;
+        private readonly ILargeChickenService _largeChickenService;
+
+        public FeedingRuleController(IFeedingRuleService feedingRuleService, IFlockService flockService, ILargeChickenService largeChickenService)
+        {
+            _feedingRuleService = feedingRuleService;
+            _flockService = flockService;
+            _largeChickenService = largeChickenService;
+        }
 
         [HttpGet]
         public async Task<IActionResult> GetAll() => Ok(await _feedingRuleService.GetAllRulesAsync());
@@ -39,25 +48,116 @@ namespace AutoFeed_Backend.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(FeedingRuleCreateDto dto)
         {
-            // Kiểm tra chỉ cho phép nhập 1 trong 2 trường
+            // Check if only one of chickenLid or flockId is provided
             bool hasChicken = dto.ChickenLid != null;
             bool hasFlock = dto.FlockId != null;
-            if (hasChicken == hasFlock) // cả hai đều null hoặc cả hai đều có giá trị
+            if (hasChicken == hasFlock) // both are null or both have values
             {
-                return BadRequest("Bạn chỉ được nhập 1 trong 2 trường chickenLid hoặc flockId, không được nhập cả hai hoặc cả hai đều null.");
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "You must provide exactly one of chickenLid or flockId. Providing both or neither is not allowed."
+                });
             }
+
+            // Validate Times > 0
+            if (dto.Times <= 0)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "Times must be greater than 0"
+                });
+            }
+
+            // Validate StartDate <= EndDate
+            if (dto.StartDate > dto.EndDate)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "Invalid date range: StartDate must be less than or equal to EndDate"
+                });
+            }
+
+            // Validate ChickenLid existence if provided
+            if (dto.ChickenLid.HasValue)
+            {
+                var chickenExists = await _largeChickenService.GetByIdAsync(dto.ChickenLid.Value);
+                if (chickenExists == null)
+                {
+                    return BadRequest(new ApiResponse<object>
+                    {
+                        Status = false,
+                        HttpCode = 400,
+                        Data = null,
+                        Description = "ChickenLid not found"
+                    });
+                }
+            }
+
+            // Validate FlockId existence if provided
+            if (dto.FlockId.HasValue)
+            {
+                var flockExists = await _flockService.GetFlockByIdAsync(dto.FlockId.Value);
+                if (flockExists == null)
+                {
+                    return BadRequest(new ApiResponse<object>
+                    {
+                        Status = false,
+                        HttpCode = 400,
+                        Data = null,
+                        Description = "FlockId not found"
+                    });
+                }
+            }
+
             try
             {
                 var success = await _feedingRuleService.CreateRuleAsync(dto);
-                return success ? Ok("Created") : BadRequest("Failed");
+                if (success)
+                {
+                    return Ok(new ApiResponse<object>
+                    {
+                        Status = true,
+                        HttpCode = 201,
+                        Data = null,
+                        Description = "Feeding rule created successfully!"
+                    });
+                }
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "Failed to create feeding rule"
+                });
             }
             catch (Microsoft.EntityFrameworkCore.DbUpdateException ex) when (ex.InnerException?.Message.Contains("UIX_FRule_Flock") == true)
             {
-                return BadRequest("Duplicate rule for this chickenLid and flockId.");
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "Duplicate rule for this chickenLid and flockId."
+                });
             }
             catch
             {
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 500,
+                    Data = null,
+                    Description = "Internal server error"
+                });
             }
         }
 
