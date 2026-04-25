@@ -11,17 +11,32 @@ namespace AutoFeed_Backend.Controllers
     public class IoTDeviceController : ControllerBase
     {
         private readonly IIoTDeviceService _deviceService;
+        private readonly IBarnService _barnService;
 
         // Chỉ tiêm Service vào đây, không dùng UnitOfWork ở Controller nữa
-        public IoTDeviceController(IIoTDeviceService deviceService)
+        public IoTDeviceController(IIoTDeviceService deviceService, IBarnService barnService)
         {
             _deviceService = deviceService;
+            _barnService = barnService;
         }
 
         // 1b. Get devices by barn id
         [HttpGet("barn/{barnId}")]
         public async Task<IActionResult> GetByBarn(int barnId)
         {
+            // Validate barn exists
+            var barn = await _barnService.GetByIdAsync(barnId);
+            if (barn == null)
+            {
+                return NotFound(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 404,
+                    Data = null,
+                    Description = $"Barn with ID {barnId} not found."
+                });
+            }
+
             var result = await _deviceService.GetDevicesByBarnIdAsync(barnId);
             return Ok(new ApiResponse<object>
             {
@@ -54,6 +69,20 @@ namespace AutoFeed_Backend.Controllers
                 HttpCode = 200,
                 Data = result,
                 Description = "Devices retrieved successfully."
+            });
+        }
+
+        // Get devices by status
+        [HttpGet("status/{status}")]
+        public async Task<IActionResult> GetByStatus(string status)
+        {
+            var result = await _deviceService.GetAllDevicesAsync("", "", status);
+            return Ok(new ApiResponse<object>
+            {
+                Status = true,
+                HttpCode = 200,
+                Data = result,
+                Description = $"Devices with status '{status}' retrieved successfully."
             });
         }
 
@@ -151,6 +180,17 @@ namespace AutoFeed_Backend.Controllers
                     Description = "Device not found."
                 });
 
+            // Validate barn exists
+            var barn = await _barnService.GetByIdAsync(request.BarnID);
+            if (barn == null)
+                return NotFound(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 404,
+                    Data = null,
+                    Description = $"Barn with ID {request.BarnID} not found."
+                });
+
             var success = await _deviceService.ReassignDeviceAsync(id, request.BarnID);
             if (success)
                 return Ok(new ApiResponse<object>
@@ -207,6 +247,19 @@ namespace AutoFeed_Backend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
+            // Check if device is assigned to a barn
+            var barn = await _deviceService.GetBarnByDeviceIdAsync(id);
+            if (barn != null)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "Cannot delete device: device is assigned to a barn. Please unassign the device first."
+                });
+            }
+
             var success = await _deviceService.DeleteDeviceAsync(id);
             if (success)
                 return Ok(new ApiResponse<object>

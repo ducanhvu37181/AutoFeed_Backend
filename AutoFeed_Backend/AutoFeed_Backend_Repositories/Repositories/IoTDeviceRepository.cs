@@ -22,6 +22,17 @@ public class IoTDeviceRepository : GenericRepository<IoTDevice>
         if (!string.IsNullOrEmpty(type) && type != "All Types")
             query = query.Where(d => d.Name.Contains(type));
 
+        if (!string.IsNullOrEmpty(status))
+        {
+            var statusBool = status.ToLower() switch
+            {
+                "online" => true,
+                "offline" => false,
+                _ => (bool?)null
+            };
+            if (statusBool.HasValue)
+                query = query.Where(d => d.Status == statusBool.Value);
+        }
         return await query.ToListAsync();
     }
 

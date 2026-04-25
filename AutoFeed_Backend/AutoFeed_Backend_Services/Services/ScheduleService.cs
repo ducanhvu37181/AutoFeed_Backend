@@ -1,433 +1,851 @@
 using AutoFeed_Backend_Services.Interfaces;
+
 using AutoFeed_Backend_Repositories.UnitOfWork;
+
 using System.Collections.Generic;
+
 using System.Threading.Tasks;
+
 using ScheduleModel = AutoFeed_Backend_DAO.Models.Schedule;
+
 using AutoFeed_Backend_Services.Models.Responses;
+
+
 
 namespace AutoFeed_Backend_Services.Services;
 
+
+
 public class ScheduleService : IScheduleService
+
 {
+
     private readonly IUnitOfWork _unitOfWork;
 
+
+
     public ScheduleService()
+
     {
+
         _unitOfWork = new UnitOfWork();
+
     }
 
+
+
     public async Task<List<(int? SchedId, bool Success, string Message)>> CreateSingleScheduleAsync(IEnumerable<ScheduleModel> schedules)
+
     {
+
         var results = new List<(int? SchedId, bool Success, string Message)>();
+
         if (schedules == null) return results;
 
+
+
         // Cache tasks to avoid repeated DB calls
+
         var taskIds = schedules.Select(s => s.TaskId).Distinct().ToList();
+
         var taskMap = (await _unitOfWork.Tasks.GetAllAsync()).Where(t => taskIds.Contains(t.TaskId)).ToDictionary(t => t.TaskId);
 
+
+
         // Keep track of successful creates in this batch to detect intra-batch conflicts
+
         var createdSchedules = new List<ScheduleModel>();
 
+
+
         foreach (var sch in schedules)
+
         {
+
             try
+
             {
+
                 // validate task
+
                 if (!taskMap.ContainsKey(sch.TaskId))
+
                 {
+
                     results.Add((null, false, "Invalid task"));
+
                     continue;
+
                 }
+
+
 
                 var newTask = taskMap[sch.TaskId];
 
+
+
                 // Check if task is active
+
                 if (newTask.Status == false)
+
                 {
+
                     results.Add((null, false, "Task is not active"));
+
                     continue;
+
                 }
+
+
 
                 // check against existing DB schedules and newly created ones in this batch
+
                 var conflict = false;
+
                 var start = sch.StartDate;
+
                 var end = sch.EndDate ?? sch.StartDate;
 
+
+
                 for (var d = start; d <= end && !conflict; d = d.AddDays(1))
+
                 {
+
                     // db existing cbarn+task
+
                     var existing = await _unitOfWork.Schedules.GetByCbarnTaskAndDateAsync(sch.CbarnId, sch.TaskId, d);
+
                     if (existing != null && existing.Count > 0)
+
                     {
+
                         foreach (var ex in existing)
+
                         {
+
                             if (!string.IsNullOrEmpty(ex.Status))
+
                             {
+
                                 var st = ex.Status.ToLower();
+
                                 if (st == "completed" || st == "disabled")
+
                                     continue;
+
                             }
+
                             var exTask = await _unitOfWork.Tasks.GetByIdAsync(ex.TaskId);
+
                             if (exTask != null && exTask.Status == false)
+
                                 continue;
+
                             conflict = true;
+
                             break;
+
                         }
+
                     }
 
+
+
                     if (conflict) break;
+
+
 
                     // check against createdSchedules in this batch (cbarn+task same date)
+
                     if (createdSchedules.Any(cs => cs.CbarnId == sch.CbarnId && cs.TaskId == sch.TaskId
+
                         && cs.StartDate <= d && (cs.EndDate == null || cs.EndDate >= d)))
+
                     {
+
                         conflict = true;
+
                         break;
+
                     }
+
+
 
                     // user overlap checks: db
+
                     var userSchedules = await _unitOfWork.Schedules.GetByUserAndDateAsync(sch.UserId, d.ToDateTime(System.TimeOnly.MinValue));
+
                     if (userSchedules != null && userSchedules.Count > 0)
+
                     {
+
                         foreach (var us in userSchedules)
+
                         {
+
                             if (!string.IsNullOrEmpty(us.Status))
+
                             {
+
                                 var ust = us.Status.ToLower();
+
                                 if (ust == "completed" || ust == "disabled")
+
                                     continue;
+
                             }
+
                             var existingTask = await _unitOfWork.Tasks.GetByIdAsync(us.TaskId);
+
                             if (existingTask == null) continue;
+
                             if (existingTask.Status == false) continue;
 
+
+
                             if (newTask.StartTime < existingTask.EndTime && existingTask.StartTime < newTask.EndTime)
+
                             {
+
                                 conflict = true;
+
                                 break;
+
                             }
+
                         }
+
                     }
+
+
 
                     if (conflict) break;
 
+
+
                     // user overlap checks: intra-batch createdSchedules
+
                     foreach (var cs in createdSchedules.Where(x => x.UserId == sch.UserId))
+
                     {
+
                         // consider date overlap
+
                         if (!(cs.StartDate <= d && (cs.EndDate == null || cs.EndDate >= d)))
+
                             continue;
+
                         var csTask = taskMap.ContainsKey(cs.TaskId) ? taskMap[cs.TaskId] : await _unitOfWork.Tasks.GetByIdAsync(cs.TaskId);
+
                         if (csTask == null) continue;
+
                         if (csTask.Status == false) continue;
+
                         if (newTask.StartTime < csTask.EndTime && csTask.StartTime < newTask.EndTime)
+
                         {
+
                             conflict = true;
+
                             break;
+
                         }
+
                     }
+
                 }
+
+
 
                 if (conflict)
+
                 {
+
                     results.Add((null, false, "Conflict with existing schedule"));
+
                     continue;
+
                 }
+
+
 
                 // create
+
                 _unitOfWork.Schedules.PrepareCreate(sch);
+
                 var r = await _unitOfWork.SaveChangesWithTransactionAsync();
+
                 if (r > 0)
+
                 {
+
                     createdSchedules.Add(sch);
+
                     results.Add((sch.SchedId, true, "Created"));
+
                 }
+
                 else
+
                 {
+
                     results.Add((null, false, "Save failed"));
+
                 }
+
             }
+
             catch (System.Exception ex)
+
             {
+
                 results.Add((null, false, ex.Message));
+
             }
+
         }
+
+
 
         return results;
+
     }
+
+
 
     public ScheduleService(IUnitOfWork unitOfWork)
+
     {
+
         _unitOfWork = unitOfWork;
+
     }
+
+
 
     public async Task<int> CreateMultipleScheduleAsync(ScheduleModel schedule)
+
     {
+
         // Check for conflicts:
+
         // 1) same cbarn + same task cannot have multiple schedules at the same date
+
         // 2) one user can only have one task at the same time (no overlapping task times)
+
         // 3) one user cannot be assigned schedules for 2 cbarnId at the same time (also covered by overlapping task times)
+
         var start = schedule.StartDate;
+
         var end = schedule.EndDate ?? schedule.StartDate;
 
-        // Validate date range
-        if (end < start)
-        {
-            return -3; // Invalid date range
-        }
+
 
         // get the task times for the new schedule
+
         var newTask = await _unitOfWork.Tasks.GetByIdAsync(schedule.TaskId);
+
         if (newTask == null)
+
         {
+
             // invalid task
+
             return 0;
+
         }
+
+
 
         // Check if task is active
+
         if (newTask.Status == false)
+
         {
+
             // task is not active, cannot create schedule
+
             return -2; // -2 indicates inactive task
+
         }
+
+
 
         for (var d = start; d <= end; d = d.AddDays(1))
+
         {
+
             // 1) cbarn + task conflict (prevents two users taking same task on same cbarn at same date)
+
             var existing = await _unitOfWork.Schedules.GetByCbarnTaskAndDateAsync(schedule.CbarnId, schedule.TaskId, d);
+
             if (existing != null && existing.Count > 0)
+
             {
+
                 // ensure we ignore any existing schedules whose task has been disabled or the schedule is completed
+
                 foreach (var ex in existing)
+
                 {
+
                     // ignore schedules that are completed or disabled
+
                     if (!string.IsNullOrEmpty(ex.Status))
+
                     {
+
                         var st = ex.Status.ToLower();
+
                         if (st == "completed" || st == "disabled")
+
                             continue;
+
                     }
+
+
 
                     var exTask = await _unitOfWork.Tasks.GetByIdAsync(ex.TaskId);
+
                     if (exTask != null && exTask.Status == false)
+
                         continue; // ignore disabled tasks
 
+
+
                     // conflict remains
+
                     return -1;
+
                 }
+
             }
+
+
 
             // 2 & 3) user cannot have overlapping tasks at the same time (regardless of cbarn)
+
             var userSchedules = await _unitOfWork.Schedules.GetByUserAndDateAsync(schedule.UserId, d.ToDateTime(System.TimeOnly.MinValue));
+
             if (userSchedules != null && userSchedules.Count > 0)
+
             {
+
                 foreach (var us in userSchedules)
+
                 {
+
                     // skip schedules that are completed or disabled
+
                     if (!string.IsNullOrEmpty(us.Status))
+
                     {
+
                         var ust = us.Status.ToLower();
+
                         if (ust == "completed" || ust == "disabled")
+
                             continue;
+
                     }
+
+
 
                     var existingTask = await _unitOfWork.Tasks.GetByIdAsync(us.TaskId);
+
                     if (existingTask == null)
+
                         continue;
+
+
 
                     // ignore disabled tasks when checking user overlaps
+
                     if (existingTask.Status == false)
+
                         continue;
 
+
+
                     // check time overlap between newTask and existingTask
+
                     var aStart = newTask.StartTime;
+
                     var aEnd = newTask.EndTime;
+
                     var bStart = existingTask.StartTime;
+
                     var bEnd = existingTask.EndTime;
 
+
+
                     // overlap check: startA < endB && startB < endA
+
                     if (aStart < bEnd && bStart < aEnd)
+
                     {
+
                         // conflict: user already has a task at this time (could be different cbarn)
+
                         return -1;
+
                     }
+
                 }
+
             }
+
         }
+
+
 
         _unitOfWork.Schedules.PrepareCreate(schedule);
+
         var result = await _unitOfWork.SaveChangesWithTransactionAsync();
+
         if (result > 0)
+
             return schedule.SchedId;
+
         return 0;
+
     }
+
+
 
     public async Task<ScheduleModel?> GetScheduleByIdAsync(int id)
+
     {
+
         return await _unitOfWork.Schedules.GetByIdAsync(id);
+
     }
+
+
 
     public async Task<List<ScheduleModel>> GetAllSchedulesAsync()
+
     {
+
         return await _unitOfWork.Schedules.GetAllAsync();
+
     }
+
+
 
     public async Task<bool> UpdateScheduleAsync(ScheduleModel schedule)
+
     {
+
         try
+
         {
+
             _unitOfWork.Schedules.PrepareUpdate(schedule);
+
             var r = await _unitOfWork.SaveChangesWithTransactionAsync();
+
             return r > 0;
+
         }
+
         catch
+
         {
+
             return false;
+
         }
+
     }
+
+
 
     public async Task<bool> DeleteScheduleAsync(int id)
+
     {
+
         var entity = await _unitOfWork.Schedules.GetByIdAsync(id);
+
         if (entity == null) return false;
+
         entity.Status = "disabled"; // soft-delete set to disabled
+
         _unitOfWork.Schedules.PrepareUpdate(entity);
+
         var r = await _unitOfWork.SaveChangesWithTransactionAsync();
+
         return r > 0;
+
     }
+
+
 
     public async Task<List<ScheduleModel>> GetInProgressScheduleAsync()
+
     {
+
         return await _unitOfWork.Schedules.GetInProgressScheduleAsync();
+
     }
+
+
 
     public async Task<List<ScheduleModel>> GetCompletedScheduleAsync()
+
     {
+
         return await _unitOfWork.Schedules.GetCompletedScheduleAsync();
+
     }
+
+
 
     public async Task<List<ScheduleModel>> GetPendingScheduleAsync()
+
     {
+
         return await _unitOfWork.Schedules.GetPendingScheduleAsync();
+
     }
+
+
 
     public async Task<List<ScheduleModel>> SearchSchedulesAsync(string query)
+
     {
+
         return await _unitOfWork.Schedules.SearchAsync(query);
+
     }
+
+
 
     public async Task<string> GetUserNameByIdAsync(int userId)
+
     {
+
         var user = await _unitOfWork.Users.GetByIdAsync(userId);
+
         return user?.Username ?? string.Empty;
+
     }
+
+
 
     public async Task<bool> UserExistsAsync(int userId)
+
     {
+
         if (userId <= 0)
+
             return false;
 
+
+
         var user = await _unitOfWork.Users.GetByIdAsync(userId);
+
         return user != null;
+
     }
+
+
 
     public async Task<List<ScheduleModel>> GetSchedulesByUserAsync(int userId)
+
     {
+
         return await _unitOfWork.Schedules.GetByUserIdAsync(userId);
+
     }
+
+
 
     public async Task<Dictionary<int, int>> GetBarnMapForSchedulesAsync(IEnumerable<int> cbarnIds)
+
     {
+
         var ids = cbarnIds?.ToList() ?? new List<int>();
+
         var result = new Dictionary<int, int>();
+
         if (!ids.Any()) return result;
+
         var cbarns = await _unitOfWork.ChickenBarns.GetByIdsAsync(ids);
+
         return cbarns.ToDictionary(c => c.CbarnId, c => c.BarnId);
+
     }
+
+
 
     public async Task<Dictionary<int, string>> GetTaskTitleMapAsync(IEnumerable<int> taskIds)
+
     {
+
         var ids = taskIds?.ToList() ?? new List<int>();
+
         var result = new Dictionary<int, string>();
+
         if (!ids.Any()) return result;
+
         var tasks = await _unitOfWork.Tasks.GetAllAsync();
+
         return tasks.Where(t => ids.Contains(t.TaskId)).ToDictionary(t => t.TaskId, t => t.Title);
+
     }
+
+
 
     public async Task<Dictionary<int, string>> GetUserNameMapAsync(IEnumerable<int> userIds)
+
     {
+
         var ids = userIds?.ToList() ?? new List<int>();
+
         var result = new Dictionary<int, string>();
+
         if (!ids.Any()) return result;
+
         var users = await _unitOfWork.Users.GetAllAsync();
+
         return users.Where(u => ids.Contains(u.UserId)).ToDictionary(u => u.UserId, u => u.Username);
+
     }
+
+
 
     // High-level methods returning DTOs
+
     public async Task<List<ScheduleResponse>> GetAllScheduleResponsesAsync()
+
     {
+
         var items = await GetAllSchedulesAsync();
+
         return await MapToResponsesAsync(items);
+
     }
+
+
 
     public async Task<List<ScheduleResponse>> GetInProgressScheduleResponsesAsync()
+
     {
+
         var items = await GetInProgressScheduleAsync();
+
         return await MapToResponsesAsync(items);
+
     }
+
+
 
     public async Task<List<ScheduleResponse>> GetCompletedScheduleResponsesAsync()
+
     {
+
         var items = await GetCompletedScheduleAsync();
+
         return await MapToResponsesAsync(items);
+
     }
+
+
 
     public async Task<List<ScheduleResponse>> SearchScheduleResponsesAsync(string query)
+
     {
+
         var items = await SearchSchedulesAsync(query);
+
         return await MapToResponsesAsync(items);
+
     }
+
+
 
     public async Task<ScheduleResponse?> GetScheduleResponseByIdAsync(int id)
+
     {
+
         var item = await GetScheduleByIdAsync(id);
+
         if (item == null) return null;
+
         var list = await MapToResponsesAsync(new List<ScheduleModel> { item });
+
         return list.FirstOrDefault();
+
     }
+
+
 
     public async Task<List<ScheduleResponse>> GetSchedulesByUserResponsesAsync(int userId)
+
     {
+
         var items = await GetSchedulesByUserAsync(userId);
+
         return await MapToResponsesAsync(items);
+
     }
+
+
 
     public async Task<List<ScheduleResponse>> GetSchedulesByUserAndDateAsync(int userId, System.DateTime date)
+
     {
+
         var items = await _unitOfWork.Schedules.GetByUserAndDateAsync(userId, date);
+
         return await MapToResponsesAsync(items);
+
     }
+
+
 
     public async Task<bool> UpdateScheduleStatusAsync(int id, string status)
+
     {
+
         var entity = await _unitOfWork.Schedules.GetByIdAsync(id);
+
         if (entity == null) return false;
+
         entity.Status = status;
+
         _unitOfWork.Schedules.PrepareUpdate(entity);
+
         var r = await _unitOfWork.SaveChangesWithTransactionAsync();
+
         return r > 0;
+
     }
 
+
+
     public async Task<bool> HasConflictAsync(int cbarnId, int taskId, DateOnly startDate, DateOnly? endDate)
+
     {
+
         var end = endDate ?? startDate;
+
         for (var d = startDate; d <= end; d = d.AddDays(1))
+
         {
+
             var existing = await _unitOfWork.Schedules.GetByCbarnTaskAndDateAsync(cbarnId, taskId, d);
+
             if (existing != null && existing.Count > 0)
+
                 return true;
+
         }
+
         return false;
+
     }
 
     public async Task<int> ValidateScheduleAsync(ScheduleModel schedule)
@@ -521,50 +939,98 @@ public class ScheduleService : IScheduleService
     }
 
     private async Task<List<ScheduleResponse>> MapToResponsesAsync(IEnumerable<ScheduleModel> items)
+
     {
+
         var itemList = items.ToList();
+
         var userIds = itemList.Select(i => i.UserId).Distinct(); // No change
+
         var cbarnIds = itemList.Select(i => i.CbarnId).Distinct(); // No change
+
         var taskIds = itemList.Select(i => i.TaskId).Distinct(); // No change
 
+
+
         var userMap = await GetUserNameMapAsync(userIds);
+
         var cbarnMap = await GetBarnMapForSchedulesAsync(cbarnIds);
+
         var taskMap = await GetTaskTitleMapAsync(taskIds);
+
         // fetch task times
+
         var taskTimes = new Dictionary<int, (TimeOnly start, TimeOnly end)>();
+
         if (taskIds.Any())
+
         {
+
             var tasks = await _unitOfWork.Tasks.GetAllAsync();
+
             foreach (var t in tasks.Where(t => taskIds.Contains(t.TaskId)))
+
             {
+
                 taskTimes[t.TaskId] = (t.StartTime, t.EndTime);
+
             }
+
         }
 
+
+
         var result = itemList.Select(s => {
+
             var username = userMap.ContainsKey(s.UserId) ? userMap[s.UserId] : null;
+
             var resp = new ScheduleResponse
+
             {
+
                 SchedId = s.SchedId,
+
                 UserId = s.UserId,
+
                 TaskId = s.TaskId,
+
                 CbarnId = s.CbarnId,
+
                 Description = s.Description,
+
                 Note = s.Note,
+
                 Priority = s.Priority,
+
                 Status = s.Status,
+
                 StartDate = s.StartDate, // No change
+
                 EndDate = s.EndDate, // No change
+
                 Username = username,
+
                 BarnId = cbarnMap.ContainsKey(s.CbarnId) ? cbarnMap[s.CbarnId] : (int?)null,
+
                 TaskTitle = taskMap.ContainsKey(s.TaskId) ? taskMap[s.TaskId] : null,
+
                 StartTime = taskTimes.ContainsKey(s.TaskId) ? taskTimes[s.TaskId].start : (TimeOnly?)null,
+
                 EndTime = taskTimes.ContainsKey(s.TaskId) ? taskTimes[s.TaskId].end : (TimeOnly?)null
+
             };
+
             return resp;
+
         }).ToList();
 
+
+
         return result;
+
     }
+
 }
+
+
 
