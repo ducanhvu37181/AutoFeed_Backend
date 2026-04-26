@@ -260,5 +260,11 @@ namespace AutoFeed_Backend_Services.Services
             rule.Status = "disabled";
             return await _context.SaveChangesAsync() > 0;
         }
+
+        public async Task<bool> DetailExistsAsync(int detailId)
+        {
+            return await _context.FeedingRuleDetails
+                .AnyAsync(x => x.FeedRuleDetailId == detailId);
+        }
     }
 }
