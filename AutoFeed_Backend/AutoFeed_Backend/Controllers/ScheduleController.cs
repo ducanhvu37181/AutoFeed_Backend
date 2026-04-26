@@ -590,21 +590,21 @@ public class ScheduleController : ControllerBase
 
 
 
-        // if any failed, return 207 Multi-Status semantics; otherwise 201
+        // if any succeeded, return true status; only false if all failed
+        var anySucceeded = results.Any(r => r.Success);
+        var allFailed = !anySucceeded;
 
-        var anyFailed = results.Any(r => !r.Success);
-
-        return StatusCode(anyFailed ? 207 : 201, new ApiResponse<object>
+        return StatusCode(allFailed ? 400 : 201, new ApiResponse<object>
 
         {
 
-            Status = !anyFailed,
+            Status = anySucceeded,
 
-            HttpCode = anyFailed ? 207 : 201,
+            HttpCode = allFailed ? 400 : 201,
 
             Data = responseItems,
 
-            Description = anyFailed ? "Partial success" : "Created"
+            Description = allFailed ? "All schedules failed to create" : "Created"
 
         });
 
