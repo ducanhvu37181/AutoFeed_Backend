@@ -73,7 +73,8 @@ public class UserController : ControllerBase
             Phone = u.Phone,
             Username = u.Username,
             AvatarUrl = u.AvatarUrl,
-            Status = u.Status
+            Status = u.Status,
+            LastLogin = u.LastLogin
         }).ToList();
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
@@ -91,7 +92,8 @@ public class UserController : ControllerBase
             Phone = u.Phone,
             Username = u.Username,
             AvatarUrl = u.AvatarUrl,
-            Status = u.Status
+            Status = u.Status,
+            LastLogin = u.LastLogin
         }).ToList();
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
@@ -109,7 +111,8 @@ public class UserController : ControllerBase
             Phone = u.Phone,
             Username = u.Username,
             AvatarUrl = u.AvatarUrl,
-            Status = u.Status
+            Status = u.Status,
+            LastLogin = u.LastLogin
         }).ToList();
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
@@ -131,7 +134,8 @@ public class UserController : ControllerBase
             Phone = item.Phone,
             Username = item.Username,
             AvatarUrl = item.AvatarUrl,
-            Status = item.Status
+            Status = item.Status,
+            LastLogin = item.LastLogin
         };
 
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
@@ -153,7 +157,8 @@ public class UserController : ControllerBase
             Phone = u.Phone,
             Username = u.Username,
             AvatarUrl = u.AvatarUrl,
-            Status = u.Status
+            Status = u.Status,
+            LastLogin = u.LastLogin
         }).ToList();
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Success" });
     }
