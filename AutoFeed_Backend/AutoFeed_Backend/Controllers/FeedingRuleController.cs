@@ -310,8 +310,145 @@ namespace AutoFeed_Backend.Controllers
         [HttpPut("detail/{detailId}")]
         public async Task<IActionResult> UpdateDetail(int detailId, RuleDetailUpdateDto dto)
         {
-            var success = await _feedingRuleService.UpdateDetailAsync(detailId, dto);
-            return success ? Ok("Updated") : BadRequest();
+            // Validate detailId > 0
+            if (detailId <= 0)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "DetailId must be greater than 0"
+                });
+            }
+
+            // Validate detailId exists
+            var detailExists = await _feedingRuleService.DetailExistsAsync(detailId);
+            if (!detailExists)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "DetailId not found"
+                });
+            }
+
+            // Validate FoodID > 0
+            if (dto.FoodID <= 0)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "FoodID must be greater than 0"
+                });
+            }
+
+            // Validate FoodID exists
+            var foodExists = await _foodService.GetFoodByIdAsync(dto.FoodID);
+            if (foodExists == null)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "FoodID not found"
+                });
+            }
+
+            // Validate Amount > 0
+            if (dto.Amount <= 0)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "Amount must be greater than 0"
+                });
+            }
+
+            // Validate FeedHour range (0-23)
+            if (dto.FeedHour < 0 || dto.FeedHour > 23)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "FeedHour must be between 0 and 23"
+                });
+            }
+
+            // Validate FeedMinute range (0-59)
+            if (dto.FeedMinute < 0 || dto.FeedMinute > 59)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "FeedMinute must be between 0 and 59"
+                });
+            }
+
+            // Validate Description not empty
+            if (string.IsNullOrWhiteSpace(dto.Description))
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "Description cannot be empty"
+                });
+            }
+
+            try
+            {
+                var success = await _feedingRuleService.UpdateDetailAsync(detailId, dto);
+                if (success)
+                {
+                    return Ok(new ApiResponse<object>
+                    {
+                        Status = true,
+                        HttpCode = 200,
+                        Data = null,
+                        Description = "Feeding rule detail updated successfully!"
+                    });
+                }
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "Failed to update feeding rule detail"
+                });
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateException ex) when (ex.InnerException?.Message.Contains("duplicate") == true || ex.InnerException?.Message.Contains("unique") == true)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 400,
+                    Data = null,
+                    Description = "Duplicate feeding rule detail for this rule and time."
+                });
+            }
+            catch
+            {
+                return StatusCode(500, new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 500,
+                    Data = null,
+                    Description = "Internal server error"
+                });
+            }
         }
 
         [HttpPut("{id}")]

@@ -13,10 +13,12 @@ namespace AutoFeed_Backend.Controllers;
 public class ChickenBarnController : ControllerBase
 {
     private readonly IChickenBarnService _service;
+    private readonly ILargeChickenService _largeChickenService;
 
-    public ChickenBarnController(IChickenBarnService service)
+    public ChickenBarnController(IChickenBarnService service, ILargeChickenService largeChickenService)
     {
         _service = service;
+        _largeChickenService = largeChickenService;
     }
 
     [HttpGet]
@@ -165,8 +167,19 @@ public class ChickenBarnController : ControllerBase
         if (model == null || model.LargeChickenId <= 0)
             return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid LargeChickenId" });
 
+        // Validate LargeChickenId exists
+        var chicken = await _largeChickenService.GetByIdAsync(model.LargeChickenId);
+        if (chicken == null)
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "LargeChickenId not found" });
+
+        // Check if chicken has already been exported (has ChickenBarn with export date or status = "exported")
+        var chickenBarns = await _service.SearchAsync(barnId: null, flockId: null, chickenLid: model.LargeChickenId, includeInactive: true);
+        var exportedBarn = chickenBarns?.FirstOrDefault(cb => cb.ExportDate.HasValue || (cb.Status != null && cb.Status.ToLower() == "exported"));
+        if (exportedBarn != null)
+            return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Chicken has already been exported" });
+
         var updated = await _service.ExportAsync(model.LargeChickenId);
-        if (updated == null) 
+        if (updated == null)
             return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Export failed" });
 
         var dto = new AutoFeed_Backend.Models.Responses.ChickenBarnResponse

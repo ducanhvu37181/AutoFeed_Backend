@@ -16,5 +16,6 @@ namespace AutoFeed_Backend_Services.Interfaces
         Task<(bool Success, string Message)> UpdateRuleAsync(int id, FeedingRuleUpdateDto dto);
         Task<bool> DeleteRuleAsync(int id);
         Task<(bool Success, string Message)> AddDetailAsync(RuleDetailCreateDto dto);
+        Task<bool> DetailExistsAsync(int detailId);
     }
 }
