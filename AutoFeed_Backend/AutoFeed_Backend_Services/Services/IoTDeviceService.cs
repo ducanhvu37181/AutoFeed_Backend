@@ -155,5 +155,10 @@ namespace AutoFeed_Backend_Services.Services
                 barn.CreateDate
             };
         }
+
+        public async Task<IEnumerable<object>> GetOfflineDevicesAsync()
+        {
+            return await GetAllDevicesAsync("", "", "Offline");
+        }
     }
 }

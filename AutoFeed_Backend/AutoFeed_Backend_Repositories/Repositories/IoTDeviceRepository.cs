@@ -46,6 +46,22 @@ public class IoTDeviceRepository : GenericRepository<IoTDevice>
 
 
 
+        if (!string.IsNullOrEmpty(status))
+
+        {
+
+            if (status.Equals("Online", StringComparison.OrdinalIgnoreCase))
+
+                query = query.Where(d => d.Status == true);
+
+            else if (status.Equals("Offline", StringComparison.OrdinalIgnoreCase))
+
+                query = query.Where(d => d.Status == false);
+
+        }
+
+
+
         return await query.ToListAsync();
 
     }
