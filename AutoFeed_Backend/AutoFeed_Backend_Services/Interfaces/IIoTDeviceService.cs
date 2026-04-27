@@ -12,5 +12,6 @@ namespace AutoFeed_Backend_Services.Interfaces
         Task<DeviceDetailResponse?> GetDeviceByIdAsync(int deviceId);
         Task<IEnumerable<object>> GetDevicesByBarnIdAsync(int barnId);
         Task<object?> GetBarnByDeviceIdAsync(int deviceId);
+        Task<IEnumerable<object>> GetOfflineDevicesAsync();
     }
 }

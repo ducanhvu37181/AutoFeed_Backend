@@ -174,6 +174,34 @@ namespace AutoFeed_Backend.Controllers
 
 
 
+        // Get offline devices
+
+        [HttpGet("offline")]
+
+        public async Task<IActionResult> GetOffline()
+
+        {
+
+            var result = await _deviceService.GetOfflineDevicesAsync();
+
+            return Ok(new ApiResponse<object>
+
+            {
+
+                Status = true,
+
+                HttpCode = 200,
+
+                Data = result,
+
+                Description = "Offline devices retrieved successfully."
+
+            });
+
+        }
+
+
+
         // 2. Lấy chi tiết thiết bị theo ID (Hàm mới Kiên yêu cầu)
 
         [HttpGet("{id}")]
