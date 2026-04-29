@@ -236,4 +236,11 @@ public class ChickenBarnController : ControllerBase
         var items = await _service.GetChickenBarnDetailAsync(barnId, barnType);
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = items, Description = "Success" });
     }
+
+    [HttpGet("large-chickens-without-feeding-rule")]
+    public async Task<IActionResult> GetLargeChickensWithoutFeedingRule()
+    {
+        var data = await _largeChickenService.GetLargeChickensWithoutFeedingRuleAsync();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = data, Description = "Large chickens without feeding rule" });
+    }
 }

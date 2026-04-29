@@ -89,4 +89,23 @@ public class LargeChickenService : ILargeChickenService
         var result = await _unitOfWork.SaveChangesWithTransactionAsync();
         return result > 0;
     }
+
+    public async Task<List<LargeChicken>> GetLargeChickensWithoutFeedingRuleAsync()
+    {
+        var allChickens = await _unitOfWork.LargeChickens.GetAllAsync();
+        if (allChickens == null || allChickens.Count == 0) return new List<LargeChicken>();
+
+        var chickenIdsWithFeedingRule = await _unitOfWork.FeedingRules
+            .GetAllAsync();
+        
+        var idsWithRule = chickenIdsWithFeedingRule
+            .Where(r => r.ChickenLid != null)
+            .Select(r => r.ChickenLid.Value)
+            .Distinct()
+            .ToHashSet();
+
+        return allChickens
+            .Where(c => !idsWithRule.Contains(c.ChickenLid) && c.IsActive == true)
+            .ToList();
+    }
 }

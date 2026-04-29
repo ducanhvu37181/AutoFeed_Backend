@@ -22,4 +22,5 @@ public interface ILargeChickenService
     // Soft delete / Restore
     Task<bool> DeleteAsync(int id);   // isActive = false
     Task<bool> RestoreAsync(int id);  // isActive = true
+    Task<List<LargeChicken>> GetLargeChickensWithoutFeedingRuleAsync();
 }
