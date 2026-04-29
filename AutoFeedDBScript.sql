@@ -356,17 +356,77 @@ GO
 INSERT INTO [Task] (title, description, startTime, endTime) VALUES 
 ('Sanitation','Floor sweeping','08:00','09:30'), ('Medical Audit','Health check','10:00','11:30'), ('Inventory Count','Count bags','14:00','15:30'), ('Maintenance','Check wires','16:00','17:00'), ('Pressure Check','Test pipes','09:30','10:30');
 
--- 3.8 FeedingRules & Details (3 samples, each with Breakfast/Lunch/Dinner)
+-- 3.8 FeedingRules & Details (20 rules: 5 Flocks + 15 LargeChickens, each 3 details)
+-- Rules 1-3: Existing (Flock 6, LChicken 1, Flock 7)
 INSERT INTO [FeedingRule] (flockID, chickenLID, startDate, endDate, times, description) VALUES 
-(6, NULL, '2026-04-10', '2026-05-10', 3, 'Flock 6 Diet'), (NULL, 1, '2026-04-01', '2026-05-01', 3, 'LChicken 1 Diet'), (7, NULL, '2026-04-12', '2026-05-12', 3, 'Flock 7 Diet');
+(6, NULL, '2026-04-10', '2026-05-10', 3, 'Flock 6 Diet'),
+(NULL, 1, '2026-04-01', '2026-05-01', 3, 'LChicken 1 Diet'),
+(7, NULL, '2026-04-12', '2026-05-12', 3, 'Flock 7 Diet');
+
+-- Rules 4-6: Active Flocks (8,9,10)
+INSERT INTO [FeedingRule] (flockID, chickenLID, startDate, endDate, times, description) VALUES 
+(8, NULL, '2026-04-14', '2026-05-14', 3, 'Flock 8 Diet'),
+(9, NULL, '2026-04-15', '2026-05-15', 3, 'Flock 9 Diet'),
+(10, NULL, '2026-04-16', '2026-05-16', 3, 'Flock 10 Diet');
+
+-- Rules 7-20: Large Chickens (2-15)
+INSERT INTO [FeedingRule] (flockID, chickenLID, startDate, endDate, times, description) VALUES 
+(NULL, 2, '2026-04-01', '2026-05-01', 3, 'LChicken 2 Diet'),
+(NULL, 3, '2026-04-01', '2026-05-01', 3, 'LChicken 3 Diet'),
+(NULL, 4, '2026-04-01', '2026-05-01', 3, 'LChicken 4 Diet'),
+(NULL, 5, '2026-04-01', '2026-05-01', 3, 'LChicken 5 Diet'),
+(NULL, 6, '2026-04-01', '2026-05-01', 3, 'LChicken 6 Diet'),
+(NULL, 7, '2026-04-02', '2026-05-02', 3, 'LChicken 7 Diet'),
+(NULL, 8, '2026-04-02', '2026-05-02', 3, 'LChicken 8 Diet'),
+(NULL, 9, '2026-04-02', '2026-05-02', 3, 'LChicken 9 Diet'),
+(NULL, 10, '2026-04-02', '2026-05-02', 3, 'LChicken 10 Diet'),
+(NULL, 11, '2026-04-02', '2026-05-02', 3, 'LChicken 11 Diet'),
+(NULL, 12, '2026-04-02', '2026-05-02', 3, 'LChicken 12 Diet'),
+(NULL, 13, '2026-04-03', '2026-05-03', 3, 'LChicken 13 Diet'),
+(NULL, 14, '2026-04-03', '2026-05-03', 3, 'LChicken 14 Diet'),
+(NULL, 15, '2026-04-03', '2026-05-03', 3, 'LChicken 15 Diet');
 
 INSERT INTO [FeedingRuleDetail] (ruleID, foodID, feedHour, feedMinute, amount, description) VALUES 
--- Rule 1
+-- Rule 1: Flock 6
 (1, 3, 7, 0, 5.0, 'Morning - Pellet'), (1, 3, 12, 0, 4.0, 'Lunch - Pellet'), (1, 5, 18, 0, 1.0, 'Dinner - Vitamin Mix'),
--- Rule 2
+-- Rule 2: LChicken 1
 (2, 2, 8, 30, 10.0, 'Morning - Soy'), (2, 2, 13, 0, 8.0, 'Lunch - Soy'), (2, 4, 19, 0, 2.0, 'Dinner - Mineral'),
--- Rule 3
-(3, 1, 7, 30, 7.0, 'Morning - Corn'), (3, 1, 12, 30, 6.0, 'Lunch - Corn'), (3, 3, 18, 30, 5.0, 'Dinner - Pellet');
+-- Rule 3: Flock 7
+(3, 1, 7, 30, 7.0, 'Morning - Corn'), (3, 1, 12, 30, 6.0, 'Lunch - Corn'), (3, 3, 18, 30, 5.0, 'Dinner - Pellet'),
+-- Rule 4: Flock 8
+(4, 2, 7, 0, 6.0, 'Morning - Soy'), (4, 3, 12, 0, 5.0, 'Lunch - Pellet'), (4, 4, 18, 0, 2.0, 'Dinner - Mineral'),
+-- Rule 5: Flock 9
+(5, 1, 7, 30, 8.0, 'Morning - Corn'), (5, 2, 12, 30, 6.0, 'Lunch - Soy'), (5, 5, 18, 30, 1.5, 'Dinner - Vitamin Mix'),
+-- Rule 6: Flock 10
+(6, 3, 7, 0, 5.5, 'Morning - Pellet'), (6, 1, 12, 0, 7.0, 'Lunch - Corn'), (6, 4, 18, 0, 2.5, 'Dinner - Mineral'),
+-- Rule 7: LChicken 2
+(7, 1, 8, 0, 9.0, 'Morning - Corn'), (7, 3, 13, 0, 7.0, 'Lunch - Pellet'), (7, 5, 19, 0, 1.5, 'Dinner - Vitamin Mix'),
+-- Rule 8: LChicken 3
+(8, 3, 7, 30, 8.0, 'Morning - Pellet'), (8, 2, 12, 30, 9.0, 'Lunch - Soy'), (8, 4, 18, 30, 2.5, 'Dinner - Mineral'),
+-- Rule 9: LChicken 4
+(9, 1, 8, 0, 10.0, 'Morning - Corn'), (9, 1, 13, 0, 8.0, 'Lunch - Corn'), (9, 5, 19, 0, 1.0, 'Dinner - Vitamin Mix'),
+-- Rule 10: LChicken 5
+(10, 2, 7, 30, 9.5, 'Morning - Soy'), (10, 3, 12, 30, 7.5, 'Lunch - Pellet'), (10, 4, 18, 30, 3.0, 'Dinner - Mineral'),
+-- Rule 11: LChicken 6
+(11, 1, 8, 0, 8.0, 'Morning - Corn'), (11, 2, 13, 0, 9.0, 'Lunch - Soy'), (11, 5, 19, 0, 1.5, 'Dinner - Vitamin Mix'),
+-- Rule 12: LChicken 7
+(12, 3, 7, 0, 7.0, 'Morning - Pellet'), (12, 1, 12, 0, 8.0, 'Lunch - Corn'), (12, 4, 18, 0, 2.0, 'Dinner - Mineral'),
+-- Rule 13: LChicken 8
+(13, 2, 8, 30, 10.0, 'Morning - Soy'), (13, 3, 13, 0, 6.0, 'Lunch - Pellet'), (13, 5, 19, 0, 2.0, 'Dinner - Vitamin Mix'),
+-- Rule 14: LChicken 9
+(14, 1, 7, 30, 9.0, 'Morning - Corn'), (14, 2, 12, 30, 7.0, 'Lunch - Soy'), (14, 4, 18, 30, 2.5, 'Dinner - Mineral'),
+-- Rule 15: LChicken 10
+(15, 3, 8, 0, 8.5, 'Morning - Pellet'), (15, 1, 13, 0, 7.5, 'Lunch - Corn'), (15, 5, 19, 0, 1.0, 'Dinner - Vitamin Mix'),
+-- Rule 16: LChicken 11
+(16, 2, 7, 0, 9.0, 'Morning - Soy'), (16, 3, 12, 0, 6.5, 'Lunch - Pellet'), (16, 4, 18, 0, 3.0, 'Dinner - Mineral'),
+-- Rule 17: LChicken 12
+(17, 1, 8, 30, 10.0, 'Morning - Corn'), (17, 2, 13, 0, 8.0, 'Lunch - Soy'), (17, 5, 19, 0, 1.5, 'Dinner - Vitamin Mix'),
+-- Rule 18: LChicken 13
+(18, 3, 7, 0, 7.5, 'Morning - Pellet'), (18, 1, 12, 0, 9.0, 'Lunch - Corn'), (18, 4, 18, 0, 2.0, 'Dinner - Mineral'),
+-- Rule 19: LChicken 14
+(19, 2, 8, 0, 8.0, 'Morning - Soy'), (19, 3, 13, 0, 7.0, 'Lunch - Pellet'), (19, 5, 19, 0, 2.0, 'Dinner - Vitamin Mix'),
+-- Rule 20: LChicken 15
+(20, 1, 7, 30, 11.0, 'Morning - Corn'), (20, 2, 12, 30, 9.0, 'Lunch - Soy'), (20, 4, 18, 30, 3.0, 'Dinner - Mineral');
 
 -- 3.9 Reports & Requests (Including 'Flock' type)
 INSERT INTO [Report] (userID, type, description, status, url, createDate) VALUES 

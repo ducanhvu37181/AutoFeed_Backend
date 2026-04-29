@@ -605,4 +605,11 @@ public class FlockController : ControllerBase
 
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Successfully transferred 1 quantity back from source flock to target flock" });
     }
+
+    [HttpGet("without-feeding-rule")]
+    public async Task<IActionResult> GetFlocksWithoutFeedingRule()
+    {
+        var data = await _flockService.GetFlocksWithoutFeedingRuleAsync();
+        return Ok(new { Success = true, Data = data, Description = "Flocks without feeding rule" });
+    }
 }
