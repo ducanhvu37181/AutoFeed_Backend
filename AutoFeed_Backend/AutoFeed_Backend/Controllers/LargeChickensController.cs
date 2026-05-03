@@ -288,4 +288,25 @@ public class LargeChickenController : ControllerBase
 
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = null, Description = "Restore success" });
     }
+
+    [HttpGet("without-feeding-rule")]
+    public async Task<IActionResult> GetLargeChickensWithoutFeedingRule()
+    {
+        var data = await _service.GetLargeChickensWithoutFeedingRuleAsync();
+        var dto = data.Select(i => new AutoFeed_Backend.Models.Responses.LargeChickenResponse
+        {
+            ChickenLid = i.ChickenLid,
+            FlockId = i.FlockId,
+            Name = i.Name,
+            Weight = i.Weight,
+            HealthStatus = i.HealthStatus,
+            Note = i.Note,
+            Url = i.Url,
+            IsActive = i.IsActive,
+            BarnId = i.IsActive == true && i.ChickenBarn != null ? i.ChickenBarn.BarnId : null,
+            AgeInMonths = CalculateAgeInMonths(i.Flock?.DoB),
+            FlockName = i.Flock?.Name
+        }).ToList();
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Large chickens without feeding rule" });
+    }
 }
