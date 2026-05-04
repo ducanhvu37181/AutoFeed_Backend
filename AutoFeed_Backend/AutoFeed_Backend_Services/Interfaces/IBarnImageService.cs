@@ -15,6 +15,9 @@ public interface IBarnImageService
     // Get all barn images by BarnId
     Task<IEnumerable<object>> GetBarnImagesByBarnIdAsync(int barnId);
 
+    // Get barn images by BarnId and CaptureDate
+    Task<IEnumerable<object>> GetBarnImagesByBarnIdAndDateAsync(int barnId, DateTime? captureDate);
+
     // Add barn image (upload to Firebase and save to database)
     Task<BarnImage> AddBarnImageAsync(int barnId, string description);
 

@@ -65,6 +65,29 @@ public class BarnImageService : IBarnImageService
         });
     }
 
+    public async Task<IEnumerable<object>> GetBarnImagesByBarnIdAndDateAsync(int barnId, DateTime? captureDate)
+    {
+        var images = await _unitOfWork.BarnImages.GetByBarnIdAsync(barnId);
+        var imagesList = images.ToList();
+
+        // Filter by captureDate if provided
+        if (captureDate.HasValue)
+        {
+            var targetDate = captureDate.Value.Date;
+            imagesList = imagesList.Where(bi => bi.CaptureDate.HasValue && bi.CaptureDate.Value.Date == targetDate).ToList();
+        }
+
+        return imagesList.Select(bi => new
+        {
+            ImageBarnId = bi.ImageBarnId,
+            BarnId = bi.BarnId,
+            BarnType = bi.Barn?.Type,
+            Url = bi.Url,
+            Description = bi.Description,
+            CaptureDate = bi.CaptureDate
+        });
+    }
+
     public async Task<BarnImage> AddBarnImageAsync(int barnId, string description)
     {
         // Validate that barn exists
