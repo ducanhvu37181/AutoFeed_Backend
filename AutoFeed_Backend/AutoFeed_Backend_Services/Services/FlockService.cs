@@ -314,15 +314,11 @@ namespace AutoFeed_Backend_Services.Services
 
             {
 
-                // Auto-assign newly created flock to an available flock barn (check first before creating)
+                // Validate BarnId is provided
 
-                var availableBarns = await _unitOfWork.Barns.GetAvailableAsync();
-
-                if (availableBarns == null || availableBarns.Count == 0)
+                if (req.BarnId <= 0)
 
                 {
-
-                    // No barns available - cannot create flock
 
                     return null;
 
@@ -330,25 +326,51 @@ namespace AutoFeed_Backend_Services.Services
 
 
 
-                // Find a flock barn (not large chicken barn) from available barns
+                // Get the specified barn
 
-                var flockBarn = availableBarns.FirstOrDefault(b =>
+                var barn = await _unitOfWork.Barns.GetByIdAsync(req.BarnId);
 
-                    b.Type != null &&
-
-                    !b.Type.Equals("LargeChickenBarn", StringComparison.OrdinalIgnoreCase) &&
-
-                    !b.Type.Equals("Large Chicken Barn", StringComparison.OrdinalIgnoreCase) &&
-
-                    !b.Type.Equals("LargeChicken", StringComparison.OrdinalIgnoreCase));
-
-
-
-                if (flockBarn == null)
+                if (barn == null)
 
                 {
 
-                    // No suitable flock barn available - cannot create flock
+                    // Barn not found
+
+                    return null;
+
+                }
+
+
+
+                // Validate barn is a flock barn (not large chicken barn)
+
+                if (barn.Type != null &&
+
+                    (barn.Type.Equals("LargeChickenBarn", StringComparison.OrdinalIgnoreCase) ||
+
+                    barn.Type.Equals("Large Chicken Barn", StringComparison.OrdinalIgnoreCase) ||
+
+                    barn.Type.Equals("LargeChicken", StringComparison.OrdinalIgnoreCase)))
+
+                {
+
+                    // Cannot assign flock to large chicken barn
+
+                    return null;
+
+                }
+
+
+
+                // Check if barn is already assigned (has active chicken barn assignments)
+
+                var existingAssignments = await _unitOfWork.ChickenBarns.SearchAsync(barnId: req.BarnId, flockId: null, chickenLid: null, includeInactive: false);
+
+                if (existingAssignments != null && existingAssignments.Count > 0)
+
+                {
+
+                    // Barn is already assigned
 
                     return null;
 
@@ -404,13 +426,13 @@ namespace AutoFeed_Backend_Services.Services
 
 
 
-                // Assign flock to barn directly (no LargeChicken intermediary)
+                // Assign flock to the specified barn directly (no LargeChicken intermediary)
 
                 var chickenBarn = new ChickenBarn
 
                 {
 
-                    BarnId = flockBarn.BarnId,
+                    BarnId = req.BarnId,
 
                     ChickenLid = null,  // Direct flock assignment, no LargeChicken
 
@@ -432,9 +454,9 @@ namespace AutoFeed_Backend_Services.Services
 
                 // Update response with assigned barn info
 
-                response.AssignedBarnId = flockBarn.BarnId;
+                response.AssignedBarnId = req.BarnId;
 
-                response.AssignedBarnName = $"Barn {flockBarn.BarnId} ({flockBarn.Type})";
+                response.AssignedBarnName = $"Barn {req.BarnId} ({barn.Type})";
 
 
 
