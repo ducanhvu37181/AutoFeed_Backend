@@ -824,6 +824,23 @@ namespace AutoFeed_Backend_Services.Services
 
         }
 
+        public async Task<IEnumerable<FlockResponse>> GetFlocksWithoutFeedingRuleAsync()
+        {
+            var flocks = await _unitOfWork.Flocks.GetAllAsync();
+            if (flocks == null) return Enumerable.Empty<FlockResponse>();
+
+            var flockIdsWithFeedingRule = await _db.FeedingRules
+                .Where(r => r.FlockId != null)
+                .Select(r => r.FlockId.Value)
+                .Distinct()
+                .ToListAsync();
+
+            return flocks
+                .Where(f => !flockIdsWithFeedingRule.Contains(f.FlockId) && f.IsActive == true)
+                .Select(MapToResponse)
+                .ToList();
+        }
+
     }
 
 }

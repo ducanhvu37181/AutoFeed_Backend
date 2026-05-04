@@ -354,37 +354,48 @@ GO
 
 -- 3.7 Manual Tasks (NO Feeding)
 INSERT INTO [Task] (title, description, startTime, endTime) VALUES 
-('Sanitation','Floor sweeping','08:00','09:30'), ('Medical Audit','Health check','10:00','11:30'), ('Inventory Count','Count bags','14:00','15:30'), ('Maintenance','Check wires','16:00','17:00'), ('Pressure Check','Test pipes','09:30','10:30');
+('Transfer Small Chickens to Barn','Move flock chickens to designated barns','07:00','08:30'),
+('Sanitation','Floor sweeping','08:30','10:00'),
+('Update Small Chicken Info','Update flock chicken details','10:00','11:30'),
+('Pressure Check','Test pipes','11:30','12:00'),
+('Medical Audit','Health check','12:00','13:30'),
+('Transfer New Large Chickens to Large Barn','Move matured chickens to large barns','13:30','15:00'),
+('Inventory Count','Count bags','15:00','16:30'),
+('Update Large Chicken Info','Update large chicken details','16:30','18:00'),
+('Maintenance','Check wires','18:00','19:30'),
+('Update Inventory Status','Review and update feed inventory status','19:30','21:00'),
+('Isolate Sick Chickens','Separate sick chickens from healthy ones','21:00','22:30'),
+('Set Up Feeding Schedule','Configure feeding times and amounts','22:30','23:59');
 
 -- 3.8 FeedingRules & Details (20 rules: 5 Flocks + 15 LargeChickens, each 3 details)
 -- Rules 1-3: Existing (Flock 6, LChicken 1, Flock 7)
 INSERT INTO [FeedingRule] (flockID, chickenLID, startDate, endDate, times, description) VALUES 
-(6, NULL, '2026-04-10', '2026-05-10', 3, 'Flock 6 Diet'),
-(NULL, 1, '2026-04-01', '2026-05-01', 3, 'LChicken 1 Diet'),
-(7, NULL, '2026-04-12', '2026-05-12', 3, 'Flock 7 Diet');
+(6, NULL, '2026-04-10', '2026-06-30', 3, 'Flock2_BinhDinh Diet'),
+(NULL, 1, '2026-04-01', '2026-06-30', 3, 'Ace_BinhDinh1 Diet'),
+(7, NULL, '2026-04-12', '2026-06-30', 3, 'Flock2_CaoLanh Diet');
 
 -- Rules 4-6: Active Flocks (8,9,10)
 INSERT INTO [FeedingRule] (flockID, chickenLID, startDate, endDate, times, description) VALUES 
-(8, NULL, '2026-04-14', '2026-05-14', 3, 'Flock 8 Diet'),
-(9, NULL, '2026-04-15', '2026-05-15', 3, 'Flock 9 Diet'),
-(10, NULL, '2026-04-16', '2026-05-16', 3, 'Flock 10 Diet');
+(8, NULL, '2026-04-14', '2026-06-30', 3, 'Flock2_BenTre Diet'),
+(9, NULL, '2026-04-15', '2026-06-30', 3, 'Flock2_DoSon Diet'),
+(10, NULL, '2026-04-16', '2026-06-30', 3, 'Flock2_NghiTam Diet');
 
 -- Rules 7-20: Large Chickens (2-15)
 INSERT INTO [FeedingRule] (flockID, chickenLID, startDate, endDate, times, description) VALUES 
-(NULL, 2, '2026-04-01', '2026-05-01', 3, 'LChicken 2 Diet'),
-(NULL, 3, '2026-04-01', '2026-05-01', 3, 'LChicken 3 Diet'),
-(NULL, 4, '2026-04-01', '2026-05-01', 3, 'LChicken 4 Diet'),
-(NULL, 5, '2026-04-01', '2026-05-01', 3, 'LChicken 5 Diet'),
-(NULL, 6, '2026-04-01', '2026-05-01', 3, 'LChicken 6 Diet'),
-(NULL, 7, '2026-04-02', '2026-05-02', 3, 'LChicken 7 Diet'),
-(NULL, 8, '2026-04-02', '2026-05-02', 3, 'LChicken 8 Diet'),
-(NULL, 9, '2026-04-02', '2026-05-02', 3, 'LChicken 9 Diet'),
-(NULL, 10, '2026-04-02', '2026-05-02', 3, 'LChicken 10 Diet'),
-(NULL, 11, '2026-04-02', '2026-05-02', 3, 'LChicken 11 Diet'),
-(NULL, 12, '2026-04-02', '2026-05-02', 3, 'LChicken 12 Diet'),
-(NULL, 13, '2026-04-03', '2026-05-03', 3, 'LChicken 13 Diet'),
-(NULL, 14, '2026-04-03', '2026-05-03', 3, 'LChicken 14 Diet'),
-(NULL, 15, '2026-04-03', '2026-05-03', 3, 'LChicken 15 Diet');
+(NULL, 2, '2026-04-01', '2026-06-30', 3, 'Bolt_BinhDinh1 Diet'),
+(NULL, 3, '2026-04-01', '2026-06-30', 3, 'Blaze_BinhDinh1 Diet'),
+(NULL, 4, '2026-04-01', '2026-06-30', 3, 'Rex_CaoLanh1 Diet'),
+(NULL, 5, '2026-04-01', '2026-06-30', 3, 'Tank_CaoLanh1 Diet'),
+(NULL, 6, '2026-04-01', '2026-06-30', 3, 'Shadow_CaoLanh1 Diet'),
+(NULL, 7, '2026-04-02', '2026-06-30', 3, 'Dark_Bentre1 Diet'),
+(NULL, 8, '2026-04-02', '2026-06-30', 3, 'Ghost_Bentre1 Diet'),
+(NULL, 9, '2026-04-02', '2026-06-30', 3, 'Grim_Bentre1 Diet'),
+(NULL, 10, '2026-04-02', '2026-06-30', 3, 'Raven_DoSon1 Diet'),
+(NULL, 11, '2026-04-02', '2026-06-30', 3, 'Duke_DoSon1 Diet'),
+(NULL, 12, '2026-04-02', '2026-06-30', 3, 'Chief_DoSon1 Diet'),
+(NULL, 13, '2026-04-03', '2026-06-30', 3, 'Spike_NghiTam1 Diet'),
+(NULL, 14, '2026-04-03', '2026-06-30', 3, 'Titan_NghiTam1 Diet'),
+(NULL, 15, '2026-04-03', '2026-06-30', 3, 'Hawk_NghiTam1 Diet');
 
 INSERT INTO [FeedingRuleDetail] (ruleID, foodID, feedHour, feedMinute, amount, description) VALUES 
 -- Rule 1: Flock 6
@@ -449,7 +460,7 @@ INSERT INTO [Request] (userID, type, description, status, createdAt) VALUES
 (4, 'Feed', 'Increase corn supply for Barn 21', 'approved', '2026-04-12 09:30:00'), (5, 'Maintenance', 'Replace LED in Barn 10', 'pending', '2026-04-20 16:00:00'),
 (3, 'Medical', 'Antibiotics for LChicken 3', 'rejected', '2026-04-19 08:00:00'), (4, 'Flock', 'Merge Flock_9 and Flock_10', 'pending', '2026-04-20 11:15:00');
 
--- 3.10 Schedule (15 entries - Today is 2026-04-20)
+-- 3.10 Schedule (22 entries - Today is 2026-04-21)
 -- Past (completed)
 INSERT INTO [Schedule] (userID, taskID, CBarnID, description, note, priority, status, startDate, endDate, createdDate) VALUES 
 (3, 1, 6, 'Sweep area', 'D', 'high', 'completed', '2026-04-10', '2026-04-10', '2026-04-08'), (4, 2, 21, 'Vaccination', 'D', 'medium', 'completed', '2026-04-11', '2026-04-11', '2026-04-09'),
@@ -462,6 +473,15 @@ INSERT INTO [Schedule] (userID, taskID, CBarnID, description, note, priority, st
 (4, 1, 11, 'Daily sweep', 'N', 'high', 'pending', '2026-04-20', '2026-04-20', '2026-04-18'), (3, 2, 25, 'Growth Audit', 'N', 'medium', 'pending', '2026-04-20', '2026-04-20', '2026-04-18'),
 (4, 3, 12, 'Storage Audit', 'N', 'low', 'pending', '2026-04-21', '2026-04-21', '2026-04-19'), (2, 4, 13, 'Sensor Swap', 'N', 'medium', 'pending', '2026-04-22', '2026-04-22', '2026-04-20'),
 (3, 5, 14, 'Clean nozzle', 'N', 'high', 'pending', '2026-04-23', '2026-04-23', '2026-04-21');
+-- Next Week (2026-05-04 to 2026-05-10) - Starting from today
+INSERT INTO [Schedule] (userID, taskID, CBarnID, description, note, priority, status, startDate, endDate, createdDate) VALUES 
+(4, 1, 15, 'Weekly barn cleaning', 'N', 'high', 'pending', '2026-05-04', '2026-05-04', '2026-05-03'),
+(3, 2, 21, 'Flock health check', 'N', 'medium', 'pending', '2026-05-05', '2026-05-05', '2026-05-03'),
+(2, 3, 22, 'Feed inventory review', 'N', 'low', 'pending', '2026-05-06', '2026-05-06', '2026-05-03'),
+(5, 4, 23, 'IoT sensor calibration', 'N', 'medium', 'pending', '2026-05-07', '2026-05-07', '2026-05-03'),
+(4, 5, 24, 'Water system maintenance', 'N', 'high', 'pending', '2026-05-08', '2026-05-08', '2026-05-03'),
+(3, 1, 25, 'Sanitation check', 'N', 'high', 'pending', '2026-05-09', '2026-05-09', '2026-05-03'),
+(2, 2, 11, 'Growth monitoring', 'N', 'medium', 'pending', '2026-05-10', '2026-05-10', '2026-05-03');
 
 -- 3.11 Inventory (Today: 2026-04-21)
 INSERT INTO [Inventory] (foodName, quantity, weightPerBag, importDate, expiredDate, status) VALUES
@@ -483,10 +503,10 @@ INSERT INTO [Inventory] (foodName, quantity, weightPerBag, importDate, expiredDa
 ('Mineral Block', 50, 10.0, '2026-04-18', '2027-04-18', 'unused'); -- New Mineral Block
 
 -- 3.12 Data_IoT: "food today" for active barns (excluding Barn 1)
--- 21 days (2026-04-01 ~ 2026-04-21), 3 measurements/day
+-- 30 days (2026-04-04 ~ 2026-05-03, excluding today 2026-05-04), 3 measurements/day
 -- Each day resets: meas1 ~3-5, meas2 ~8-12, meas3 >= 15
 DECLARE @BarnID INT, @DeviceID INT, @DayOffset INT, @Meas INT;
-DECLARE @BaseDate DATE = '2026-04-01';
+DECLARE @BaseDate DATE = '2026-04-04';
 
 DECLARE @ActiveBarns TABLE (barnID INT);
 INSERT INTO @ActiveBarns VALUES (2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(21),(22),(23),(24),(25);
@@ -503,7 +523,7 @@ BEGIN
     WHERE bd.barnID = @BarnID AND d.name = 'HX711';
 
     SET @DayOffset = 0;
-    WHILE @DayOffset < 21
+    WHILE @DayOffset < 30
     BEGIN
         SET @Meas = 1;
         WHILE @Meas <= 3

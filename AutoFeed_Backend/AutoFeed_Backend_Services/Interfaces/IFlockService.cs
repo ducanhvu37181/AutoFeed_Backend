@@ -62,6 +62,8 @@ namespace AutoFeed_Backend_Services.Interfaces
 
         Task<bool> TransferQuantityToFlockAndBarnAsync(int sourceFlockId, int targetFlockId, int targetBarnId);
 
+        Task<IEnumerable<FlockResponse>> GetFlocksWithoutFeedingRuleAsync();
+
     }
 
 }

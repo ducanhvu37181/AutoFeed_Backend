@@ -223,4 +223,42 @@ public class BarnImageController : ControllerBase
             });
         }
     }
+
+    // GET api/BarnImage/barn/{barnId}/date
+    // Get barn images by BarnId and CaptureDate
+    [HttpGet("barn/{barnId:int}/date")]
+    public async Task<IActionResult> GetBarnImagesByBarnIdAndDate(int barnId, [FromQuery] DateTime? captureDate)
+    {
+        if (barnId <= 0)
+            return BadRequest(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = "Invalid barnId"
+            });
+
+        try
+        {
+            var data = await _service.GetBarnImagesByBarnIdAndDateAsync(barnId, captureDate);
+
+            return Ok(new ApiResponse<object>
+            {
+                Status = true,
+                HttpCode = 200,
+                Data = data,
+                Description = "Success"
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new ApiResponse<object>
+            {
+                Status = false,
+                HttpCode = 400,
+                Data = null,
+                Description = ex.Message
+            });
+        }
+    }
 }
