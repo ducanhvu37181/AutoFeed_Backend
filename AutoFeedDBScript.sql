@@ -365,7 +365,7 @@ INSERT INTO [Task] (title, description, startTime, endTime) VALUES
 ('Maintenance','Check wires','18:00','19:30'),
 ('Update Inventory Status','Review and update feed inventory status','19:30','21:00'),
 ('Isolate Sick Chickens','Separate sick chickens from healthy ones','21:00','22:30'),
-('Set Up Feeding Schedule','Configure feeding times and amounts','22:30','24:00');
+('Set Up Feeding Schedule','Configure feeding times and amounts','22:30','23:59');
 
 -- 3.8 FeedingRules & Details (20 rules: 5 Flocks + 15 LargeChickens, each 3 details)
 -- Rules 1-3: Existing (Flock 6, LChicken 1, Flock 7)
@@ -503,10 +503,10 @@ INSERT INTO [Inventory] (foodName, quantity, weightPerBag, importDate, expiredDa
 ('Mineral Block', 50, 10.0, '2026-04-18', '2027-04-18', 'unused'); -- New Mineral Block
 
 -- 3.12 Data_IoT: "food today" for active barns (excluding Barn 1)
--- 21 days (2026-04-01 ~ 2026-04-21), 3 measurements/day
+-- 30 days (2026-04-04 ~ 2026-05-03, excluding today 2026-05-04), 3 measurements/day
 -- Each day resets: meas1 ~3-5, meas2 ~8-12, meas3 >= 15
 DECLARE @BarnID INT, @DeviceID INT, @DayOffset INT, @Meas INT;
-DECLARE @BaseDate DATE = '2026-04-01';
+DECLARE @BaseDate DATE = '2026-04-04';
 
 DECLARE @ActiveBarns TABLE (barnID INT);
 INSERT INTO @ActiveBarns VALUES (2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(21),(22),(23),(24),(25);
@@ -523,7 +523,7 @@ BEGIN
     WHERE bd.barnID = @BarnID AND d.name = 'HX711';
 
     SET @DayOffset = 0;
-    WHILE @DayOffset < 21
+    WHILE @DayOffset < 30
     BEGIN
         SET @Meas = 1;
         WHILE @Meas <= 3

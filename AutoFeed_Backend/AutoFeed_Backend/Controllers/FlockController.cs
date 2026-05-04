@@ -150,7 +150,17 @@ public class FlockController : ControllerBase
 
     }
 
+    [HttpGet("without-feeding-rule")]
 
+    public async Task<IActionResult> GetFlocksWithoutFeedingRule()
+
+    {
+
+        var data = await _flockService.GetFlocksWithoutFeedingRuleAsync();
+
+        return Ok(new { Success = true, Data = data, Description = "Flocks without feeding rule" });
+
+    }
 
     [HttpPost]
 
