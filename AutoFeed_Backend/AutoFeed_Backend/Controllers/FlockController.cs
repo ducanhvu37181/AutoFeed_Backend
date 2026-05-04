@@ -178,7 +178,7 @@ public class FlockController : ControllerBase
 
         if (createResponse == null)
 
-            return BadRequest(new { Success = false, Message = "Create failed - no available barn to assign flock" });
+            return BadRequest(new { Success = false, Message = "Create failed - invalid or unavailable barn. Please provide a valid BarnId." });
 
 
 

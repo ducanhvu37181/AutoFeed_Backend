@@ -12,6 +12,7 @@ namespace AutoFeed_Backend.Models.Requests.Flock
         public DateOnly TransferDate { get; set; }
         public string? Note { get; set; }
         public bool IsActive { get; set; } = true; // Default to active when created
+        public int BarnId { get; set; } // Required: Barn to assign flock to
     }
 
     public class FlockUpdateRequest
