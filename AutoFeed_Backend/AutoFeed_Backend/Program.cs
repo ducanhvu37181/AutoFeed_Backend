@@ -76,11 +76,12 @@ catch (Exception ex)
     startupLogger.LogWarning(ex, "Password migration skipped: database not reachable. Start SQL Server (e.g. docker compose up -d) and restart the app.");
 }
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "AutoFeed API V1");
+    c.RoutePrefix = string.Empty;
+});
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
