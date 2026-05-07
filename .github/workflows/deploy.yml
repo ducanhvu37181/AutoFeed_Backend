@@ -1,4 +1,3 @@
-```yaml id="v4p7xz"
 name: Deploy AutoFeed Backend
 
 on:
@@ -17,7 +16,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: '8.0.x'
 
       - name: Restore
         run: dotnet restore AutoFeed_Backend.sln
@@ -34,4 +33,4 @@ jobs:
           app-name: AutoFeed
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: publish
-```
+          package: publish
