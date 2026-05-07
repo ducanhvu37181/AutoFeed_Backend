@@ -24,13 +24,38 @@ jobs:
       - name: Build
         run: dotnet build AutoFeed_Backend.sln --configuration Release --no-restore
 
-      - name: Publish
-        run: dotnet publish AutoFeed_Backend/AutoFeed_Backend.csproj -c Release -o publish
+      name: Deploy AutoFeed Backend
 
-      - name: Deploy
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: AutoFeed
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: publish
-          package: publish
+      on:
+        push:
+          branches:
+            - main
+
+      jobs:
+        build-and-deploy:
+          runs-on: ubuntu-latest
+
+          steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                dotnet-version: '8.0.x'
+
+            - name: Restore
+              run: dotnet restore AutoFeed_Backend.sln
+
+            - name: Build
+              run: dotnet build AutoFeed_Backend.sln --configuration Release --no-restore
+
+            - name: Publish
+              run: dotnet publish AutoFeed_Backend/AutoFeed_Backend.csproj -c Release -o publish
+
+            - name: Deploy
+              uses: azure/webapps-deploy@v3
+              with:
+                app-name: AutoFeed
+                publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+                package: publish
