@@ -1,3 +1,4 @@
+```yaml id="v4p7xz"
 name: Deploy AutoFeed Backend
 
 on:
@@ -10,18 +11,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.0.x"
+          dotnet-version: 8.0.x
 
       - name: Restore
-        run: dotnet restore
+        run: dotnet restore AutoFeed_Backend.sln
 
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build AutoFeed_Backend.sln --configuration Release --no-restore
 
       - name: Publish
         run: dotnet publish AutoFeed_Backend/AutoFeed_Backend.csproj -c Release -o publish
@@ -32,3 +34,4 @@ jobs:
           app-name: AutoFeed
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: publish
+```
