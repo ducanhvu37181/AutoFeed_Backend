@@ -28,4 +28,9 @@
     <Folder Include="Models\Requests\FeedingRuleRequest\" />
     <Folder Include="Models\Requests\IotDevice\" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
+                           Condition="$([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)')).EndsWith('copilot.exe')" />
+  </ItemGroup>
 </Project>
