@@ -31,6 +31,6 @@
 
   <ItemGroup>
     <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
-                           Condition="$([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)')).EndsWith('copilot.exe')" />
+                           Condition="$([MSBuild]::EndsWith('%(ResolvedFileToPublish.RelativePath)', 'copilot.exe'))" />
   </ItemGroup>
 </Project>
