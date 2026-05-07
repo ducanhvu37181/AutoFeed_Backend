@@ -288,9 +288,10 @@ GO
 -- 3.1 Roles & Foods
 INSERT INTO [Role] (description) VALUES ('Manager'), ('TechFarmer'), ('Farmer');
 INSERT INTO [Food] (name, type, note) VALUES 
-('Organic Corn', 'Grain', 'High fiber'), ('Soy Protein', 'Protein', 'Mass gain'), 
-('Growth Pellet', 'Processed', 'Standard'), ('Mineral Block', 'Supplement', 'Bone health'), 
-('Vitamin Mix', 'Additive', 'Immunity');
+('Rice', 'Grain', 'Gạo - Staple food'), 
+('Corn', 'Grain', 'Ngô - Energy source'), 
+('Unhusked Rice', 'Grain', 'Thóc - Raw rice'), 
+('Vegetables', 'Vegetable', 'Rau - Fresh greens');
 
 -- 3.2 Barns (30 Barns)
 INSERT INTO [Barn] (temperature, humidity, type, area, waterAmount, foodAmount) VALUES 
@@ -354,18 +355,16 @@ GO
 
 -- 3.7 Manual Tasks (NO Feeding)
 INSERT INTO [Task] (title, description, startTime, endTime) VALUES 
-('Transfer Small Chickens to Barn','Move flock chickens to designated barns','07:00','08:30'),
-('Sanitation','Floor sweeping','08:30','10:00'),
-('Update Small Chicken Info','Update flock chicken details','10:00','11:30'),
-('Pressure Check','Test pipes','11:30','12:00'),
-('Medical Audit','Health check','12:00','13:30'),
-('Transfer New Large Chickens to Large Barn','Move matured chickens to large barns','13:30','15:00'),
-('Inventory Count','Count bags','15:00','16:30'),
-('Update Large Chicken Info','Update large chicken details','16:30','18:00'),
-('Maintenance','Check wires','18:00','19:30'),
-('Update Inventory Status','Review and update feed inventory status','19:30','21:00'),
-('Isolate Sick Chickens','Separate sick chickens from healthy ones','21:00','22:30'),
-('Set Up Feeding Schedule','Configure feeding times and amounts','22:30','23:59');
+('Transfer Small Chickens to Barn & Update Info','Move flock chickens to designated barns and update details','07:00','09:30'),
+('Sanitation','Floor sweeping','09:30','11:00'),
+('Pressure Check','Test pipes','11:00','11:30'),
+('Medical Audit','Health check','11:30','13:00'),
+('Transfer New Large Chickens to Large Barn & Update Info','Move matured chickens to large barns and update details','13:00','15:30'),
+('Inventory Count','Count bags','15:30','17:00'),
+('Maintenance','Check wires','17:00','18:30'),
+('Update Inventory Status','Review and update feed inventory status','18:30','20:00'),
+('Isolate Sick Chickens','Separate sick chickens from healthy ones','20:00','21:30'),
+('Set Up Feeding Schedule','Configure feeding times and amounts','21:30','23:59');
 
 -- 3.8 FeedingRules & Details (20 rules: 5 Flocks + 15 LargeChickens, each 3 details)
 -- Rules 1-3: Existing (Flock 6, LChicken 1, Flock 7)
@@ -399,45 +398,45 @@ INSERT INTO [FeedingRule] (flockID, chickenLID, startDate, endDate, times, descr
 
 INSERT INTO [FeedingRuleDetail] (ruleID, foodID, feedHour, feedMinute, amount, description) VALUES 
 -- Rule 1: Flock 6
-(1, 3, 7, 0, 5.0, 'Morning - Pellet'), (1, 3, 12, 0, 4.0, 'Lunch - Pellet'), (1, 5, 18, 0, 1.0, 'Dinner - Vitamin Mix'),
+(1, 3, 7, 0, 5.0, 'Morning - Unhusked Rice'), (1, 3, 12, 0, 4.0, 'Lunch - Unhusked Rice'), (1, 4, 18, 0, 1.0, 'Dinner - Vegetables'),
 -- Rule 2: LChicken 1
-(2, 2, 8, 30, 10.0, 'Morning - Soy'), (2, 2, 13, 0, 8.0, 'Lunch - Soy'), (2, 4, 19, 0, 2.0, 'Dinner - Mineral'),
+(2, 2, 8, 30, 10.0, 'Morning - Corn'), (2, 2, 13, 0, 8.0, 'Lunch - Corn'), (2, 4, 19, 0, 2.0, 'Dinner - Vegetables'),
 -- Rule 3: Flock 7
-(3, 1, 7, 30, 7.0, 'Morning - Corn'), (3, 1, 12, 30, 6.0, 'Lunch - Corn'), (3, 3, 18, 30, 5.0, 'Dinner - Pellet'),
+(3, 1, 7, 30, 7.0, 'Morning - Rice'), (3, 1, 12, 30, 6.0, 'Lunch - Rice'), (3, 3, 18, 30, 5.0, 'Dinner - Unhusked Rice'),
 -- Rule 4: Flock 8
-(4, 2, 7, 0, 6.0, 'Morning - Soy'), (4, 3, 12, 0, 5.0, 'Lunch - Pellet'), (4, 4, 18, 0, 2.0, 'Dinner - Mineral'),
+(4, 2, 7, 0, 6.0, 'Morning - Corn'), (4, 3, 12, 0, 5.0, 'Lunch - Unhusked Rice'), (4, 4, 18, 0, 2.0, 'Dinner - Vegetables'),
 -- Rule 5: Flock 9
-(5, 1, 7, 30, 8.0, 'Morning - Corn'), (5, 2, 12, 30, 6.0, 'Lunch - Soy'), (5, 5, 18, 30, 1.5, 'Dinner - Vitamin Mix'),
+(5, 1, 7, 30, 8.0, 'Morning - Rice'), (5, 2, 12, 30, 6.0, 'Lunch - Corn'), (5, 4, 18, 30, 1.5, 'Dinner - Vegetables'),
 -- Rule 6: Flock 10
-(6, 3, 7, 0, 5.5, 'Morning - Pellet'), (6, 1, 12, 0, 7.0, 'Lunch - Corn'), (6, 4, 18, 0, 2.5, 'Dinner - Mineral'),
+(6, 3, 7, 0, 5.5, 'Morning - Unhusked Rice'), (6, 1, 12, 0, 7.0, 'Lunch - Rice'), (6, 4, 18, 0, 2.5, 'Dinner - Vegetables'),
 -- Rule 7: LChicken 2
-(7, 1, 8, 0, 9.0, 'Morning - Corn'), (7, 3, 13, 0, 7.0, 'Lunch - Pellet'), (7, 5, 19, 0, 1.5, 'Dinner - Vitamin Mix'),
+(7, 1, 8, 0, 9.0, 'Morning - Rice'), (7, 3, 13, 0, 7.0, 'Lunch - Unhusked Rice'), (7, 4, 19, 0, 1.5, 'Dinner - Vegetables'),
 -- Rule 8: LChicken 3
-(8, 3, 7, 30, 8.0, 'Morning - Pellet'), (8, 2, 12, 30, 9.0, 'Lunch - Soy'), (8, 4, 18, 30, 2.5, 'Dinner - Mineral'),
+(8, 3, 7, 30, 8.0, 'Morning - Unhusked Rice'), (8, 2, 12, 30, 9.0, 'Lunch - Corn'), (8, 4, 18, 30, 2.5, 'Dinner - Vegetables'),
 -- Rule 9: LChicken 4
-(9, 1, 8, 0, 10.0, 'Morning - Corn'), (9, 1, 13, 0, 8.0, 'Lunch - Corn'), (9, 5, 19, 0, 1.0, 'Dinner - Vitamin Mix'),
+(9, 1, 8, 0, 10.0, 'Morning - Rice'), (9, 1, 13, 0, 8.0, 'Lunch - Rice'), (9, 4, 19, 0, 1.0, 'Dinner - Vegetables'),
 -- Rule 10: LChicken 5
-(10, 2, 7, 30, 9.5, 'Morning - Soy'), (10, 3, 12, 30, 7.5, 'Lunch - Pellet'), (10, 4, 18, 30, 3.0, 'Dinner - Mineral'),
+(10, 2, 7, 30, 9.5, 'Morning - Corn'), (10, 3, 12, 30, 7.5, 'Lunch - Unhusked Rice'), (10, 4, 18, 30, 3.0, 'Dinner - Vegetables'),
 -- Rule 11: LChicken 6
-(11, 1, 8, 0, 8.0, 'Morning - Corn'), (11, 2, 13, 0, 9.0, 'Lunch - Soy'), (11, 5, 19, 0, 1.5, 'Dinner - Vitamin Mix'),
+(11, 1, 8, 0, 8.0, 'Morning - Rice'), (11, 2, 13, 0, 9.0, 'Lunch - Corn'), (11, 4, 19, 0, 1.5, 'Dinner - Vegetables'),
 -- Rule 12: LChicken 7
-(12, 3, 7, 0, 7.0, 'Morning - Pellet'), (12, 1, 12, 0, 8.0, 'Lunch - Corn'), (12, 4, 18, 0, 2.0, 'Dinner - Mineral'),
+(12, 3, 7, 0, 7.0, 'Morning - Unhusked Rice'), (12, 1, 12, 0, 8.0, 'Lunch - Rice'), (12, 4, 18, 0, 2.0, 'Dinner - Vegetables'),
 -- Rule 13: LChicken 8
-(13, 2, 8, 30, 10.0, 'Morning - Soy'), (13, 3, 13, 0, 6.0, 'Lunch - Pellet'), (13, 5, 19, 0, 2.0, 'Dinner - Vitamin Mix'),
+(13, 2, 8, 30, 10.0, 'Morning - Corn'), (13, 3, 13, 0, 6.0, 'Lunch - Unhusked Rice'), (13, 4, 19, 0, 2.0, 'Dinner - Vegetables'),
 -- Rule 14: LChicken 9
-(14, 1, 7, 30, 9.0, 'Morning - Corn'), (14, 2, 12, 30, 7.0, 'Lunch - Soy'), (14, 4, 18, 30, 2.5, 'Dinner - Mineral'),
+(14, 1, 7, 30, 9.0, 'Morning - Rice'), (14, 2, 12, 30, 7.0, 'Lunch - Corn'), (14, 4, 18, 30, 2.5, 'Dinner - Vegetables'),
 -- Rule 15: LChicken 10
-(15, 3, 8, 0, 8.5, 'Morning - Pellet'), (15, 1, 13, 0, 7.5, 'Lunch - Corn'), (15, 5, 19, 0, 1.0, 'Dinner - Vitamin Mix'),
+(15, 3, 8, 0, 8.5, 'Morning - Unhusked Rice'), (15, 1, 13, 0, 7.5, 'Lunch - Rice'), (15, 4, 19, 0, 1.0, 'Dinner - Vegetables'),
 -- Rule 16: LChicken 11
-(16, 2, 7, 0, 9.0, 'Morning - Soy'), (16, 3, 12, 0, 6.5, 'Lunch - Pellet'), (16, 4, 18, 0, 3.0, 'Dinner - Mineral'),
+(16, 2, 7, 0, 9.0, 'Morning - Corn'), (16, 3, 12, 0, 6.5, 'Lunch - Unhusked Rice'), (16, 4, 18, 0, 3.0, 'Dinner - Vegetables'),
 -- Rule 17: LChicken 12
-(17, 1, 8, 30, 10.0, 'Morning - Corn'), (17, 2, 13, 0, 8.0, 'Lunch - Soy'), (17, 5, 19, 0, 1.5, 'Dinner - Vitamin Mix'),
+(17, 1, 8, 30, 10.0, 'Morning - Rice'), (17, 2, 13, 0, 8.0, 'Lunch - Corn'), (17, 4, 19, 0, 1.5, 'Dinner - Vegetables'),
 -- Rule 18: LChicken 13
-(18, 3, 7, 0, 7.5, 'Morning - Pellet'), (18, 1, 12, 0, 9.0, 'Lunch - Corn'), (18, 4, 18, 0, 2.0, 'Dinner - Mineral'),
+(18, 3, 7, 0, 7.5, 'Morning - Unhusked Rice'), (18, 1, 12, 0, 9.0, 'Lunch - Rice'), (18, 4, 18, 0, 2.0, 'Dinner - Vegetables'),
 -- Rule 19: LChicken 14
-(19, 2, 8, 0, 8.0, 'Morning - Soy'), (19, 3, 13, 0, 7.0, 'Lunch - Pellet'), (19, 5, 19, 0, 2.0, 'Dinner - Vitamin Mix'),
+(19, 2, 8, 0, 8.0, 'Morning - Corn'), (19, 3, 13, 0, 7.0, 'Lunch - Unhusked Rice'), (19, 4, 19, 0, 2.0, 'Dinner - Vegetables'),
 -- Rule 20: LChicken 15
-(20, 1, 7, 30, 11.0, 'Morning - Corn'), (20, 2, 12, 30, 9.0, 'Lunch - Soy'), (20, 4, 18, 30, 3.0, 'Dinner - Mineral');
+(20, 1, 7, 30, 11.0, 'Morning - Rice'), (20, 2, 12, 30, 9.0, 'Lunch - Corn'), (20, 4, 18, 30, 3.0, 'Dinner - Vegetables');
 
 -- 3.9 Reports & Requests (Including 'Flock' type)
 INSERT INTO [Report] (userID, type, description, status, url, createDate) VALUES 
@@ -460,47 +459,50 @@ INSERT INTO [Request] (userID, type, description, status, createdAt) VALUES
 (4, 'Feed', 'Increase corn supply for Barn 21', 'approved', '2026-04-12 09:30:00'), (5, 'Maintenance', 'Replace LED in Barn 10', 'pending', '2026-04-20 16:00:00'),
 (3, 'Medical', 'Antibiotics for LChicken 3', 'rejected', '2026-04-19 08:00:00'), (4, 'Flock', 'Merge Flock_9 and Flock_10', 'pending', '2026-04-20 11:15:00');
 
--- 3.10 Schedule (22 entries - Today is 2026-04-21)
+-- 3.10 Schedule (20 entries - Today is 2026-04-21)
 -- Past (completed)
 INSERT INTO [Schedule] (userID, taskID, CBarnID, description, note, priority, status, startDate, endDate, createdDate) VALUES 
 (3, 1, 6, 'Sweep area', 'D', 'high', 'completed', '2026-04-10', '2026-04-10', '2026-04-08'), (4, 2, 21, 'Vaccination', 'D', 'medium', 'completed', '2026-04-11', '2026-04-11', '2026-04-09'),
-(3, 3, 1, 'Stock Check', 'D', 'low', 'completed', '2026-04-12', '2026-04-12', '2026-04-10'), (2, 4, 7, 'Calibration', 'D', 'medium', 'completed', '2026-04-13', '2026-04-13', '2026-04-11'),
+(2, 3, 1, 'Stock Check', 'D', 'low', 'completed', '2026-04-12', '2026-04-12', '2026-04-10'), (2, 4, 7, 'Calibration', 'D', 'medium', 'completed', '2026-04-13', '2026-04-13', '2026-04-11'),
 (3, 5, 22, 'Water Test', 'D', 'high', 'completed', '2026-04-14', '2026-04-14', '2026-04-12'), (4, 1, 8, 'Floor Sweep', 'D', 'medium', 'completed', '2026-04-15', '2026-04-15', '2026-04-13'),
 (3, 2, 23, 'Vet Audit', 'D', 'high', 'completed', '2026-04-16', '2026-04-16', '2026-04-14'), (4, 3, 9, 'Bag Count', 'D', 'low', 'completed', '2026-04-17', '2026-04-17', '2026-04-15'),
-(2, 4, 10, 'IOT Maint', 'D', 'medium', 'completed', '2026-04-18', '2026-04-18', '2026-04-16'), (3, 5, 24, 'Pressure test', 'D', 'high', 'completed', '2026-04-19', '2026-04-19', '2026-04-17');
+(2, 4, 10, 'IOT Maint', 'D', 'medium', 'completed', '2026-04-18', '2026-04-18', '2026-04-16'), (2, 5, 24, 'Pressure test', 'D', 'high', 'completed', '2026-04-19', '2026-04-19', '2026-04-17');
 -- Present & Future (pending)
 INSERT INTO [Schedule] (userID, taskID, CBarnID, description, note, priority, status, startDate, endDate, createdDate) VALUES 
 (4, 1, 11, 'Daily sweep', 'N', 'high', 'pending', '2026-04-20', '2026-04-20', '2026-04-18'), (3, 2, 25, 'Growth Audit', 'N', 'medium', 'pending', '2026-04-20', '2026-04-20', '2026-04-18'),
 (4, 3, 12, 'Storage Audit', 'N', 'low', 'pending', '2026-04-21', '2026-04-21', '2026-04-19'), (2, 4, 13, 'Sensor Swap', 'N', 'medium', 'pending', '2026-04-22', '2026-04-22', '2026-04-20'),
-(3, 5, 14, 'Clean nozzle', 'N', 'high', 'pending', '2026-04-23', '2026-04-23', '2026-04-21');
+(2, 5, 14, 'Clean nozzle', 'N', 'high', 'pending', '2026-04-23', '2026-04-23', '2026-04-21');
 -- Next Week (2026-05-04 to 2026-05-10) - Starting from today
 INSERT INTO [Schedule] (userID, taskID, CBarnID, description, note, priority, status, startDate, endDate, createdDate) VALUES 
 (4, 1, 15, 'Weekly barn cleaning', 'N', 'high', 'pending', '2026-05-04', '2026-05-04', '2026-05-03'),
 (3, 2, 21, 'Flock health check', 'N', 'medium', 'pending', '2026-05-05', '2026-05-05', '2026-05-03'),
-(2, 3, 22, 'Feed inventory review', 'N', 'low', 'pending', '2026-05-06', '2026-05-06', '2026-05-03'),
-(5, 4, 23, 'IoT sensor calibration', 'N', 'medium', 'pending', '2026-05-07', '2026-05-07', '2026-05-03'),
-(4, 5, 24, 'Water system maintenance', 'N', 'high', 'pending', '2026-05-08', '2026-05-08', '2026-05-03'),
+(2, 3, 22, 'Pressure check', 'N', 'low', 'pending', '2026-05-06', '2026-05-06', '2026-05-03'),
+(5, 4, 23, 'Medical audit', 'N', 'medium', 'pending', '2026-05-07', '2026-05-07', '2026-05-03'),
+(2, 7, 24, 'Maintenance', 'N', 'high', 'pending', '2026-05-08', '2026-05-08', '2026-05-03'),
 (3, 1, 25, 'Sanitation check', 'N', 'high', 'pending', '2026-05-09', '2026-05-09', '2026-05-03'),
-(2, 2, 11, 'Growth monitoring', 'N', 'medium', 'pending', '2026-05-10', '2026-05-10', '2026-05-03');
+(2, 3, 11, 'Pressure check', 'N', 'medium', 'pending', '2026-05-10', '2026-05-10', '2026-05-03');
 
--- 3.11 Inventory (Today: 2026-04-21)
+-- 3.11 Inventory (Today: 2026-05-07)
 INSERT INTO [Inventory] (foodName, quantity, weightPerBag, importDate, expiredDate, status) VALUES
 -- 1. EXPIRED ITEMS (DaysExpired < 0) - USED
-('Organic Corn', 3, 20.0, '2026-01-10', '2026-04-10', 'used'),   -- Organic Corn (Expired 11 days ago)
-('Vitamin Mix', 1, 5.0, '2026-01-15', '2026-04-15', 'used'),    -- Vitamin Mix (Expired 6 days ago)
-('Growth Pellet', 5, 25.0, '2026-02-01', '2026-04-18', 'used'),   -- Growth Pellet (Expired 3 days ago)
+('Rice', 3, 20.0, '2026-01-10', '2026-04-10', 'used'),   -- Rice (Expired 27 days ago)
+('Corn', 1, 25.0, '2026-01-15', '2026-04-15', 'used'),    -- Corn (Expired 22 days ago)
+('Unhusked Rice', 5, 30.0, '2026-02-01', '2026-04-18', 'used'),   -- Unhusked Rice (Expired 19 days ago)
 
 -- 2. NEAR EXPIRY (DaysExpired 0~5) - USED
-('Soy Protein', 50, 25.0, '2026-02-20', '2026-04-21', 'used'),  -- Soy Protein (Expires today)
-('Mineral Block', 20, 10.0, '2026-03-01', '2026-04-25', 'used'),  -- Mineral Block (4 days left)
+('Vegetables', 50, 10.0, '2026-04-02', '2026-05-07', 'used'),  -- Vegetables (Expires today)
+('Rice', 20, 20.0, '2026-04-03', '2026-05-11', 'used'),  -- Rice (4 days left)
 
 -- 3. SAFE (DaysExpired > 30) - USED
-('Organic Corn', 200, 20.0, '2026-04-01', '2027-01-01', 'used'),  -- Organic Corn (255 days left)
-('Growth Pellet', 150, 25.0, '2026-04-05', '2026-12-30', 'used'), -- Growth Pellet (253 days left)
+('Corn', 200, 25.0, '2026-04-01', '2027-01-01', 'used'),  -- Corn (239 days left)
+('Unhusked Rice', 150, 30.0, '2026-04-05', '2026-12-30', 'used'), -- Unhusked Rice (237 days left)
 
 -- 4. NEW INVENTORY - UNUSED
-('Soy Protein', 100, 25.0, '2026-04-15', '2027-04-15', 'unused'),  -- New Soy Protein
-('Mineral Block', 50, 10.0, '2026-04-18', '2027-04-18', 'unused'); -- New Mineral Block
+('Vegetables', 100, 10.0, '2026-04-15', '2027-04-15', 'unused'),  -- New Vegetables
+('Rice', 50, 20.0, '2026-04-18', '2027-04-18', 'unused'), -- New Rice
+
+-- 5. LOW STOCK - UNUSED
+('Corn', 1, 25.0, '2026-05-01', '2026-12-01', 'unused'); -- Corn (LOW STOCK - quantity = 1)
 
 -- 3.12 Data_IoT: "food today" for active barns (excluding Barn 1)
 -- 30 days (2026-04-04 ~ 2026-05-03, excluding today 2026-05-04), 3 measurements/day
