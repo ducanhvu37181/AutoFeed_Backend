@@ -29,8 +29,9 @@
     <Folder Include="Models\Requests\IotDevice\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
-                           Condition="'%(ResolvedFileToPublish.Filename)%(ResolvedFileToPublish.Extension)' == 'copilot.exe'" />
-  </ItemGroup>
+  <Target Name="RemoveCopilotFromPublish" AfterTargets="ComputeResolvedFilesToPublishList">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(Filename)%(Extension)' == 'copilot.exe'" />
+    </ItemGroup>
+  </Target>
 </Project>
