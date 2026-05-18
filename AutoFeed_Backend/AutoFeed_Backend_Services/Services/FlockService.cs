@@ -488,6 +488,8 @@ namespace AutoFeed_Backend_Services.Services
 
             f.Note = req.Note;
 
+            f.Weight = req.Weight;
+
 
 
             // GenericRepository.UpdateAsync already persists; second SaveChanges returns 0 rows.

@@ -21,6 +21,7 @@ namespace AutoFeed_Backend.Models.Requests.Flock
         public string Name { get; set; } = null!;
         public string HealthStatus { get; set; } = null!;
         public string? Note { get; set; }
+        public decimal Weight { get; set; }
     }
 
     // Internal request class for operations that need to update quantity, weight, isActive, etc.
