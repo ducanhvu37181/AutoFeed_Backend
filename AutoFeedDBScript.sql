@@ -232,7 +232,7 @@ CREATE TABLE [dbo].[Report] (
     [createDate] DATETIME DEFAULT GETDATE(),
     CONSTRAINT [FK_Report_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID]),
     CONSTRAINT [CK_Report_Status] CHECK ([status] IN ('pending', 'reviewed')),
-    CONSTRAINT [CK_Report_Type] CHECK ([type] IN ('Feed', 'Maintenance', 'Medical', 'Inventory', 'Schedule', 'Flock', 'Others'))
+    CONSTRAINT [CK_Report_Type] CHECK ([type] IN ('Feed', 'Maintenance', 'Medical', 'Inventory', 'Schedule', 'Chicken', 'Others'))
 );
 
 CREATE TABLE [dbo].[Request] (
@@ -245,7 +245,7 @@ CREATE TABLE [dbo].[Request] (
     [createdAt] DATETIME DEFAULT GETDATE(),
     CONSTRAINT [FK_Request_User] FOREIGN KEY([userID]) REFERENCES [dbo].[User] ([userID]),
     CONSTRAINT [CK_Request_Status] CHECK ([status] IN ('pending', 'approved', 'rejected')),
-    CONSTRAINT [CK_Request_Type] CHECK ([type] IN ('Feed', 'Maintenance', 'Medical', 'Inventory', 'Schedule', 'Flock', 'Others'))
+    CONSTRAINT [CK_Request_Type] CHECK ([type] IN ('Feed', 'Maintenance', 'Medical', 'Inventory', 'Schedule', 'Chicken', 'Others'))
 );
 
 CREATE TABLE [dbo].[Schedule] (
@@ -288,10 +288,13 @@ GO
 -- 3.1 Roles & Foods
 INSERT INTO [Role] (description) VALUES ('Manager'), ('TechFarmer'), ('Farmer');
 INSERT INTO [Food] (name, type, note) VALUES 
-('Rice', 'Grain', 'Gạo - Staple food'), 
-('Corn', 'Grain', 'Ngô - Energy source'), 
-('Unhusked Rice', 'Grain', 'Thóc - Raw rice'), 
-('Vegetables', 'Vegetable', 'Rau - Fresh greens');
+('Rice', 'Grain', 'Staple food'), 
+('Corn', 'Grain', 'Energy source'), 
+('Unhusked Rice', 'Grain', 'Raw rice'), 
+('Vegetables', 'Vegetable', 'Fresh greens'),
+('Antibiotic A', 'Medicine', 'Antibiotic A - Treat infections'),
+('Vitamin C', 'Medicine', 'Vitamin C - Boost immune system'),
+('Electrolyte Water', 'Drink', 'Electrolyte Water - Rehydrate and replenish minerals');
 
 -- 3.2 Barns (30 Barns)
 INSERT INTO [Barn] (temperature, humidity, type, area, waterAmount, foodAmount) VALUES 
@@ -304,11 +307,11 @@ INSERT INTO [Barn] (temperature, humidity, type, area, waterAmount, foodAmount) 
 
 -- 3.3 Users
 INSERT INTO [User] (roleID, email, password, fullName, phone, username, avatarURL) VALUES 
-(1, 'manager@farm.com', 'p1', 'Alice Manager', '0912345671', 'alice_mgr', 'https://tse1.mm.bing.net/th/id/OIP.p9bNjr0mX-spDgSi1S5hrgHaLH?rs=1&pid=ImgDetMain&o=7&rm=3'),
-(2, 'tech@farm.com', 'p2', 'Bob Smith', '0912345672', 'bob_tech', 'https://haycafe.vn/wp-content/uploads/2022/03/Hinh-anh-chan-dung-nam-dep.jpg'),
-(3, 'farmer1@farm.com', 'p3', 'Charlie Brown', '0912345673', 'charlie_f', 'https://tse1.mm.bing.net/th/id/OIP.s_OjVf-2_ScyG9UniAlm6wHaLH?w=1024&h=1536&rs=1&pid=ImgDetMain&o=7&rm=3'),
-(3, 'farmer2@farm.com', 'p4', 'Frank Green', '0912345674', 'frank_f', 'https://haycafe.vn/wp-content/uploads/2022/03/Hinh-anh-chan-dung-nam-dep.jpg'),
-(3, 'farmer3@farm.com', 'p5', 'Visger Green', '0912345674', 'vis_gr', 'https://haycafe.vn/wp-content/uploads/2022/03/Hinh-anh-chan-dung-nam-dep.jpg');
+(1, 'toanh93.pch.1819@gmail.com', 'p1', 'Quach To Anh', '0912345671', 'quch_ta', 'https://tse1.mm.bing.net/th/id/OIP.p9bNjr0mX-spDgSi1S5hrgHaLH?rs=1&pid=ImgDetMain&o=7&rm=3'),
+(2, 'nguyentrungkien261003@gmail.com', 'p2', 'Nguyen Trung Kien', '0912345672', 'kien_nt', 'https://haycafe.vn/wp-content/uploads/2022/03/Hinh-anh-chan-dung-nam-dep.jpg'),
+(3, 'ducanhvu43@gmail.com', 'p3', 'Vu Duc Anh', '0912345673', 'anh_vd', 'https://tse1.mm.bing.net/th/id/OIP.s_OjVf-2_ScyG9UniAlm6wHaLH?w=1024&h=1536&rs=1&pid=ImgDetMain&o=7&rm=3'),
+(3, 'frgreen@gmail.com', 'p4', 'Frank Green', '0912345674', 'frank_f', 'https://haycafe.vn/wp-content/uploads/2022/03/Hinh-anh-chan-dung-nam-dep.jpg'),
+(3, 'greenvs@farm.com', 'p5', 'Visger Green', '0912345674', 'vis_gr', 'https://haycafe.vn/wp-content/uploads/2022/03/Hinh-anh-chan-dung-nam-dep.jpg');
 
 
 -- 3.4 Flock & Large Chicken
@@ -440,24 +443,18 @@ INSERT INTO [FeedingRuleDetail] (ruleID, foodID, feedHour, feedMinute, amount, d
 
 -- 3.9 Reports & Requests (Including 'Flock' type)
 INSERT INTO [Report] (userID, type, description, status, url, createDate) VALUES 
-(3, 'Medical', 'Flock_8 stable', 'reviewed', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2Ff0439f90-8361-492d-b366-b21c5f6d8581.pdf?alt=media&token=e6f7c2b6-1687-413c-b50e-e4fcb9818ae0', '2026-04-17 08:30:00'),
-(4, 'Inventory', 'Weekly audit sector A', 'pending', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2Ff0439f90-8361-492d-b366-b21c5f6d8581.pdf?alt=media&token=e6f7c2b6-1687-413c-b50e-e4fcb9818ae0', '2026-04-18 10:15:00'),
-(3, 'Flock', 'Flock_6 active behavior', 'reviewed', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2Ff0439f90-8361-492d-b366-b21c5f6d8581.pdf?alt=media&token=e6f7c2b6-1687-413c-b50e-e4fcb9818ae0', '2026-04-19 14:00:00'),
-(2, 'Maintenance', 'Sensor check Barn 1', 'reviewed', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2Ff0439f90-8361-492d-b366-b21c5f6d8581.pdf?alt=media&token=e6f7c2b6-1687-413c-b50e-e4fcb9818ae0', '2026-04-20 16:45:00'),
-(4, 'Feed', 'Corn supply running low in Barn 3', 'reviewed', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2Ff0439f90-8361-492d-b366-b21c5f6d8581.pdf?alt=media&token=e6f7c2b6-1687-413c-b50e-e4fcb9818ae0', '2026-04-14 09:15:00'),
-(3, 'Schedule', 'Weekly schedule conflict detected', 'pending', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2Ff0439f90-8361-492d-b366-b21c5f6d8581.pdf?alt=media&token=e6f7c2b6-1687-413c-b50e-e4fcb9818ae0', '2026-04-15 11:00:00'),
-(2, 'Others', 'General farm observation notes', 'reviewed', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2Ff0439f90-8361-492d-b366-b21c5f6d8581.pdf?alt=media&token=e6f7c2b6-1687-413c-b50e-e4fcb9818ae0', '2026-04-16 13:30:00'),
-(5, 'Medical', 'Flock_9 vaccination completed', 'reviewed', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2Ff0439f90-8361-492d-b366-b21c5f6d8581.pdf?alt=media&token=e6f7c2b6-1687-413c-b50e-e4fcb9818ae0', '2026-04-13 08:45:00'),
-(4, 'Inventory', 'Monthly stock summary', 'pending', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2Ff0439f90-8361-492d-b366-b21c5f6d8581.pdf?alt=media&token=e6f7c2b6-1687-413c-b50e-e4fcb9818ae0', '2026-04-20 10:30:00'),
-(3, 'Maintenance', 'Water pump Barn 5 replaced', 'reviewed', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2Ff0439f90-8361-492d-b366-b21c5f6d8581.pdf?alt=media&token=e6f7c2b6-1687-413c-b50e-e4fcb9818ae0', '2026-04-12 15:00:00'),
-(5, 'Flock', 'Flock_10 weight gain on track', 'pending', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2Ff0439f90-8361-492d-b366-b21c5f6d8581.pdf?alt=media&token=e6f7c2b6-1687-413c-b50e-e4fcb9818ae0', '2026-04-20 14:15:00');
+(3, 'Medical', 'Flock2_BenTre stable', 'reviewed', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2FMEDICAL%20FOLLOW-UP%20REPORT.pdf?alt=media&token=0e70b8ea-68ae-49e6-8dad-191567c1788d', '2026-04-17 08:30:00'),
+(4, 'Inventory', 'Weekly audit sector A', 'pending', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2FMEDICAL%20FOLLOW-UP%20REPORT.pdf?alt=media&token=0e70b8ea-68ae-49e6-8dad-191567c1788d', '2026-04-18 10:15:00'),
+(3, 'Chicken', 'Flock2_BinhDinh active behavior', 'reviewed', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2FMEDICAL%20FOLLOW-UP%20REPORT.pdf?alt=media&token=0e70b8ea-68ae-49e6-8dad-191567c1788d', '2026-04-19 14:00:00'),
+(2, 'Maintenance', 'Sensor check Barn 1', 'reviewed', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2FMEDICAL%20FOLLOW-UP%20REPORT.pdf?alt=media&token=0e70b8ea-68ae-49e6-8dad-191567c1788d', '2026-04-20 16:45:00'),
+(4, 'Feed', 'Corn supply running low in Barn 3', 'reviewed', 'https://firebasestorage.googleapis.com/v0/b/autofeeddata-6bcd2.firebasestorage.app/o/avatars%2FMEDICAL%20FOLLOW-UP%20REPORT.pdf?alt=media&token=0e70b8ea-68ae-49e6-8dad-191567c1788d', '2026-04-14 09:15:00');
 
 INSERT INTO [Request] (userID, type, description, status, createdAt) VALUES 
-(3, 'Feed', 'Order Soy', 'approved', '2026-04-15 09:00:00'), (3, 'Flock', 'Split Flock_6', 'pending', '2026-04-18 13:30:00'), (2, 'Maintenance', 'Sensor fix', 'pending', '2026-04-19 15:45:00'),
-(4, 'Medical', 'Request vet visit for Flock_8', 'approved', '2026-04-13 08:30:00'), (5, 'Inventory', 'Restock Vitamin Mix urgently', 'approved', '2026-04-14 10:00:00'),
+(3, 'Feed', 'Order Soy', 'approved', '2026-04-15 09:00:00'), (3, 'Chicken', 'Split Flock2_BinhDinh', 'pending', '2026-04-18 13:30:00'), (2, 'Maintenance', 'Sensor fix', 'pending', '2026-04-19 15:45:00'),
+(4, 'Medical', 'Request vet visit for Flock2_BenTre', 'approved', '2026-04-13 08:30:00'), (5, 'Inventory', 'Restock Vitamin Mix urgently', 'approved', '2026-04-14 10:00:00'),
 (3, 'Schedule', 'Reschedule sanitation task', 'rejected', '2026-04-16 11:30:00'), (2, 'Others', 'Request new staff ID badges', 'pending', '2026-04-17 14:45:00'),
 (4, 'Feed', 'Increase corn supply for Barn 21', 'approved', '2026-04-12 09:30:00'), (5, 'Maintenance', 'Replace LED in Barn 10', 'pending', '2026-04-20 16:00:00'),
-(3, 'Medical', 'Antibiotics for LChicken 3', 'rejected', '2026-04-19 08:00:00'), (4, 'Flock', 'Merge Flock_9 and Flock_10', 'pending', '2026-04-20 11:15:00');
+(3, 'Medical', 'Antibiotics for LChicken 3', 'rejected', '2026-04-19 08:00:00'), (4, 'Chicken', 'Merge Flock2_DoSon and Flock2_NghiTam', 'pending', '2026-04-20 11:15:00');
 
 -- 3.10 Schedule (20 entries - Today is 2026-04-21)
 -- Past (completed)
@@ -511,7 +508,7 @@ DECLARE @BarnID INT, @DeviceID INT, @DayOffset INT, @Meas INT;
 DECLARE @BaseDate DATE = '2026-04-04';
 
 DECLARE @ActiveBarns TABLE (barnID INT);
-INSERT INTO @ActiveBarns VALUES (2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(21),(22),(23),(24),(25);
+INSERT INTO @ActiveBarns VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(21),(22),(23),(24),(25);
 
 DECLARE barn_cur CURSOR LOCAL FAST_FORWARD FOR SELECT barnID FROM @ActiveBarns;
 OPEN barn_cur;

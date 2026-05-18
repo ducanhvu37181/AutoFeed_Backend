@@ -21,7 +21,19 @@ namespace AutoFeed_Backend.Helpers
             if (string.IsNullOrWhiteSpace(serviceAccountPath))
                 throw new ArgumentException("serviceAccountPath is required", nameof(serviceAccountPath));
 
-            var credential = GoogleCredential.FromFile(serviceAccountPath);
+            // Handle relative paths by combining with content root
+            string fullPath;
+            if (Path.IsPathRooted(serviceAccountPath))
+            {
+                fullPath = serviceAccountPath;
+            }
+            else
+            {
+                var contentRoot = Directory.GetCurrentDirectory();
+                fullPath = Path.Combine(contentRoot, serviceAccountPath);
+            }
+
+            var credential = GoogleCredential.FromFile(fullPath);
             var storageClient = StorageClient.Create(credential);
 
             var ext = Path.GetExtension(file.FileName) ?? string.Empty;
