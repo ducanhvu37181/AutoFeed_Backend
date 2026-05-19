@@ -32,8 +32,7 @@ public class BarnImageService : IBarnImageService
         });
     }
 
-    public async T
-    ask<object> GetBarnImageByIdAsync(int imageBarnId)
+    public async Task<object> GetBarnImageByIdAsync(int imageBarnId)
     {
         var image = await _unitOfWork.BarnImages.GetByImageIdAsync(imageBarnId);
 

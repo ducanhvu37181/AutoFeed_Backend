@@ -276,7 +276,7 @@ public class BarnController : ControllerBase
     {
         if (req == null) return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
 
-        var ok = await _barnService.UpdateAllMetricsAsync(req.BarnId, req.FoodAmount, req.WaterAmount, req.Temperature, req.Humidity);
+        var ok = await _barnService.UpdateAllMetricsAsync(req.BarnId, req.FoodAmount, (int)req.WaterAmount, req.Temperature, req.Humidity);
         if (!ok) return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Barn not found or update failed" });
 
         // return the updated values
