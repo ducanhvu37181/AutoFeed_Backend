@@ -83,7 +83,7 @@ public class BarnService : IBarnService
         return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
     }
 
-    public async Task<bool> UpdateAllMetricsAsync(int barnId, decimal foodAmount, decimal waterAmount, decimal temperature, decimal humidity)
+    public async Task<bool> UpdateAllMetricsAsync(int barnId, decimal foodAmount, int waterAmount, decimal temperature, decimal humidity)
     {
         var barn = await _unitOfWork.Barns.GetByIdAsync(barnId);
         if (barn == null) return false;
