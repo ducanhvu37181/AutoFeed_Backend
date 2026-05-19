@@ -55,6 +55,15 @@ public class BarnController : ControllerBase
         public decimal WaterAmount { get; set; }
     }
 
+    public class UpdateAllMetricsRequest
+    {
+        public int BarnId { get; set; }
+        public decimal FoodAmount { get; set; }
+        public decimal WaterAmount { get; set; }
+        public decimal Temperature { get; set; }
+        public decimal Humidity { get; set; }
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetAllBarns()
     {
@@ -260,5 +269,26 @@ public class BarnController : ControllerBase
         var updated = await _barnService.GetByIdAsync(req.BarnId);
         var dto = new { BarnId = updated?.BarnId, Temperature = updated?.Temperature, Humidity = updated?.Humidity };
         return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "Metrics updated" });
+    }
+
+    [HttpPatch("all-metrics")]
+    public async Task<IActionResult> UpdateAllMetrics([FromBody] UpdateAllMetricsRequest req)
+    {
+        if (req == null) return BadRequest(new ApiResponse<object> { Status = false, HttpCode = 400, Data = null, Description = "Invalid request" });
+
+        var ok = await _barnService.UpdateAllMetricsAsync(req.BarnId, req.FoodAmount, req.WaterAmount, req.Temperature, req.Humidity);
+        if (!ok) return NotFound(new ApiResponse<object> { Status = false, HttpCode = 404, Data = null, Description = "Barn not found or update failed" });
+
+        // return the updated values
+        var updated = await _barnService.GetByIdAsync(req.BarnId);
+        var dto = new
+        {
+            BarnId = updated?.BarnId,
+            FoodAmount = updated?.FoodAmount,
+            WaterAmount = updated?.WaterAmount,
+            Temperature = updated?.Temperature,
+            Humidity = updated?.Humidity
+        };
+        return Ok(new ApiResponse<object> { Status = true, HttpCode = 200, Data = dto, Description = "All metrics updated" });
     }
 }
