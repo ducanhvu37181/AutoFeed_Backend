@@ -19,6 +19,8 @@ public interface IBarnService
     Task<bool> UpdateFoodAmountAsync(int barnId, decimal foodAmount);
     // Update water amount for a barn
     Task<bool> UpdateWaterAmountAsync(int barnId, int waterAmount);
+    // Update all metrics (food, water, temperature, humidity) for a barn
+    Task<bool> UpdateAllMetricsAsync(int barnId, decimal foodAmount, decimal waterAmount, decimal temperature, decimal humidity);
     // Get barn status: "empty" if no active ChickenBarn, "used" if has active ChickenBarn
     Task<string> GetBarnStatusAsync(int barnId);
     Task<decimal> GetFoodWeekAsync(int barnId);

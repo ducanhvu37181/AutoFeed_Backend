@@ -83,6 +83,20 @@ public class BarnService : IBarnService
         return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
     }
 
+    public async Task<bool> UpdateAllMetricsAsync(int barnId, decimal foodAmount, decimal waterAmount, decimal temperature, decimal humidity)
+    {
+        var barn = await _unitOfWork.Barns.GetByIdAsync(barnId);
+        if (barn == null) return false;
+
+        barn.FoodAmount = foodAmount;
+        barn.WaterAmount = waterAmount;
+        barn.Temperature = temperature;
+        barn.Humidity = humidity;
+
+        _unitOfWork.Barns.PrepareUpdate(barn);
+        return await _unitOfWork.SaveChangesWithTransactionAsync() > 0;
+    }
+
     public async Task<string> GetBarnStatusAsync(int barnId)
     {
         // Check if barn has any active ChickenBarn record (status != "export")
