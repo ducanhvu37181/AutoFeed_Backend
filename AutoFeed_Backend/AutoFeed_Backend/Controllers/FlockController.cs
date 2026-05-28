@@ -596,7 +596,7 @@ public class FlockController : ControllerBase
 
                 Name = largeChickenName,
 
-                Weight = 0,
+                Weight = flock.Weight,
 
                 HealthStatus = "Healthy",
 
@@ -663,6 +663,9 @@ public class FlockController : ControllerBase
             else
 
             {
+
+                // Auto-create feeding rule for this ChickenBarn
+                await _chickenBarnService.AutoCreateFeedingRuleForExistingAsync(cBarnId);
 
                 createdLargeChickens.Add(new { ChickenLid = chickenLid, ChickenName = largeChickenName });
 
