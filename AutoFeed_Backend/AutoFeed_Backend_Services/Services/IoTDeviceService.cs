@@ -160,5 +160,17 @@ namespace AutoFeed_Backend_Services.Services
         {
             return await GetAllDevicesAsync("", "", "Offline");
         }
+
+        public async Task<bool> SetDeviceOfflineAsync(int deviceId)
+        {
+            var device = await _unitOfWork.IoTDevices.GetByIdAsync(deviceId);
+            if (device == null) return false;
+
+            device.Status = false;
+
+            await _unitOfWork.IoTDevices.UpdateAsync(device);
+            await _unitOfWork.SaveChangesWithTransactionAsync();
+            return true;
+        }
     }
 }
