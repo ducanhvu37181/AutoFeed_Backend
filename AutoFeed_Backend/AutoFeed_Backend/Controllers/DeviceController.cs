@@ -586,6 +586,72 @@ namespace AutoFeed_Backend.Controllers
 
         }
 
+
+
+        // 7. Set device to offline status
+
+        [HttpPatch("{id}/offline")]
+
+        public async Task<IActionResult> SetOffline(int id)
+
+        {
+
+            var device = await _deviceService.GetDeviceByIdAsync(id);
+
+            if (device == null)
+
+                return NotFound(new ApiResponse<object>
+
+                {
+
+                    Status = false,
+
+                    HttpCode = 404,
+
+                    Data = null,
+
+                    Description = $"Device with ID {id} not found."
+
+                });
+
+
+
+            var success = await _deviceService.SetDeviceOfflineAsync(id);
+
+            if (success)
+
+                return Ok(new ApiResponse<object>
+
+                {
+
+                    Status = true,
+
+                    HttpCode = 200,
+
+                    Data = null,
+
+                    Description = $"Device {id} set to offline successfully."
+
+                });
+
+
+
+            return BadRequest(new ApiResponse<object>
+
+            {
+
+                Status = false,
+
+                HttpCode = 400,
+
+                Data = null,
+
+                Description = "Failed to set device offline."
+
+            });
+
+        }
+
     }
 
 }
