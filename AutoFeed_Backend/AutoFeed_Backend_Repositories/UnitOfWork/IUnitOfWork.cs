@@ -25,6 +25,9 @@ public interface IUnitOfWork
     ReportRepository Reports { get; }
     DataIoTRepository DataIoTs { get; }
     NotificationRepository Notifications { get; }
+    FeedingGuideLargeChickenRepository FeedingGuideLargeChickens { get; }
+    FeedingGuideFlockRepository FeedingGuideFlocks { get; }
+    FeedingRuleDetailRepository FeedingRuleDetails { get; }
 
     int SaveChangesWithTransaction();
     Task<int> SaveChangesWithTransactionAsync();

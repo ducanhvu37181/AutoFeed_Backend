@@ -34,15 +34,19 @@ namespace AutoFeed_Backend_Services.Services
 
     private readonly AutoFeedDBContext _db;
 
+    private readonly IChickenBarnService _chickenBarnService;
 
 
-        public FlockService(IUnitOfWork unitOfWork, AutoFeedDBContext db)
+
+        public FlockService(IUnitOfWork unitOfWork, AutoFeedDBContext db, IChickenBarnService chickenBarnService)
 
         {
 
             _unitOfWork = unitOfWork;
 
             _db = db;
+
+            _chickenBarnService = chickenBarnService;
 
         }
 
@@ -450,7 +454,8 @@ namespace AutoFeed_Backend_Services.Services
 
                 await _unitOfWork.ChickenBarns.CreateAsync(chickenBarn);
 
-
+                // Auto-create feeding rule for this ChickenBarn
+                await _chickenBarnService.AutoCreateFeedingRuleForExistingAsync(chickenBarn.CbarnId);
 
                 // Update response with assigned barn info
 

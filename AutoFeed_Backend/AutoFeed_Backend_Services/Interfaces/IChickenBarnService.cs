@@ -17,4 +17,6 @@ public interface IChickenBarnService
     Task<ChickenBarnModel?> ExportAsync(int largeChickenId);
     Task<ChickenBarnModel?> GetByLargeChickenIdAsync(int largeChickenId);
     Task<List<dynamic>> GetChickenBarnDetailAsync(int? barnId, string? barnType);
+    Task AutoCreateFeedingRuleForExistingAsync(int cbarnId);
+    Task AutoUpdateFeedingRuleForLargeChickenAsync(int chickenLid);
 }

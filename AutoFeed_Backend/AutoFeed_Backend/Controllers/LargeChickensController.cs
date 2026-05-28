@@ -17,10 +17,12 @@ namespace AutoFeed_Backend.Controllers;
 public class LargeChickenController : ControllerBase
 {
     private readonly ILargeChickenService _service;
+    private readonly IChickenBarnService _chickenBarnService;
 
-    public LargeChickenController(ILargeChickenService service)
+    public LargeChickenController(ILargeChickenService service, IChickenBarnService chickenBarnService)
     {
         _service = service;
+        _chickenBarnService = chickenBarnService;
     }
 
     private static int? CalculateAgeInMonths(DateOnly? dateOfBirth)
@@ -246,6 +248,9 @@ public class LargeChickenController : ControllerBase
         var ok = await _service.UpdateAsync(existing);
         if (!ok)
             return StatusCode(500, new ApiResponse<object> { Status = false, HttpCode = 500, Data = null, Description = "Update failed" });
+
+        // Auto-update feeding rule for this LargeChicken
+        await _chickenBarnService.AutoUpdateFeedingRuleForLargeChickenAsync(existing.ChickenLid);
 
         // Re-fetch to get the Flock relationship for age calculation and flock name
         var updatedEntity = await _service.GetByIdAsync(existing.ChickenLid);

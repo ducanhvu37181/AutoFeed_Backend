@@ -281,6 +281,33 @@ CREATE TABLE [dbo].[Notification] (
 );
 GO
 
+CREATE TABLE [dbo].[FeedingGuideLargeChicken] (
+    [guideLID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    [chickenType] NVARCHAR(50) NOT NULL,
+    [status] NVARCHAR(50) NOT NULL,
+    [weight] DECIMAL(18, 2) NOT NULL,
+    [feedPerDay] DECIMAL(18, 2) NOT NULL,
+    [session] INT NOT NULL,
+    [note] NVARCHAR(MAX) NULL,
+    [createdAt] DATETIME DEFAULT GETDATE(),
+    CONSTRAINT [CK_FeedingGuideL_ChickenType] CHECK ([chickenType] IN ('Binh Dinh', 'Cao lanh', 'Ben Tre', 'Do Son', 'Nghi Tam'))
+);
+GO
+
+CREATE TABLE [dbo].[FeedingGuideFlock] (
+    [guideFID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    [chickenType] NVARCHAR(50) NOT NULL,
+    [status] NVARCHAR(50) NOT NULL,
+    [age] INT NOT NULL,
+    [feedPerDay] DECIMAL(18, 2) NOT NULL,
+    [session] INT NOT NULL,
+    [note] NVARCHAR(MAX) NULL,
+    [createdAt] DATETIME DEFAULT GETDATE(),
+    CONSTRAINT [CK_FeedingGuideF_ChickenType] CHECK ([chickenType] IN ('Binh Dinh', 'Cao lanh', 'Ben Tre', 'Do Son', 'Nghi Tam')),
+    CONSTRAINT [CK_FeedingGuideF_Status] CHECK ([status] IN ('Sick', 'Healthy'))
+);
+GO
+
 -- ======================================================
 -- 3. DATA INSERTION
 -- ======================================================
@@ -553,3 +580,92 @@ END
 CLOSE barn_cur;
 DEALLOCATE barn_cur;
 GO
+
+-- 3.13 Feeding guide Large chicken
+INSERT INTO [FeedingGuideLargeChicken] (chickenType, status, weight, feedPerDay, session) VALUES
+-- Binh Dinh
+('Binh Dinh', 'Healthy', 1.50, 100.00, 3),
+('Binh Dinh', 'Healthy', 2.50, 120.00, 3),
+('Binh Dinh', 'Healthy', 3.50, 150.00, 3),
+('Binh Dinh', 'Healthy', 4.50, 180.00, 3),
+('Binh Dinh', 'Sick', 1.50, 80.00, 7),
+('Binh Dinh', 'Sick', 2.50, 100.00, 7),
+('Binh Dinh', 'Sick', 3.50, 130.00, 7),
+('Binh Dinh', 'Sick', 4.50, 150.00, 7),
+-- Cao lanh
+('Cao lanh', 'Healthy', 1.50, 120.00, 3),
+('Cao lanh', 'Healthy', 2.50, 150.00, 3),
+('Cao lanh', 'Healthy', 3.50, 170.00, 3),
+('Cao lanh', 'Healthy', 4.50, 200.00, 3),
+('Cao lanh', 'Sick', 1.50, 100.00, 7),
+('Cao lanh', 'Sick', 2.50, 120.00, 7),
+('Cao lanh', 'Sick', 3.50, 140.00, 7),
+('Cao lanh', 'Sick', 4.50, 160.00, 7),
+-- Ben Tre
+('Ben Tre', 'Healthy', 1.50, 90.00, 3),
+('Ben Tre', 'Healthy', 2.50, 110.00, 3),
+('Ben Tre', 'Healthy', 3.50, 130.00, 3),
+('Ben Tre', 'Healthy', 4.50, 150.00, 3),
+('Ben Tre', 'Sick', 1.50, 80.00, 7),
+('Ben Tre', 'Sick', 2.50, 100.00, 7),
+('Ben Tre', 'Sick', 3.50, 120.00, 7),
+('Ben Tre', 'Sick', 4.50, 140.00, 7),
+-- Do Son
+('Do Son', 'Healthy', 1.50, 110.00, 3),
+('Do Son', 'Healthy', 2.50, 130.00, 3),
+('Do Son', 'Healthy', 3.50, 150.00, 3),
+('Do Son', 'Healthy', 4.50, 170.00, 3),
+('Do Son', 'Sick', 1.50, 90.00, 7),
+('Do Son', 'Sick', 2.50, 110.00, 7),
+('Do Son', 'Sick', 3.50, 130.00, 7),
+('Do Son', 'Sick', 4.50, 150.00, 7),
+-- Nghi Tam
+('Nghi Tam', 'Healthy', 1.50, 80.00, 3),
+('Nghi Tam', 'Healthy', 2.50, 100.00, 3),
+('Nghi Tam', 'Healthy', 3.50, 120.00, 3),
+('Nghi Tam', 'Healthy', 4.50, 140.00, 3),
+('Nghi Tam', 'Sick', 1.50, 70.00, 7),
+('Nghi Tam', 'Sick', 2.50, 90.00, 7),
+('Nghi Tam', 'Sick', 3.50, 110.00, 7),
+('Nghi Tam', 'Sick', 4.50, 130.00, 7);
+GO
+
+-- 3.14 Feeding guide Flock
+INSERT INTO [FeedingGuideFlock] (chickenType, status, age, feedPerDay, session) VALUES
+-- Binh Dinh
+('Binh Dinh', 'Healthy', 0, 25.00, 5),
+('Binh Dinh', 'Healthy', 1, 45.00, 5),
+('Binh Dinh', 'Healthy', 2, 65.00, 5),
+('Binh Dinh', 'Sick', 0, 20.00, 8),
+('Binh Dinh', 'Sick', 1, 40.00, 8),
+('Binh Dinh', 'Sick', 2, 55.00, 8),
+-- Cao lanh
+('Cao lanh', 'Healthy', 0, 30.00, 5),
+('Cao lanh', 'Healthy', 1, 55.00, 5),
+('Cao lanh', 'Healthy', 2, 75.00, 5),
+('Cao lanh', 'Sick', 0, 25.00, 8),
+('Cao lanh', 'Sick', 1, 45.00, 8),
+('Cao lanh', 'Sick', 2, 65.00, 8),
+-- Ben Tre
+('Ben Tre', 'Healthy', 0, 23.00, 5),
+('Ben Tre', 'Healthy', 1, 40.00, 5),
+('Ben Tre', 'Healthy', 2, 55.00, 5),
+('Ben Tre', 'Sick', 0, 20.00, 8),
+('Ben Tre', 'Sick', 1, 35.00, 8),
+('Ben Tre', 'Sick', 2, 50.00, 8),
+-- Do Son
+('Do Son', 'Healthy', 0, 28.00, 5),
+('Do Son', 'Healthy', 1, 50.00, 5),
+('Do Son', 'Healthy', 2, 65.00, 5),
+('Do Son', 'Sick', 0, 22.00, 8),
+('Do Son', 'Sick', 1, 40.00, 8),
+('Do Son', 'Sick', 2, 60.00, 8),
+-- Nghi Tam
+('Nghi Tam', 'Healthy', 0, 20.00, 5),
+('Nghi Tam', 'Healthy', 1, 35.00, 5),
+('Nghi Tam', 'Healthy', 2, 50.00, 5),
+('Nghi Tam', 'Sick', 0, 18.00, 8),
+('Nghi Tam', 'Sick', 1, 30.00, 8),
+('Nghi Tam', 'Sick', 2, 45.00, 8);
+GO
+

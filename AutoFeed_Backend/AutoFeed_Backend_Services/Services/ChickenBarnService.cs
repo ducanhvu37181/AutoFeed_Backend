@@ -28,7 +28,279 @@ public class ChickenBarnService : IChickenBarnService
     {
         _unitOfWork.ChickenBarns.PrepareCreate(entity);
         await _unitOfWork.SaveChangesWithTransactionAsync();
+
+        // Auto-create feeding rule for Flock only (LargeChicken is handled separately in FlockController)
+        if (entity.FlockId.HasValue)
+        {
+            await AutoCreateFeedingRuleAsync(entity);
+        }
+
         return entity.CbarnId;  // Return the actual ID, not the row count
+    }
+
+    public async System.Threading.Tasks.Task AutoCreateFeedingRuleForExistingAsync(int cbarnId)
+    {
+        var chickenBarn = await _unitOfWork.ChickenBarns.GetByIdAsync(cbarnId);
+        if (chickenBarn == null) return;
+
+        await AutoCreateFeedingRuleAsync(chickenBarn);
+    }
+
+    public async System.Threading.Tasks.Task AutoUpdateFeedingRuleForLargeChickenAsync(int chickenLid)
+    {
+        try
+        {
+            // Find the ChickenBarn for this LargeChicken
+            var chickenBarns = await _unitOfWork.ChickenBarns.SearchAsync(barnId: null, flockId: null, chickenLid: chickenLid, includeInactive: false);
+            var chickenBarn = chickenBarns?.FirstOrDefault();
+            if (chickenBarn == null) return;
+
+            // Find the existing FeedingRule for this LargeChicken
+            var feedingRules = await _unitOfWork.FeedingRules.GetAllAsync();
+            var existingRule = feedingRules.FirstOrDefault(r => r.ChickenLid == chickenLid && r.Status == "active");
+            if (existingRule == null) return;
+
+            // Get the updated LargeChicken info
+            var largeChicken = await _unitOfWork.LargeChickens.GetByIdAsync(chickenLid);
+            if (largeChicken == null) return;
+
+            // Get flock info for chicken type
+            var flock = await _unitOfWork.Flocks.GetByIdAsync(largeChicken.FlockId);
+            if (flock == null) return;
+
+            // Extract chicken type from flock name
+            var chickenType = ExtractChickenType(flock.Name);
+            if (string.IsNullOrEmpty(chickenType)) return;
+
+            // Normalize status
+            var status = NormalizeStatus(largeChicken.HealthStatus);
+            if (string.IsNullOrEmpty(status)) return;
+
+            // Find matching feeding guide (find closest weight match)
+            var guides = await _unitOfWork.FeedingGuideLargeChickens.GetAllAsync();
+            var guide = guides
+                .Where(g => g.ChickenType == chickenType && g.Status == status)
+                .OrderBy(g => Math.Abs(g.Weight - largeChicken.Weight))
+                .FirstOrDefault();
+
+            if (guide == null) return;
+
+            // Update the feeding rule
+            existingRule.Times = guide.Session;
+            existingRule.Description = $"Auto-generated from FeedingGuide for {chickenType} {status} (Weight: {largeChicken.Weight}kg)";
+            existingRule.Note = guide.Note;
+
+            _unitOfWork.FeedingRules.PrepareUpdate(existingRule);
+            await _unitOfWork.SaveChangesWithTransactionAsync();
+
+            // Delete existing feeding rule details
+            var existingDetails = await _unitOfWork.FeedingRuleDetails.GetAllAsync();
+            var detailsToDelete = existingDetails.Where(d => d.RuleId == existingRule.RuleId).ToList();
+            foreach (var detail in detailsToDelete)
+            {
+                await _unitOfWork.FeedingRuleDetails.RemoveAsync(detail);
+            }
+            await _unitOfWork.SaveChangesWithTransactionAsync();
+
+            // Create new feeding rule details
+            await CreateFeedingRuleDetailsAsync(existingRule.RuleId, guide.Session, guide.FeedPerDay);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"AutoUpdateFeedingRuleForLargeChickenAsync failed: {ex.Message}");
+        }
+    }
+
+    private async System.Threading.Tasks.Task AutoCreateFeedingRuleAsync(ChickenBarnModel chickenBarn)
+    {
+        try
+        {
+            // For Flock
+            if (chickenBarn.FlockId.HasValue)
+            {
+                var flock = await _unitOfWork.Flocks.GetByIdAsync(chickenBarn.FlockId.Value);
+                if (flock == null) return;
+
+                // Extract chicken type from flock name (e.g., "Flock1_BinhDinh" -> "Binh Dinh")
+                var chickenType = ExtractChickenType(flock.Name);
+                if (string.IsNullOrEmpty(chickenType)) return;
+
+                // Normalize status
+                var status = NormalizeStatus(flock.HealthStatus);
+                if (string.IsNullOrEmpty(status)) return;
+
+                // Calculate age in months
+                var ageInMonths = CalculateAgeInMonths(flock.DoB);
+                if (!ageInMonths.HasValue) return;
+
+                // Find matching feeding guide (find closest age match)
+                var guides = await _unitOfWork.FeedingGuideFlocks.GetAllAsync();
+                var guide = guides
+                    .Where(g => g.ChickenType == chickenType && g.Status == status)
+                    .OrderBy(g => Math.Abs(g.Age - ageInMonths.Value))
+                    .FirstOrDefault();
+
+                if (guide == null) return;
+
+                // Create feeding rule
+                var rule = new FeedingRule
+                {
+                    FlockId = flock.FlockId,
+                    ChickenLid = null,
+                    StartDate = chickenBarn.StartDate,
+                    EndDate = chickenBarn.StartDate.AddYears(1),
+                    Times = guide.Session,
+                    Description = $"Auto-generated from FeedingGuide for {chickenType} {status} (Age: {ageInMonths} months)",
+                    Note = guide.Note,
+                    Status = "active"
+                };
+
+                _unitOfWork.FeedingRules.PrepareCreate(rule);
+                await _unitOfWork.SaveChangesWithTransactionAsync();
+
+                // Create feeding rule details
+                await CreateFeedingRuleDetailsAsync(rule.RuleId, guide.Session, guide.FeedPerDay);
+            }
+            // For Large Chicken
+            else if (chickenBarn.ChickenLid.HasValue)
+            {
+                var largeChicken = await _unitOfWork.LargeChickens.GetByIdAsync(chickenBarn.ChickenLid.Value);
+                if (largeChicken == null) return;
+
+                // Get flock info for chicken type
+                var flock = await _unitOfWork.Flocks.GetByIdAsync(largeChicken.FlockId);
+                if (flock == null) return;
+
+                // Extract chicken type from flock name
+                var chickenType = ExtractChickenType(flock.Name);
+                if (string.IsNullOrEmpty(chickenType)) return;
+
+                // Normalize status
+                var status = NormalizeStatus(largeChicken.HealthStatus);
+                if (string.IsNullOrEmpty(status)) return;
+
+                // Find matching feeding guide (find closest weight match)
+                var guides = await _unitOfWork.FeedingGuideLargeChickens.GetAllAsync();
+                var guide = guides
+                    .Where(g => g.ChickenType == chickenType && g.Status == status)
+                    .OrderBy(g => Math.Abs(g.Weight - largeChicken.Weight))
+                    .FirstOrDefault();
+
+                if (guide == null) return;
+
+                // Create feeding rule
+                var rule = new FeedingRule
+                {
+                    ChickenLid = largeChicken.ChickenLid,
+                    FlockId = null,
+                    StartDate = chickenBarn.StartDate,
+                    EndDate = chickenBarn.StartDate.AddYears(1),
+                    Times = guide.Session,
+                    Description = $"Auto-generated from FeedingGuide for {chickenType} {status} (Weight: {largeChicken.Weight}kg)",
+                    Note = guide.Note,
+                    Status = "active"
+                };
+
+                _unitOfWork.FeedingRules.PrepareCreate(rule);
+                await _unitOfWork.SaveChangesWithTransactionAsync();
+
+                // Create feeding rule details
+                await CreateFeedingRuleDetailsAsync(rule.RuleId, guide.Session, guide.FeedPerDay);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"AutoCreateFeedingRuleAsync failed: {ex.Message}");
+        }
+    }
+
+    private async System.Threading.Tasks.Task CreateFeedingRuleDetailsAsync(int ruleId, int session, decimal feedPerDay)
+    {
+        // Get default food (Rice or Corn)
+        var foods = await _unitOfWork.Foods.GetAllAsync();
+        var defaultFood = foods.FirstOrDefault(f => f.Name == "Rice") ?? foods.FirstOrDefault(f => f.Name == "Corn");
+        if (defaultFood == null) return;
+
+        // Calculate amount per session
+        var amountPerSession = feedPerDay / session;
+
+        // Distribute feeding times (e.g., 8:00, 13:00, 18:00 for 3 sessions)
+        var feedTimes = GetFeedTimes(session);
+
+        foreach (var (hour, minute) in feedTimes)
+        {
+            var detail = new FeedingRuleDetail
+            {
+                RuleId = ruleId,
+                FoodId = defaultFood.FoodId,
+                FeedHour = hour,
+                FeedMinute = minute,
+                Amount = amountPerSession,
+                Description = $"Session {feedTimes.IndexOf((hour, minute)) + 1}",
+                Status = true
+            };
+
+            _unitOfWork.FeedingRuleDetails.PrepareCreate(detail);
+        }
+
+        await _unitOfWork.SaveChangesWithTransactionAsync();
+    }
+
+    private string ExtractChickenType(string flockName)
+    {
+        if (string.IsNullOrEmpty(flockName)) return null;
+
+        // Extract chicken type from flock name (e.g., "Flock1_BinhDinh" -> "Binh Dinh")
+        var parts = flockName.Split('_');
+        if (parts.Length >= 2)
+        {
+            var typePart = parts[1].ToLower();
+            // Map to standardized names
+            return typePart switch
+            {
+                "binhdinh" => "Binh Dinh",
+                "caolanh" => "Cao lanh",
+                "bentre" => "Ben Tre",
+                "doson" => "Do Son",
+                "nghitam" => "Nghi Tam",
+                _ => null
+            };
+        }
+        return null;
+    }
+
+    private string NormalizeStatus(string status)
+    {
+        if (string.IsNullOrEmpty(status)) return null;
+
+        return status.ToLower() switch
+        {
+            "healthy" => "Healthy",
+            "sick" => "Sick",
+            _ => null
+        };
+    }
+
+    private int? CalculateAgeInMonths(DateOnly dob)
+    {
+        if (dob == null) return null;
+
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        var age = (today.Year - dob.Year) * 12 + (today.Month - dob.Month);
+        return age >= 0 ? age : null;
+    }
+
+    private List<(int Hour, int Minute)> GetFeedTimes(int session)
+    {
+        return session switch
+        {
+            1 => new List<(int, int)> { (8, 0) },
+            2 => new List<(int, int)> { (8, 0), (17, 0) },
+            3 => new List<(int, int)> { (8, 0), (13, 0), (18, 0) },
+            4 => new List<(int, int)> { (7, 0), (11, 0), (15, 0), (19, 0) },
+            5 => new List<(int, int)> { (7, 0), (10, 0), (13, 0), (16, 0), (19, 0) },
+            _ => new List<(int, int)> { (8, 0), (13, 0), (18, 0) } // Default to 3 sessions
+        };
     }
 
     public async Task<ChickenBarnModel?> GetByIdAsync(int id)

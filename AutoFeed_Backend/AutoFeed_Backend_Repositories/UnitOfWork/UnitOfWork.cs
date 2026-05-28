@@ -27,6 +27,9 @@ public class UnitOfWork : IUnitOfWork
     private DataIoTRepository _dataIoTRepository;
     private FeedingRuleRepository _feedingRuleRepository;
     private NotificationRepository _notificationRepository;
+    private FeedingGuideLargeChickenRepository _feedingGuideLargeChickenRepository;
+    private FeedingGuideFlockRepository _feedingGuideFlockRepository;
+    private FeedingRuleDetailRepository _feedingRuleDetailRepository;
 
     public UnitOfWork() => _context ??= new AutoFeedDBContext();
 
@@ -118,6 +121,18 @@ public class UnitOfWork : IUnitOfWork
     public NotificationRepository Notifications
     {
         get { return _notificationRepository ??= new NotificationRepository(_context); }
+    }
+    public FeedingGuideLargeChickenRepository FeedingGuideLargeChickens
+    {
+        get { return _feedingGuideLargeChickenRepository ??= new FeedingGuideLargeChickenRepository(_context); }
+    }
+    public FeedingGuideFlockRepository FeedingGuideFlocks
+    {
+        get { return _feedingGuideFlockRepository ??= new FeedingGuideFlockRepository(_context); }
+    }
+    public FeedingRuleDetailRepository FeedingRuleDetails
+    {
+        get { return _feedingRuleDetailRepository ??= new FeedingRuleDetailRepository(_context); }
     }
     public int SaveChangesWithTransaction()
     {

@@ -60,6 +60,10 @@ public partial class AutoFeedDBContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    public virtual DbSet<FeedingGuideLargeChicken> FeedingGuideLargeChickens { get; set; }
+
+    public virtual DbSet<FeedingGuideFlock> FeedingGuideFlocks { get; set; }
+
     public static string GetConnectionString(string connectionStringName)
     {
         var config = new ConfigurationBuilder()
@@ -671,6 +675,66 @@ public partial class AutoFeedDBContext : DbContext
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_User_Role");
+        });
+
+        modelBuilder.Entity<FeedingGuideLargeChicken>(entity =>
+        {
+            entity.HasKey(e => e.GuideLid).HasName("PK__FeedingGuideLargeChicken__");
+
+            entity.ToTable("FeedingGuideLargeChicken");
+
+            entity.Property(e => e.GuideLid).HasColumnName("guideLID");
+            entity.Property(e => e.ChickenType)
+                .IsRequired()
+                .HasMaxLength(50)
+                .HasColumnName("chickenType");
+            entity.Property(e => e.Status)
+                .IsRequired()
+                .HasMaxLength(50)
+                .HasColumnName("status");
+            entity.Property(e => e.Weight)
+                .HasColumnType("decimal(18, 2)")
+                .HasColumnName("weight");
+            entity.Property(e => e.FeedPerDay)
+                .HasColumnType("decimal(18, 2)")
+                .HasColumnName("feedPerDay");
+            entity.Property(e => e.Session).HasColumnName("session");
+            entity.Property(e => e.Note)
+                .HasMaxLength(255)
+                .HasColumnName("note");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("createdAt");
+        });
+
+        modelBuilder.Entity<FeedingGuideFlock>(entity =>
+        {
+            entity.HasKey(e => e.GuideFid).HasName("PK__FeedingGuideFlock__");
+
+            entity.ToTable("FeedingGuideFlock");
+
+            entity.Property(e => e.GuideFid).HasColumnName("guideFID");
+            entity.Property(e => e.ChickenType)
+                .IsRequired()
+                .HasMaxLength(50)
+                .HasColumnName("chickenType");
+            entity.Property(e => e.Status)
+                .IsRequired()
+                .HasMaxLength(50)
+                .HasColumnName("status");
+            entity.Property(e => e.Age).HasColumnName("age");
+            entity.Property(e => e.FeedPerDay)
+                .HasColumnType("decimal(18, 2)")
+                .HasColumnName("feedPerDay");
+            entity.Property(e => e.Session).HasColumnName("session");
+            entity.Property(e => e.Note)
+                .HasMaxLength(255)
+                .HasColumnName("note");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("createdAt");
         });
 
         OnModelCreatingPartial(modelBuilder);
