@@ -87,7 +87,7 @@ public class ChickenBarnService : IChickenBarnService
 
             // Update the feeding rule
             existingRule.Times = guide.Session;
-            existingRule.Description = $"Auto-generated from FeedingGuide for {chickenType} {status} (Weight: {largeChicken.Weight}kg)";
+            existingRule.Description = $"Chicken{chickenLid}_{chickenType}";
             existingRule.Note = guide.Note;
 
             _unitOfWork.FeedingRules.PrepareUpdate(existingRule);
