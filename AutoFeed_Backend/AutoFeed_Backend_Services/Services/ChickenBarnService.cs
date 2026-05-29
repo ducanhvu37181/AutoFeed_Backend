@@ -123,7 +123,13 @@ public class ChickenBarnService : IChickenBarnService
             // Find the existing FeedingRule for this Flock
             var feedingRules = await _unitOfWork.FeedingRules.GetAllAsync();
             var existingRule = feedingRules.FirstOrDefault(r => r.FlockId == flockId && r.Status == "active");
-            if (existingRule == null) return;
+            
+            // If no existing rule, create a new one
+            if (existingRule == null)
+            {
+                await AutoCreateFeedingRuleAsync(chickenBarn);
+                return;
+            }
 
             // Get the updated Flock info
             var flock = await _unitOfWork.Flocks.GetByIdAsync(flockId);
