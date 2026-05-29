@@ -152,7 +152,7 @@ public class ChickenBarnService : IChickenBarnService
 
             // Update the feeding rule
             existingRule.Times = guide.Session;
-            existingRule.Description = $"Auto-generated from FeedingGuide for {chickenType} {status} (Age: {ageInMonths} months)";
+            existingRule.Description = $"Flock{flockId}_{chickenType}";
             existingRule.Note = guide.Note;
 
             _unitOfWork.FeedingRules.PrepareUpdate(existingRule);
@@ -243,7 +243,7 @@ public class ChickenBarnService : IChickenBarnService
                     StartDate = chickenBarn.StartDate,
                     EndDate = chickenBarn.StartDate.AddYears(1),
                     Times = guide.Session,
-                    Description = $"Auto-generated from FeedingGuide for {chickenType} {status} (Age: {ageInMonths} months)",
+                    Description = $"Flock{flock.FlockId}_{chickenType}",
                     Note = guide.Note,
                     Status = "active"
                 };
@@ -289,7 +289,7 @@ public class ChickenBarnService : IChickenBarnService
                     StartDate = chickenBarn.StartDate,
                     EndDate = chickenBarn.StartDate.AddYears(1),
                     Times = guide.Session,
-                    Description = $"Auto-generated from FeedingGuide for {chickenType} {status} (Weight: {largeChicken.Weight}kg)",
+                    Description = $"Chicken{largeChicken.ChickenLid}_{chickenType}",
                     Note = guide.Note,
                     Status = "active"
                 };
