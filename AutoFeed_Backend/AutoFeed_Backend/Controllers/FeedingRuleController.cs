@@ -14,13 +14,15 @@ namespace AutoFeed_Backend.Controllers
         private readonly IFlockService _flockService;
         private readonly ILargeChickenService _largeChickenService;
         private readonly IFoodService _foodService;
+        private readonly IChickenBarnService _chickenBarnService;
 
-        public FeedingRuleController(IFeedingRuleService feedingRuleService, IFlockService flockService, ILargeChickenService largeChickenService, IFoodService foodService)
+        public FeedingRuleController(IFeedingRuleService feedingRuleService, IFlockService flockService, ILargeChickenService largeChickenService, IFoodService foodService, IChickenBarnService chickenBarnService)
         {
             _feedingRuleService = feedingRuleService;
             _flockService = flockService;
             _largeChickenService = largeChickenService;
             _foodService = foodService;
+            _chickenBarnService = chickenBarnService;
         }
 
         [HttpGet]
@@ -467,6 +469,32 @@ namespace AutoFeed_Backend.Controllers
         {
             var success = await _feedingRuleService.DeleteRuleAsync(id);
             return success ? Ok("Deleted") : NotFound();
+        }
+
+        [HttpPost("sync-all")]
+        public async Task<IActionResult> SyncAllFromGuides()
+        {
+            try
+            {
+                await _chickenBarnService.SyncAllFeedingRulesFromGuidesAsync();
+                return Ok(new ApiResponse<object>
+                {
+                    Status = true,
+                    HttpCode = 200,
+                    Data = null,
+                    Description = "Successfully synced all feeding rules from feeding guides"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<object>
+                {
+                    Status = false,
+                    HttpCode = 500,
+                    Data = null,
+                    Description = $"Failed to sync feeding rules: {ex.Message}"
+                });
+            }
         }
     }
 }

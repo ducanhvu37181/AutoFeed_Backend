@@ -19,4 +19,6 @@ public interface IChickenBarnService
     Task<List<dynamic>> GetChickenBarnDetailAsync(int? barnId, string? barnType);
     Task AutoCreateFeedingRuleForExistingAsync(int cbarnId);
     Task AutoUpdateFeedingRuleForLargeChickenAsync(int chickenLid);
+    Task AutoUpdateFeedingRuleForFlockAsync(int flockId);
+    Task SyncAllFeedingRulesFromGuidesAsync();
 }
