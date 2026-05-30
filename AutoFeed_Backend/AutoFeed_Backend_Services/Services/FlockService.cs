@@ -791,7 +791,16 @@ namespace AutoFeed_Backend_Services.Services
 
             {
 
-                return await _unitOfWork.Flocks.TransferQuantityToFlockAsync(sourceFlockId, targetFlockId);
+                var result = await _unitOfWork.Flocks.TransferQuantityToFlockAsync(sourceFlockId, targetFlockId);
+
+                if (result)
+                {
+                    // Auto-update feeding rules for both source and target flocks after transfer
+                    await _chickenBarnService.AutoUpdateFeedingRuleForFlockAsync(sourceFlockId);
+                    await _chickenBarnService.AutoUpdateFeedingRuleForFlockAsync(targetFlockId);
+                }
+
+                return result;
 
             }
 
