@@ -172,5 +172,17 @@ namespace AutoFeed_Backend_Services.Services
             await _unitOfWork.SaveChangesWithTransactionAsync();
             return true;
         }
+
+        public async Task<bool> SetDeviceOnlineAsync(int deviceId)
+        {
+            var device = await _unitOfWork.IoTDevices.GetByIdAsync(deviceId);
+            if (device == null) return false;
+
+            device.Status = true;
+
+            await _unitOfWork.IoTDevices.UpdateAsync(device);
+            await _unitOfWork.SaveChangesWithTransactionAsync();
+            return true;
+        }
     }
 }
