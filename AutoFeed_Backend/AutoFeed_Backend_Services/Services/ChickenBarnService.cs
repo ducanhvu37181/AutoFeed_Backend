@@ -401,6 +401,8 @@ public class ChickenBarnService : IChickenBarnService
             3 => new List<(int, int)> { (8, 0), (13, 0), (18, 0) },
             4 => new List<(int, int)> { (7, 0), (11, 0), (15, 0), (19, 0) },
             5 => new List<(int, int)> { (7, 0), (10, 0), (13, 0), (16, 0), (19, 0) },
+            6 => new List<(int, int)> { (7, 0), (9, 0), (11, 0), (13, 0), (15, 0), (17, 0) },
+            7 => new List<(int, int)> { (7, 0), (9, 0), (11, 0), (13, 0), (15, 0), (17, 0), (19, 0) },
             _ => new List<(int, int)> { (8, 0), (13, 0), (18, 0) } // Default to 3 sessions
         };
     }
