@@ -652,6 +652,70 @@ namespace AutoFeed_Backend.Controllers
 
         }
 
+        // 8. Set device to online status
+
+        [HttpPatch("{id}/online")]
+
+        public async Task<IActionResult> SetOnline(int id)
+
+        {
+
+            var device = await _deviceService.GetDeviceByIdAsync(id);
+
+            if (device == null)
+
+                return NotFound(new ApiResponse<object>
+
+                {
+
+                    Status = false,
+
+                    HttpCode = 404,
+
+                    Data = null,
+
+                    Description = $"Device with ID {id} not found."
+
+                });
+
+
+
+            var success = await _deviceService.SetDeviceOnlineAsync(id);
+
+            if (success)
+
+                return Ok(new ApiResponse<object>
+
+                {
+
+                    Status = true,
+
+                    HttpCode = 200,
+
+                    Data = null,
+
+                    Description = $"Device {id} set to online successfully."
+
+                });
+
+
+
+            return BadRequest(new ApiResponse<object>
+
+            {
+
+                Status = false,
+
+                HttpCode = 400,
+
+                Data = null,
+
+                Description = "Failed to set device online."
+
+            });
+
+        }
+
     }
 
 }
