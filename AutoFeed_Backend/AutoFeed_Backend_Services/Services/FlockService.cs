@@ -741,9 +741,44 @@ namespace AutoFeed_Backend_Services.Services
 
                 await _unitOfWork.ChickenBarns.CreateAsync(cb);
 
+                // 3. Disable feeding rules and their details for the source flock
+                var feedingRules = await _db.FeedingRules
+                    .Where(r => r.FlockId == req.FlockID)
+                    .ToListAsync();
+                var ruleIds = feedingRules.Select(r => r.RuleId).ToList();
+                
+                // Disable feeding rule details
+                var feedingRuleDetails = await _db.FeedingRuleDetails
+                    .Where(d => ruleIds.Contains(d.RuleId))
+                    .ToListAsync();
+                foreach (var detail in feedingRuleDetails)
+                {
+                    detail.Status = false;
+                    _db.FeedingRuleDetails.Update(detail);
+                }
+                
+                // Disable feeding rules
+                foreach (var rule in feedingRules)
+                {
+                    rule.Status = "disabled";
+                    _db.FeedingRules.Update(rule);
+                }
 
+                // 4. Disable schedules for the source flock's chicken barn
+                var flockChickenBarns = await _db.ChickenBarns
+                    .Where(cb => cb.FlockId == req.FlockID && cb.ChickenLid == null)
+                    .ToListAsync();
+                var cbarnIds = flockChickenBarns.Select(cb => cb.CbarnId).ToList();
+                var schedules = await _db.Schedules
+                    .Where(s => cbarnIds.Contains(s.CbarnId))
+                    .ToListAsync();
+                foreach (var schedule in schedules)
+                {
+                    schedule.Status = "disabled";
+                    _db.Schedules.Update(schedule);
+                }
 
-                // 3. Update the source flock: Decrease quantity by 1
+                // 5. Update the source flock: Decrease quantity by 1
 
                 flock.Quantity -= 1;
 
