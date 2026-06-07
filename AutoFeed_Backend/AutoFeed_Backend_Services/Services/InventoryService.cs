@@ -182,7 +182,8 @@ public class InventoryService : IInventoryService
 
         var existing = await _unitOfWork.Inventories
             .FirstOrDefaultAsync(x => x.FoodName == item.FoodName
-           && x.ExpiredDate == item.ExpiredDate);
+           && x.ExpiredDate == item.ExpiredDate
+           && x.WeightPerBag == item.WeightPerBag);
 
         if (existing != null)
         {

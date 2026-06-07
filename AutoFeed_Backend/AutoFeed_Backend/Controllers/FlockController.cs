@@ -174,6 +174,12 @@ public class FlockController : ControllerBase
 
 
 
+        // Validate DoB - must not be in the future
+        if (model.DoB > DateOnly.FromDateTime(DateTime.Now))
+            return BadRequest(new { Success = false, Message = "Date of birth cannot be in the future" });
+
+
+
         var createResponse = await _flockService.CreateFlockAsync(model);
 
         if (createResponse == null)
